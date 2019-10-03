@@ -1,0 +1,113 @@
+html,body {
+  font-family: sans-serif;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  color:#fff;
+}
+canvas {
+  height: 100%;
+  width: 100%;
+}
+
+div.top-bar {
+  position: absolute;
+  max-width: 100%;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  padding: 10px;
+  text-align: center;
+  background-color: rgba(0,0,0,0.4);
+}
+
+div.shop {
+  position: absolute;
+  top:0;
+  right:0;
+  padding:15px;
+  height: calc(100% - 35px);
+  overflow-y: scroll;
+  background-color: rgba(10,60,10,0.8);
+  width:25%;
+}
+
+div.shop.mobile {
+  top: 50px;
+  left:50%;
+  transform:translateX(-50%);
+  height: calc(100% - 100px);
+  width:auto;
+}
+
+div.start-game, div.end-level {
+  position: absolute;
+  top: 50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  padding:15px;
+  background-color: rgba(10,60,10,0.9);
+  text-align: center;
+}
+
+div.start-game ul > li {
+  text-align: left;
+  line-height: 26px;
+}
+
+div.start-game button, 
+div.end-level button,
+div.shop button {
+  padding:10px 20px;
+  font-size: 20px;
+  color:#000;
+}
+
+div.shop div.upgrade {
+  background-color: rgba(0,0,0,0.8);
+  padding:15px;
+  margin:15px;
+  line-height: 25px;
+}
+
+div.shop div.upgrade h4 {
+  font-size: 24px;
+  margin: 0;
+}
+
+div.shop div.upgrade p {
+  margin:10px 0;
+}
+
+div.shop div.upgrade label {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+div.top-bar label {
+  font-size:24px;
+  margin: 15px;
+}
+div.top-bar div.stats {
+  padding-top:10px;
+}
+div.top-bar div.stats label {
+  font-size:20px;
+}
+
+div.top-bar button {
+  padding:5px;
+  font-size: 20px;
+}
+
+.energy {
+  color: dodgerblue;
+}
+
+.blood {
+  color: #fd5252;
+}
+
+.brains {
+  color: mediumseagreen;
+}

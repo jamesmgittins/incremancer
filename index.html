@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html ng-app="zombieApp">
+  <head>
+    <title>Incremancer</title>
+    <meta name="description" content="Zombie necromancer idle game">
+    <meta name="keywords" content="zombie,game,idle,javascript">
+    <script src="js/pixi.min.js"></script>
+    <script src="js/utilsfunctions.js"></script>
+    <script src="js/zombiemancer.js"></script>
+    <script src="js/gamemodel.js"></script>
+    <script src="js/upgrades.js"></script>
+    <script src="js/humans.js"></script>
+    <script src="js/zombies.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/angularzombie.js"></script>
+    <link rel="stylesheet" type="text/css" href="zombiemancer.css">
+  </head>
+  <body ng-controller="ZombieController as zm">
+    <div class="top-bar">
+      <label class="energy">Energy: {{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}</label>
+      <label class="blood">Blood: {{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}</label>
+      <label class="brains">Brains: {{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}</label>
+      <button ng-click="zm.toggleShop();">Shop</button>
+      <div class="stats">
+        <label>Level: {{zm.model.level}}</label>
+        <label>Humans: {{zm.model.humanCount}}</label>
+        <label>Zombies: {{zm.model.zombieCount}}</label>
+      </div>
+    </div>
+    <div class="shop" ng-show="zm.shopOpen">
+      <h2>Shop</h2>
+      <button ng-click="zm.toggleShop();">Close</button>
+      <div ng-repeat="upgrade in zm.upgrades" class="upgrade {{upgrade.costType}}" ng-show="zm.upgradeVisible(upgrade);">
+        <h4>{{upgrade.name}}</h4>
+        <p>{{upgrade.description}}</p>
+        <label>Cost: {{zm.upgradePrice(upgrade)|whole}} {{upgrade.costType}}</label>
+        <p>Current Rank: {{zm.currentRank(upgrade)}} / {{upgrade.cap}} - {{zm.upgradeStatInfo(upgrade)}}</p>
+        <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{zm.currentRank(upgrade) >= upgrade.cap ? 'Sold Out' : 'Purchase'}}</button>
+      </div>
+      <button ng-click="zm.toggleShop();">Close</button>
+    </div>
+    <div class="start-game" ng-show="zm.model.currentState == zm.model.states.startGame">
+      <h2>Incremancer</h2>
+      <h4>Take control of a horde of zombies to ravage small towns</h4>
+      <ul>
+        <li>Energy refills over time. You need 10 energy to spawn a zombie by clicking on the ground.</li>
+        <li>Whenever one of your zombies attacks a human you will collect some blood.</li>
+        <li>Killing a human or turning them into a zombie will earn you 1 brain.</li>
+        <li>You can spend these currencies in the shop to purchase valuable upgrades for your zombie horde.</li>
+        <li>The world can be dragged with the mouse to explore it. Or zoomed using your mouse wheel.</li>
+      </ul>
+      <button ng-click="zm.startGame();">Start Game</button>
+    </div>
+    <div class="end-level" ng-show="zm.model.currentState == zm.model.states.levelCompleted">
+      <h2>Level {{zm.model.level}} Complete</h2>
+      <h4>All the humans are either dead or undead!</h4>
+      <button ng-click="zm.nextLevel();">Start Level {{zm.model.level + 1}}</button>
+    </div>
+  </body>
+</html>
