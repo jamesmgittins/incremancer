@@ -241,11 +241,11 @@ Humans = {
   scanForZombies(human) {
     human.timeToScan = this.scanTime;
     zombieSpottedCount = 0;
-    for (var i = 0; i < Zombies.zombies.length; i++) {
-      if (!Zombies.zombies[i].dead) {
-        if (Math.abs(Zombies.zombies[i].x - human.x) < human.visionDistance) {
-          if (Math.abs(Zombies.zombies[i].y - human.y) < human.visionDistance) {
-            human.zombieTarget = Zombies.zombies[i];
+    for (var i = 0; i < Zombies.aliveZombies.length; i++) {
+      if (!Zombies.aliveZombies[i].dead) {
+        if (Math.abs(Zombies.aliveZombies[i].x - human.x) < human.visionDistance) {
+          if (Math.abs(Zombies.aliveZombies[i].y - human.y) < human.visionDistance) {
+            human.zombieTarget = Zombies.aliveZombies[i];
             zombieSpottedCount++;
           }
         }

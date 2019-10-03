@@ -1,6 +1,7 @@
 Zombies = {
   
   zombies : [],
+  aliveZombies : [],
   zombieFrames : [],
   zombieDeadTexture : false,
   scaling : 2,
@@ -48,7 +49,7 @@ Zombies = {
     zombie.visible = true;
     zombie.health = GameModel.zombieHealth;
     zombie.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
-    zombie.attackTimer = this.attackSpeed;
+    zombie.attackTimer = 0;
     zombie.xSpeed = 0;
     zombie.ySpeed = 0;
     zombie.scanTime = 0;
@@ -80,8 +81,11 @@ Zombies = {
   },
 
   update(timeDiff) {
+    this.aliveZombies = [];
     for (var i=0; i < this.zombies.length; i++) {
       this.updateZombie(this.zombies[i],timeDiff);
+      if (!this.zombies[i].dead)
+        this.aliveZombies.push(this.zombies[i]);
     }
     if (GameModel.energy >= GameModel.zombieCost && GameModel.currentState == GameModel.states.playingLevel) {
       this.zombieCursor.visible = true;
@@ -176,10 +180,10 @@ Zombies = {
   spaceNeeded : 3,
 
   isSpaceToMove(zombie, x, y) {
-    for (var i=0; i < Zombies.zombies.length; i++) {
-      if (Zombies.zombies[i].zombieId != zombie.zombieId && Math.abs(Zombies.zombies[i].x - x) < this.spaceNeeded) {
-        if (Math.abs(Zombies.zombies[i].y - y) < this.spaceNeeded) {
-          if (distanceBetweenPoints(x, y, Zombies.zombies[i].x, Zombies.zombies[i].y) < distanceBetweenPoints(zombie.x, zombie.y, Zombies.zombies[i].x, Zombies.zombies[i].y))
+    for (var i=0; i < Zombies.aliveZombies.length; i++) {
+      if (Zombies.aliveZombies[i].zombieId != zombie.zombieId && Math.abs(Zombies.aliveZombies[i].x - x) < this.spaceNeeded) {
+        if (Math.abs(Zombies.aliveZombies[i].y - y) < this.spaceNeeded) {
+          if (distanceBetweenPoints(x, y, Zombies.aliveZombies[i].x, Zombies.aliveZombies[i].y) < distanceBetweenPoints(zombie.x, zombie.y, Zombies.aliveZombies[i].x, Zombies.aliveZombies[i].y))
             return false;
         }
       }
