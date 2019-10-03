@@ -63,23 +63,29 @@ div.shop button {
   color:#000;
 }
 
-div.shop div.upgrade {
+div.shop div.upgrade, div.shop div.bone-collectors {
   background-color: rgba(0,0,0,0.8);
   padding:15px;
   margin:15px;
   line-height: 25px;
 }
 
-div.shop div.upgrade h4 {
+div.shop div.bone-collectors button {
+  margin: 10px;
+  padding : 5px 15px;
+}
+
+div.shop div.upgrade h4, div.shop div.bone-collectors h4 {
   font-size: 24px;
   margin: 0;
 }
 
-div.shop div.upgrade p {
+div.shop div.upgrade p, div.shop div.bone-collectors p{
   margin:10px 0;
 }
 
-div.shop div.upgrade label {
+
+div.shop div.upgrade label, div.shop div.bone-collectors label {
   font-weight: bold;
   font-size: 18px;
 }
@@ -96,8 +102,9 @@ div.top-bar div.stats label {
 }
 
 div.top-bar button {
-  padding:5px;
+  padding: 5px 10px;
   font-size: 20px;
+  margin: 0 5px;
 }
 
 .energy {
@@ -110,4 +117,8 @@ div.top-bar button {
 
 .brains {
   color: mediumseagreen;
+}
+
+.bones {
+  color: #ccc;
 }

@@ -11,6 +11,7 @@
     <script src="js/upgrades.js"></script>
     <script src="js/humans.js"></script>
     <script src="js/zombies.js"></script>
+    <script src="js/graveyard.js"></script>
     <script src="js/particles.js"></script>
     <script src="js/angular.min.js"></script>
     <script src="js/angularzombie.js"></script>
@@ -21,13 +22,17 @@
       <label class="energy">Energy: {{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}</label>
       <label class="blood">Blood: {{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}</label>
       <label class="brains">Brains: {{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}</label>
-      <button ng-click="zm.toggleShop();">Shop</button>
+      <label class="bones" ng-show="zm.model.graveyard">Bones: {{zm.model.persistentData.bones|whole}}</label>
       <div class="stats">
         <label>Level: {{zm.model.level}}</label>
         <label>Humans: {{zm.model.getHumanCount()}}</label>
         <label>Zombies: {{zm.model.zombieCount}}</label>
+        <button ng-click="zm.toggleShop();">Shop</button>
+        <button ng-click="zm.toggleGraveyard();" ng-show="zm.model.graveyard">Graveyard</button>
+        <button ng-click="zm.toggleOptions();">Options</button>
       </div>
     </div>
+
     <div class="shop" ng-show="zm.shopOpen">
       <h2>Shop</h2>
       <button ng-click="zm.toggleShop();">Close</button>
@@ -40,6 +45,49 @@
       </div>
       <button ng-click="zm.toggleShop();">Close</button>
     </div>
+
+    <div class="shop" ng-show="zm.graveyardOpen">
+      <h2>Cursed Graveyard</h2>
+      <button ng-click="zm.toggleGraveyard();">Close</button>
+
+      <div class="bone-collectors bones">
+        <h4>Bone Collectors</h4>
+        <p>Hire bone collectors to gather bones from the town's dead and your own fallen zombies. Each bone collector consumes 1 energy per second. They're hungry little creatures.</p>
+        <h4>Energy rate {{zm.model.getEnergyRate()|decimal}} per second</h4>
+        <button ng-click="zm.subtractBoneCollector();">-</button><label>{{zm.model.persistentData.boneCollectors|whole}} bone collectors</label><button ng-click="zm.addBoneCollector();">+</button>
+      </div>
+
+      <div ng-repeat="upgrade in zm.graveyardUpgrades" class="upgrade {{upgrade.costType}}" ng-show="zm.upgradeVisible(upgrade);">
+        <h4>{{upgrade.name}}</h4>
+        <p>{{upgrade.description}}</p>
+        <label>Cost: {{zm.upgradePrice(upgrade)|whole}} {{upgrade.costType}}</label>
+        <p>Current Rank: {{zm.currentRank(upgrade)}} / {{upgrade.cap}} - {{zm.upgradeStatInfo(upgrade)}}</p>
+        <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{zm.currentRank(upgrade) >= upgrade.cap ? 'Sold Out' : 'Purchase'}}</button>
+      </div>
+      <button ng-click="zm.toggleGraveyard();">Close</button>
+    </div>
+
+    <div class="shop" ng-show="zm.optionsOpen">
+      <h2>Options</h2>
+      <button ng-click="zm.toggleOptions();">Close</button>
+      <div class="upgrade">
+        <h4>How to play</h4>
+        <ul>
+          <li>Energy refills over time. You need 10 energy to spawn a zombie by clicking on the ground.</li>
+          <li>Whenever one of your zombies attacks a human you will collect some blood.</li>
+          <li>Killing a human or turning them into a zombie will earn you 1 brain.</li>
+          <li>You can spend these currencies in the shop to purchase valuable upgrades for your zombie horde.</li>
+          <li>The world can be dragged with the mouse to explore it. Or zoomed using your mouse wheel.</li>
+        </ul>
+      </div>
+      <div class="upgrade">
+        <h4>Reset Game</h4>
+        <p>This will reset all save data if you want to start from the very beginning again.</p>
+        <button ng-click="zm.resetGame();">Reset Game</button>
+      </div>
+      <button ng-click="zm.toggleOptions();">Close</button>
+    </div>
+
     <div class="start-game" ng-show="zm.model.currentState == zm.model.states.startGame">
       <h2>Incremancer</h2>
       <h4>Take control of a horde of zombies to ravage small towns</h4>

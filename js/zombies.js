@@ -39,7 +39,6 @@ Zombies = {
   },
 
   createZombie(x,y) {
-    GameModel.zombieCount++;
     var zombie = new PIXI.AnimatedSprite(this.zombieFrames);
     zombie.dead = false;
     zombie.animationSpeed = 0.2;
@@ -71,8 +70,8 @@ Zombies = {
     zombie.health -= damage;
     Blood.newSplatter(zombie.x, zombie.y);
     if (zombie.health <= 0 && !zombie.dead) {
+      Bones.newBones(zombie.x, zombie.y);
       zombie.dead = true;
-      GameModel.zombieCount--;
       zombie.textures = this.zombieDeadTexture;
       if (Math.random() < GameModel.brainRecoverChance) {
         GameModel.addBrains(1);
@@ -81,12 +80,14 @@ Zombies = {
   },
 
   update(timeDiff) {
-    this.aliveZombies = [];
+    var aliveZombies = [];
     for (var i=0; i < this.zombies.length; i++) {
       this.updateZombie(this.zombies[i],timeDiff);
       if (!this.zombies[i].dead)
-        this.aliveZombies.push(this.zombies[i]);
+        aliveZombies.push(this.zombies[i]);
     }
+    GameModel.zombieCount = aliveZombies.length;
+    this.aliveZombies = aliveZombies;
     if (GameModel.energy >= GameModel.zombieCost && GameModel.currentState == GameModel.states.playingLevel) {
       this.zombieCursor.visible = true;
     } else {
@@ -170,7 +171,7 @@ Zombies = {
       zombie.ySpeed -= zombie.ySpeed * timeDiff * 8;
     }
     var newPosition = {x:zombie.position.x + zombie.xSpeed * timeDiff, y:zombie.position.y + zombie.ySpeed * timeDiff};
-    if (this.isSpaceToMove(zombie, newPosition.x, newPosition.y) || Math.random() > 0.9) {
+    if (Math.random() > 0.9 || this.isSpaceToMove(zombie, newPosition.x, newPosition.y)) {
       zombie.position = newPosition;
       zombie.zIndex = zombie.position.y;
     }

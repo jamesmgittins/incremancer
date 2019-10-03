@@ -12,6 +12,9 @@ GameModel = {
   zombieSpeed : 10,
   brainRecoverChance:0,
   riseFromTheDeadChance:0,
+  humanCount : 50,
+
+  graveyard : 0,
 
   level:1,
   zombieCount:0,
@@ -34,7 +37,8 @@ GameModel = {
     zombieSpeed : 10,
     brainRecoverChance : 0,
     riseFromTheDeadChance : 0,
-    level : 1
+    level : 1,
+    graveyard : 0
   },
 
   resetToBaseStats() {
@@ -47,6 +51,7 @@ GameModel = {
     this.zombieSpeed = this.baseStats.zombieSpeed;
     this.brainRecoverChance = this.baseStats.brainRecoverChance;
     this.riseFromTheDeadChance = this.baseStats.riseFromTheDeadChance;
+    this.graveyard = this.baseStats.graveyard;
   },
 
   addEnergy(value) {
@@ -67,12 +72,21 @@ GameModel = {
       this.persistentData.brains = this.brainsMax;
   },
 
+  addBones(value) {
+    this.persistentData.bones += value;
+    this.persistentData.bonesTotal += value;
+  },
+
   getHumanCount(){
-    return Humans.aliveHumans.length;
+    return this.humanCount;
+  },
+
+  getEnergyRate() {
+    return this.energyRate - this.persistentData.boneCollectors;
   },
 
   update(timeDiff, updateTime) {
-    this.addEnergy(this.energyRate * timeDiff);
+    this.addEnergy(this.getEnergyRate() * timeDiff);
 
     if (this.currentState == this.states.playingLevel) {
 
@@ -94,6 +108,7 @@ GameModel = {
     setGameFieldSizeForLevel();
     Humans.populate();
     Zombies.populate();
+    Graveyard.initialize();
     centerGameContainer();
   },
 
@@ -103,7 +118,9 @@ GameModel = {
     levelUnlocked : 1,
     blood : 0,
     brains : 0,
-    upgrades : []
+    bones: 0,
+    upgrades : [],
+    boneCollectors : 0
   },
 
   saveData() {

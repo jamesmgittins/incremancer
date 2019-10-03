@@ -12,6 +12,7 @@ Humans = {
   humans : [],
   aliveHumans : [],
   humansPerLevel : 50,
+  maxHumans : 1000,
   scaling: 2,
   pointsOfInterest : [],
   maxPois : 7,
@@ -24,11 +25,21 @@ Humans = {
   attackDamage : 5,
   fadeSpeed : 0.1,
 
+  states : {
+    standing:"standing",
+    walking:"walking",
+    attacking:"attacking",
+    fleeing:"fleeing"
+  },
+
   randomSecondsToStand() {
     return this.minSecondsTostand + Math.random() * (this.maxSecondsToStand - this.minSecondsTostand);
   },
 
   isValidPosition(position) {
+
+    if (distanceBetweenPoints(position.x, position.y, gameFieldSize.x / 2, gameFieldSize.y / 2) < gameFieldSize.x * 0.25)
+      return false;
 
     for (var i=0; i < this.pointsOfInterest.length; i++) {
       if (distanceBetweenPoints(position.x, position.y, this.pointsOfInterest[i].x, this.pointsOfInterest[i].y) < gameFieldSize.x * 0.2)
@@ -68,7 +79,9 @@ Humans = {
     GameModel.addBlood(Math.round(damage / 3));
     human.health -= damage;
     Blood.newSplatter(human.x, human.y);
+    human.timeToScan = 0;
     if (human.health <= 0) {
+      Bones.newBones(human.x, human.y);
       human.dead = true;
       GameModel.addBrains(1);
       human.textures = human.deadTexture;
@@ -82,6 +95,10 @@ Humans = {
     human.maxSpeed = human.timeFleeing > 0 ? this.maxRunSpeed : this.maxWalkSpeed;
     human.xSpeed = 0;
     human.ySpeed = 0;
+  },
+
+  getMaxHumans() {
+    return Math.min(this.humansPerLevel * GameModel.level, this.maxHumans) - (Police.getMaxPolice() + Army.getMaxArmy());
   },
 
   populate() {
@@ -105,7 +122,7 @@ Humans = {
       this.aliveHumans = [];
     }
 
-    var maxHumans = (this.humansPerLevel * GameModel.level) - (Police.getMaxPolice() + Army.getMaxArmy());
+    var maxHumans = this.getMaxHumans();
   
     for (var i=0; i < maxHumans; i++) {
       var isWhite = Math.random() > 0.5;
@@ -118,12 +135,12 @@ Humans = {
       human.zIndex = human.position.y;
       human.xSpeed = 0;
       human.ySpeed = 0;
-      human.maxSpeed = this.maxWalkSpeed;
       human.visionDistance = this.visionDistance;
       human.visible = true;
       human.health = this.baseHealth;
       human.timeToScan = Math.random() * this.scanTime;
       human.timeFleeing = 0;
+      this.changeState(human, this.states.standing);
       human.timeStanding = Math.random() * this.randomSecondsToStand();
       human.attackTimer = this.attackSpeed;
       human.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
@@ -139,7 +156,7 @@ Humans = {
 
     var accelX = human.target.x - human.position.x;
     var accelY = human.target.y - human.position.y;
-    var factor = human.maxSpeed / (magnitude(accelX, accelY) || 1);
+    var factor = human.maxSpeed * 2 / (magnitude(accelX, accelY) || 1);
     human.xSpeed += accelX * factor * timeDiff;
     human.ySpeed += accelY * factor * timeDiff;
   
@@ -153,14 +170,17 @@ Humans = {
   },
 
   update(timeDiff) {
-    this.aliveHumans = [];
+    var aliveHumans = [];
     for (var i=0; i < this.humans.length; i++) {
       this.updateHuman(this.humans[i], timeDiff);
       if (!this.humans[i].dead)
-        this.aliveHumans.push(this.humans[i]);
+        aliveHumans.push(this.humans[i]);
     }
+    this.aliveHumans = aliveHumans;
     Police.update(timeDiff);
     Army.update(timeDiff);
+
+    GameModel.humanCount = this.aliveHumans.length;
   },
 
   updateDeadHumanFading(human, timeDiff) {
@@ -182,59 +202,88 @@ Humans = {
     return;
   },
 
+  changeState(human, state) {
+    switch(state) {
+      case this.states.standing:
+        human.gotoAndStop(0);
+        human.maxSpeed = this.maxWalkSpeed;
+        human.timeStanding = Humans.randomSecondsToStand();
+        break;
+      case this.states.walking:
+        human.play();
+        human.maxSpeed = this.maxWalkSpeed;
+        break;
+      case this.states.fleeing:
+        human.play();
+        human.timeFleeing = this.fleeTime;
+        human.maxSpeed = this.maxRunSpeed;
+        this.assignRandomTarget(human);
+        Exclamations.newExclamation(human);
+        break;
+      case this.states.attacking:
+        human.play();
+        human.maxSpeed = this.maxRunSpeed;
+        break;
+    }
+    human.state = state;
+  },
+
   updateHuman(human, timeDiff) {
     
     if (human.dead)
       return this.updateDeadHumanFading(human, timeDiff);
+
+    human.attackTimer -= timeDiff;
+    human.timeToScan -= timeDiff;
+    human.timeFleeing -= timeDiff;
 
     if ((!human.zombieTarget || human.zombieTarget.dead) && human.timeToScan < 0) {
       var count = Humans.scanForZombies(human);
 
       if (count > 0) {
         if (Math.random() < count * this.fleeChancePerZombie) {
-          human.timeFleeing = this.fleeTime;
-          human.maxSpeed = this.maxRunSpeed;
-          Exclamations.newExclamation(human);
+          this.changeState(human, this.states.fleeing);
         } else {
           human.target = human.zombieTarget;
+          this.changeState(human, this.states.attacking);
         }
       }
     }
 
-    human.attackTimer -= timeDiff;
-    human.timeToScan -= timeDiff;
-
-    if (human.target) {
-      
-      human.play();
-
-      if (distanceBetweenPoints(human.position.x, human.position.y, human.target.x, human.target.y) < this.attackDistance) {
-
-        if (human.zombieTarget && human.timeFleeing < 0 && !human.zombieTarget.dead) {
-          if (human.attackTimer < 0) {
-            Zombies.damageZombie(human.zombieTarget, this.attackDamage);
-            human.attackTimer = this.attackSpeed;
-          }
-        } else {
+    switch (human.state) {
+      case this.states.standing:
+        human.timeStanding -= timeDiff;
+        if (human.timeStanding < 0) {
+          this.assignRandomTarget(human);
+          this.changeState(human, this.states.walking);
+        }
+        break;
+      case this.states.walking:
+      case this.states.fleeing:
+        if (distanceBetweenPoints(human.position.x, human.position.y, human.target.x, human.target.y) < this.attackDistance) {
           human.target = false;
           human.zombieTarget = false;
-          human.timeFleeing = 0;
-          human.timeStanding = this.randomSecondsToStand();
-          human.gotoAndStop(0);
+          this.changeState(human, this.states.standing);
+        } else {
+          Humans.updateHumanSpeed(human, timeDiff);
+          human.scale = {x:human.xSpeed > 0 ? this.scaling : -this.scaling, y:this.scaling};
         }
-      } else {
-        Humans.updateHumanSpeed(human, timeDiff);
-        human.scale = {x:human.xSpeed > 0 ? this.scaling : -this.scaling, y:this.scaling};
-      }
-    } else {
-      human.timeStanding -= timeDiff;
-      human.timeFleeing -= timeDiff;
-      if (human.timeFleeing < 0) {
-        human.maxSpeed = this.maxWalkSpeed;
-      }
-      if (human.timeStanding < 0 || human.timeFleeing > 0) {
-        this.assignRandomTarget(human);
-      }
+        break;
+      case this.states.attacking:
+        if (distanceBetweenPoints(human.position.x, human.position.y, human.target.x, human.target.y) < this.attackDistance) {
+          if (human.zombieTarget && !human.zombieTarget.dead) {
+            if (human.attackTimer < 0) {
+              Zombies.damageZombie(human.zombieTarget, this.attackDamage);
+              human.attackTimer = this.attackSpeed;
+            }
+          } else {
+            this.changeState(human, this.states.standing);
+          }
+        } else {
+          Humans.updateHumanSpeed(human, timeDiff);
+          human.scale = {x:human.xSpeed > 0 ? this.scaling : -this.scaling, y:this.scaling};
+        }
+        break;
     }
   },
 
@@ -264,7 +313,7 @@ Police = {
   deadTexture :[],
   policePerLevel : 0.6,
   attackSpeed : 2,
-  attackDamage : 12,
+  attackDamage : 16,
   attackDistance : 20,
   shootDistance : 100,
   visionDistance : 150,
@@ -488,7 +537,7 @@ Army = {
   deadTexture :[],
   armyPerLevel : 0.3,
   attackSpeed : 2,
-  attackDamage : 16,
+  attackDamage : 20,
   attackDistance : 25,
   shootDistance : 120,
   visionDistance : 200,

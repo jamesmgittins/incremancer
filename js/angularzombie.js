@@ -11,11 +11,42 @@ angular.module('zombieApp', [])
 
     zm.lastUpdate = 0;
     zm.shopOpen = false;
+    zm.graveyardOpen = false;
+    zm.optionsOpen = false;
     zm.upgrades = [];
 
     zm.toggleShop = function() {
-      zm.shopOpen = !zm.shopOpen;
+      zm.optionsOpen = false;
+      zm.graveyardOpen = false;
       zm.upgrades = Upgrades.upgrades;
+      zm.shopOpen = !zm.shopOpen;
+    }
+
+    zm.toggleGraveyard = function() {
+      zm.optionsOpen = false;
+      zm.shopOpen = false;
+      zm.graveyardUpgrades = Upgrades.boneUpgrades;
+      zm.graveyardOpen = !zm.graveyardOpen;
+    }
+
+    zm.toggleOptions = function() {
+      zm.shopOpen = false;
+      zm.graveyardOpen = false;
+      zm.optionsOpen = !zm.optionsOpen;
+    }
+
+    zm.resetGame = function() {
+      GameModel.resetData();
+    }
+
+    zm.addBoneCollector = function() {
+      if (zm.model.getEnergyRate() >= 1)
+        zm.model.persistentData.boneCollectors++;
+    }
+
+    zm.subtractBoneCollector = function() {
+      if (zm.model.persistentData.boneCollectors > 0)
+        zm.model.persistentData.boneCollectors--;
     }
 
     zm.upgradePrice = function(upgrade) {
@@ -34,6 +65,8 @@ angular.module('zombieApp', [])
           return GameModel.bloodMax >= upgrade.basePrice;
         case Upgrades.costs.brains:
           return GameModel.brainsMax >= upgrade.basePrice;
+        case Upgrades.costs.bones:
+          return GameModel.persistentData.bonesTotal >= upgrade.basePrice;
       }
       return true;
     }

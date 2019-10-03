@@ -116,6 +116,7 @@ function centerGameContainer() {
 }
 
 function update(timeDiff) {
+  Graveyard.update(timeDiff);
   Humans.update(timeDiff);
   Zombies.update(timeDiff);
   Blood.update(timeDiff);
@@ -124,9 +125,10 @@ function update(timeDiff) {
 }
 
 function setGameFieldSizeForLevel() {
+  var size = Math.min(500 + (GameModel.level * 100), 2000);
   gameFieldSize = {
-    x:500 + (GameModel.level * 100),
-    y:500 + (GameModel.level * 100)
+    x:size,
+    y:size
   };
   grass.width = gameFieldSize.x;
   grass.height = gameFieldSize.y;
@@ -145,11 +147,13 @@ function startGame() {
 
   app.loader
     .add('sprites/grass.png')
+    .add('sprites/graveyard.png')
     .add('sprites/whiteguy.json')
     .add('sprites/blackguy.json')
     .add('sprites/cop.json')
     .add('sprites/army.json')
     .add('sprites/zombie.json')
+    .add('sprites/bonecollector.json')
     .add('sprites/objects.json')
     .load(function(){
 
