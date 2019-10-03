@@ -119,6 +119,7 @@ GameModel = {
     blood : 0,
     brains : 0,
     bones: 0,
+    bonesTotal : 0,
     upgrades : [],
     boneCollectors : 0
   },
