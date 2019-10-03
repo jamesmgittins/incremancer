@@ -6,6 +6,13 @@ function distanceBetweenPoints(x1, y1, x2, y2) {
   return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
 
+function RotateVector2d(x, y, radians) {
+  return {
+      x: x * Math.cos(radians) - y * Math.sin(radians),
+      y: x * Math.sin(radians) + y * Math.cos(radians)
+  };
+}
+
 function getRandomElementFromArray(array, random) {
   return array[Math.floor(random * array.length)];
 }

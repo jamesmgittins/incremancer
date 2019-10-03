@@ -69,7 +69,7 @@ Zombies = {
   damageZombie(zombie, damage) {
     zombie.health -= damage;
     Blood.newSplatter(zombie.x, zombie.y);
-    if (zombie.health <= 0) {
+    if (zombie.health <= 0 && !zombie.dead) {
       zombie.dead = true;
       GameModel.zombieCount--;
       zombie.textures = this.zombieDeadTexture;
@@ -133,15 +133,13 @@ Zombies = {
 
     zombie.scanTime = this.scanTime;
     var distanceToTarget = 10000;
-    for (var i = 0; i < Humans.humans.length; i++) {
-      if (!Humans.humans[i].dead) {
-        if (Math.abs(Humans.humans[i].x - zombie.x) < this.targetDistance) {
-          if (Math.abs(Humans.humans[i].y - zombie.y) < this.targetDistance) {
-            var distanceToHuman = distanceBetweenPoints(zombie.x, zombie.y, Humans.humans[i].x, Humans.humans[i].y);
-            if (distanceToHuman < distanceToTarget) {
-              zombie.target = Humans.humans[i];
-              distanceToTarget = distanceToHuman;
-            }
+    for (var i = 0; i < Humans.aliveHumans.length; i++) {
+      if (Math.abs(Humans.aliveHumans[i].x - zombie.x) < this.targetDistance) {
+        if (Math.abs(Humans.aliveHumans[i].y - zombie.y) < this.targetDistance) {
+          var distanceToHuman = distanceBetweenPoints(zombie.x, zombie.y, Humans.aliveHumans[i].x, Humans.aliveHumans[i].y);
+          if (distanceToHuman < distanceToTarget) {
+            zombie.target = Humans.aliveHumans[i];
+            distanceToTarget = distanceToHuman;
           }
         }
       }
@@ -149,7 +147,7 @@ Zombies = {
   },
 
   assignRandomTarget(zombie) {
-    zombie.target = getRandomElementFromArray(Humans.humans, Math.random());
+    zombie.target = getRandomElementFromArray(Humans.aliveHumans, Math.random());
   },
 
   updateZombieSpeed(zombie, timeDiff) {

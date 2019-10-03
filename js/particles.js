@@ -94,9 +94,10 @@ Tombstones = {
 Exclamations = {
   sprites : [],
   discardedSprites : [],
-  maxSprites : 20,
+  maxSprites : 50,
   container:null,
-  texture:null,
+  exclamationTexture:null,
+  radioTexture:null,
   height:20,
   displayTime:2,
   fadeSpeed:4,
@@ -105,11 +106,12 @@ Exclamations = {
     this.container = new PIXI.Container();
     characterContainer.addChild(this.container);
 
-    this.texture = PIXI.Texture.from("exclamation.png");
+    this.exclamationTexture = PIXI.Texture.from("exclamation.png");
+    this.radioTexture = PIXI.Texture.from("radio.png");
 
 		for (var i = 0; i < this.maxSprites; i++) {
 
-      var sprite = new PIXI.Sprite(this.texture);
+      var sprite = new PIXI.Sprite(this.exclamationTexture);
       this.container.addChild(sprite);
       sprite.visible=false;
       sprite.anchor = {x:0.5,y:1};
@@ -121,6 +123,21 @@ Exclamations = {
   newExclamation(target) {
     if (this.discardedSprites.length > 0) {
       var sprite = this.discardedSprites.pop();
+      sprite.texture = this.exclamationTexture;
+      sprite.target = target;
+      sprite.x = target.x;
+      sprite.y = target.y - this.height;
+      sprite.visible = true;
+      sprite.time = this.displayTime;
+      sprite.alpha = 1;
+      sprite.scale = {x:1.5,y:1.5};
+    }
+  },
+
+  newRadio(target) {
+    if (this.discardedSprites.length > 0) {
+      var sprite = this.discardedSprites.pop();
+      sprite.texture = this.radioTexture;
       sprite.target = target;
       sprite.x = target.x;
       sprite.y = target.y - this.height;
@@ -150,6 +167,80 @@ Exclamations = {
         sprite.visible = false;
         this.discardedSprites.push(sprite);
       }
+    }
+  }
+};
+
+Bullets = {
+  maxParts : 200,
+  speed : 150,
+  hitbox : 8,
+  container : null,
+  sprites : [],
+  discardedSprites : [],
+	getTexture() {
+		var blast = document.createElement('canvas');
+		blast.width = 1;
+		blast.height = 1;
+		var blastCtx = blast.getContext('2d');
+
+		// draw shape
+		blastCtx.fillStyle = "#ffffff";
+		blastCtx.fillRect(0, 0, 1, 1);
+		return PIXI.Texture.from(blast);
+	},
+	initialize() {
+
+    this.texture = this.getTexture();
+
+		for (var i = 0; i < this.maxParts; i++) {
+
+      var sprite = new PIXI.Sprite(this.texture);
+      gameContainer.addChild(sprite);
+      sprite.visible=false;
+      sprite.scale.x = sprite.scale.y = 2;
+      this.sprites.push(sprite);
+    }
+    this.discardedSprites = this.sprites.slice();
+	},
+	update(timeDiff) {
+		for (var i = 0; i < this.sprites.length; i++) {
+      if (this.sprites[i].visible) {
+        this.updatePart(this.sprites[i], timeDiff);
+      }
+		}
+  },
+  updatePart(sprite, timeDiff) {
+    if (distanceBetweenPoints(sprite.x, sprite.y + 8, sprite.target.x, sprite.target.y) < this.hitbox) {
+      Zombies.damageZombie(sprite.target, sprite.damage);
+      sprite.visible = false;
+      this.discardedSprites.push(sprite);
+    } else {
+      sprite.x += sprite.xSpeed * timeDiff;
+      sprite.y += sprite.ySpeed * timeDiff;
+      sprite.zIndex = sprite.y;
+    }
+
+    if (sprite.x > gameContainer.width + 100 || sprite.x < -100 || sprite.y < -100 || sprite.y > gameContainer.height + 100) {
+      sprite.visible = false;
+      this.discardedSprites.push(sprite);
+    }
+    
+  },
+  newBullet(x,y,target,damage) {
+    if (this.discardedSprites.length > 0) {
+      var sprite = this.discardedSprites.pop();
+      sprite.x = x;
+      sprite.y = y - 8;
+      sprite.target = target;
+      sprite.damage = damage;
+      sprite.visible = true;
+      
+      var aimAngle = Math.atan2(x - target.x, target.y - y);
+      var bulletSpeed = RotateVector2d(0, this.speed, aimAngle);
+      
+      sprite.xSpeed = bulletSpeed.x;
+      sprite.ySpeed = bulletSpeed.y;
     }
   }
 };

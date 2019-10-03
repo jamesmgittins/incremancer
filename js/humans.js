@@ -2,6 +2,7 @@ Humans = {
 
   maxWalkSpeed : 15,
   maxRunSpeed : 35,
+  baseHealth: 100,
   minSecondsTostand : 10,
   maxSecondsToStand : 200,
   whiteguyFrames : [],
@@ -9,6 +10,7 @@ Humans = {
   blackguyFrames : [],
   deadBlackguy : [],
   humans : [],
+  aliveHumans : [],
   humansPerLevel : 50,
   scaling: 2,
   pointsOfInterest : [],
@@ -69,11 +71,7 @@ Humans = {
     if (human.health <= 0) {
       human.dead = true;
       GameModel.addBrains(1);
-      GameModel.humanCount--;
-      if (human.isWhite)
-        human.textures = this.deadWhiteguy;
-      else
-        human.textures = this.deadBlackguy;
+      human.textures = human.deadTexture;
     }
   },
 
@@ -104,14 +102,15 @@ Humans = {
         characterContainer.removeChild(this.humans[i]);
       }
       this.humans = [];
+      this.aliveHumans = [];
     }
 
-    var maxHumans = this.humansPerLevel * GameModel.level;
+    var maxHumans = (this.humansPerLevel * GameModel.level) - (Police.getMaxPolice() + Army.getMaxArmy());
   
     for (var i=0; i < maxHumans; i++) {
       var isWhite = Math.random() > 0.5;
       var human = new PIXI.AnimatedSprite(isWhite ? this.whiteguyFrames : this.blackguyFrames);
-      human.isWhite = isWhite;
+      human.deadTexture = isWhite ? this.deadWhiteguy : this.deadBlackguy;
       human.animationSpeed = 0.2;
       human.anchor = {x:0.5,y:1};
       var poi = getRandomElementFromArray(this.pointsOfInterest, Math.random());
@@ -119,8 +118,10 @@ Humans = {
       human.zIndex = human.position.y;
       human.xSpeed = 0;
       human.ySpeed = 0;
+      human.maxSpeed = this.maxWalkSpeed;
+      human.visionDistance = this.visionDistance;
       human.visible = true;
-      human.health = 100;
+      human.health = this.baseHealth;
       human.timeToScan = Math.random() * this.scanTime;
       human.timeFleeing = 0;
       human.timeStanding = Math.random() * this.randomSecondsToStand();
@@ -129,7 +130,9 @@ Humans = {
       this.humans.push(human);
       characterContainer.addChild(human);
     }
-    GameModel.humanCount += this.humans.length;
+
+    Police.populate();
+    Army.populate();
   },
 
   updateHumanSpeed(human, timeDiff) {
@@ -150,9 +153,14 @@ Humans = {
   },
 
   update(timeDiff) {
+    this.aliveHumans = [];
     for (var i=0; i < this.humans.length; i++) {
       this.updateHuman(this.humans[i], timeDiff);
+      if (!this.humans[i].dead)
+        this.aliveHumans.push(this.humans[i]);
     }
+    Police.update(timeDiff);
+    Army.update(timeDiff);
   },
 
   updateDeadHumanFading(human, timeDiff) {
@@ -235,8 +243,8 @@ Humans = {
     zombieSpottedCount = 0;
     for (var i = 0; i < Zombies.zombies.length; i++) {
       if (!Zombies.zombies[i].dead) {
-        if (Math.abs(Zombies.zombies[i].x - human.x) < this.visionDistance) {
-          if (Math.abs(Zombies.zombies[i].y - human.y) < this.visionDistance) {
+        if (Math.abs(Zombies.zombies[i].x - human.x) < human.visionDistance) {
+          if (Math.abs(Zombies.zombies[i].y - human.y) < human.visionDistance) {
             human.zombieTarget = Zombies.zombies[i];
             zombieSpottedCount++;
           }
@@ -246,3 +254,433 @@ Humans = {
     return zombieSpottedCount;
   }
 };
+
+Police = {
+  maxWalkSpeed : 15,
+  maxRunSpeed : 40,
+  baseHealth : 200,
+  police : [],
+  walkTexture : [],
+  deadTexture :[],
+  policePerLevel : 0.6,
+  attackSpeed : 2,
+  attackDamage : 12,
+  attackDistance : 20,
+  shootDistance : 100,
+  visionDistance : 150,
+  scaling :2,
+  radioTime : 30,
+
+  states : {
+    shooting : "shooting",
+    attacking : "attacking",
+    walking : "walking",
+    running : "running",
+    standing : "standing"
+  },
+
+  getMaxPolice() {
+    var maxPolice = Math.round(this.policePerLevel * GameModel.level);
+
+    if (GameModel.level < 3)
+      return 0;
+
+    return maxPolice;
+  },
+
+  populate() {
+    if (this.walkTexture.length == 0) {
+      for (var i=0; i < 3; i++) {
+        this.walkTexture.push(PIXI.Texture.from('cop' + (i + 1) + '.png'))
+      }
+      this.deadTexture = [PIXI.Texture.from('cop4.png')];
+    }
+
+    if (this.police.length > 0) {
+      for (var i=0; i < this.police.length; i++) {
+        characterContainer.removeChild(this.police[i]);
+      }
+      this.police = [];
+    }
+
+    var maxPolice = this.getMaxPolice();
+
+    for (var i=0; i < maxPolice; i++) {
+      var police = new PIXI.AnimatedSprite(this.walkTexture);
+      police.deadTexture = this.deadTexture;
+      police.animationSpeed = 0.2;
+      police.anchor = {x:0.5,y:1};
+      var poi = getRandomElementFromArray(Humans.pointsOfInterest, Math.random());
+      police.position = {x:poi.x + (Math.random() * poi.width), y: poi.y + (Math.random() * poi.height)};
+      police.zIndex = police.position.y;
+      police.xSpeed = 0;
+      police.ySpeed = 0;
+      police.radioTime = 5;
+      police.maxSpeed = this.maxWalkSpeed;
+      police.visionDistance = this.visionDistance;
+      police.visible = true;
+      police.health = this.baseHealth;
+      police.timeToScan = Math.random() * Humans.scanTime;
+      police.timeStanding = Math.random() * Humans.randomSecondsToStand();
+      police.state = this.states.standing;
+      police.attackTimer = this.attackSpeed;
+      police.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
+      this.police.push(police);
+      characterContainer.addChild(police);
+    }
+  },
+
+  update(timeDiff) {
+    for (var i=0; i < this.police.length; i++) {
+      this.updatePolice(this.police[i], timeDiff);
+      if (!this.police[i].dead)
+        Humans.aliveHumans.push(this.police[i]);
+    }
+  },
+
+  decideStateOnZombieDistance(police) {
+    if (police.zombieTarget && !police.zombieTarget.dead) {
+      police.target = police.zombieTarget;
+      var distanceToTarget = distanceBetweenPoints(police.position.x, police.position.y, police.target.x, police.target.y);
+
+      if (distanceToTarget > this.shootDistance) {
+        this.changeState(police, this.states.running);
+        return;
+      }
+
+      if (distanceToTarget < this.attackDistance) {
+        this.changeState(police, this.states.attacking);
+        return;
+      }
+      this.changeState(police, this.states.shooting);
+    }
+  },
+
+  changeState(police, state) {
+    switch(state) {
+      case this.states.standing:
+        police.gotoAndStop(0);
+        break;
+      case this.states.walking:
+        police.play();
+        police.maxSpeed = this.maxWalkSpeed;
+        break;
+      case this.states.running:
+        police.play();
+        police.maxSpeed = this.maxRunSpeed;
+        break;
+      case this.states.shooting:
+        police.gotoAndStop(0);
+        break;
+      case this.states.attacking:
+        police.play();
+        break;
+    }
+    police.state = state;
+  },
+
+  radioForBackup(police) {
+    
+    var closestPolice = false;
+    var closestDistance = 2000;
+
+    for (var i=0; i < this.police.length; i++) {
+      if (!this.police[i].dead && (!this.police[i].zombieTarget || this.police[i].zombieTarget.dead)) {
+        var distance = distanceBetweenPoints(police.x, police.y, this.police[i].x, this.police[i].y);
+        if (distance < closestDistance) {
+          closestPolice = this.police[i];
+          closestDistance = distance;
+        }
+      }
+    }
+
+    if (closestPolice) {
+      closestPolice.zombieTarget = police.zombieTarget;
+      Exclamations.newRadio(police);
+      Exclamations.newRadio(closestPolice);
+      police.radioTime = this.radioTime;
+      closestPolice.radioTime = this.radioTime;
+    }
+  },
+
+  updatePolice(police, timeDiff) {
+    
+    if (police.dead)
+      return Humans.updateDeadHumanFading(police, timeDiff);
+
+    police.attackTimer -= timeDiff;
+    police.timeToScan -= timeDiff;
+    police.radioTime -= timeDiff;
+
+    if ((!police.zombieTarget || police.zombieTarget.dead) && police.timeToScan < 0) {
+      Humans.scanForZombies(police);
+      if (police.zombieTarget && !police.zombieTarget.dead && police.radioTime < 0)
+        this.radioForBackup(police);
+    }
+
+    this.decideStateOnZombieDistance(police);
+
+    switch (police.state) {
+
+      case this.states.standing:
+        police.timeStanding -= timeDiff;
+        if (police.timeStanding < 0) {
+          Humans.assignRandomTarget(police);
+          this.changeState(police, this.states.walking);
+        }
+
+        break;
+      case this.states.walking:
+
+        if (distanceBetweenPoints(police.position.x, police.position.y, police.target.x, police.target.y) < this.attackDistance) {
+          police.target = false;
+          police.zombieTarget = false;
+          police.timeStanding = Humans.randomSecondsToStand();
+          this.changeState(police, this.states.standing);
+        } else {
+          Humans.updateHumanSpeed(police, timeDiff);
+          police.scale = {x:police.xSpeed > 0 ? this.scaling : -this.scaling, y:this.scaling};
+        }
+
+        break;
+      case this.states.running:
+
+        if (police.zombieTarget && !police.zombieTarget.dead) {
+          Humans.updateHumanSpeed(police, timeDiff);
+          police.scale = {x:police.xSpeed > 0 ? this.scaling : -this.scaling, y:this.scaling};
+        } else {
+          this.changeState(police, this.states.standing);
+        }
+        break;
+      case this.states.attacking:
+        if (police.zombieTarget && !police.zombieTarget.dead) {
+          if (police.attackTimer < 0) {
+            Zombies.damageZombie(police.zombieTarget, this.attackDamage);
+            police.attackTimer = this.attackSpeed;
+          }
+        } else {
+          this.changeState(police, this.states.standing);
+        }
+
+        break;
+      case this.states.shooting:
+        if (police.zombieTarget && !police.zombieTarget.dead) {
+          if (police.attackTimer < 0) {
+            Bullets.newBullet(police.x, police.y, police.zombieTarget, this.attackDamage);
+            police.attackTimer = this.attackSpeed;
+          }
+        } else {
+          this.changeState(police, this.states.standing);
+        }
+
+        break;
+    }
+  }
+
+}
+
+Army = {
+  maxWalkSpeed : 20,
+  maxRunSpeed : 50,
+  baseHealth : 300,
+  armymen : [],
+  walkTexture : [],
+  deadTexture :[],
+  armyPerLevel : 0.3,
+  attackSpeed : 2,
+  attackDamage : 16,
+  attackDistance : 25,
+  shootDistance : 120,
+  visionDistance : 200,
+  scaling :2,
+  shotsPerBurst : 3,
+
+  states : {
+    shooting : "shooting",
+    attacking : "attacking",
+    walking : "walking",
+    running : "running",
+    standing : "standing"
+  },
+
+  getMaxArmy() {
+    var maxArmy = Math.round(this.armyPerLevel * GameModel.level);
+
+    if (GameModel.level < 8)
+      return 0;
+
+    return maxArmy;
+  },
+
+
+  populate() {
+    if (this.walkTexture.length == 0) {
+      for (var i=0; i < 3; i++) {
+        this.walkTexture.push(PIXI.Texture.from('army' + (i + 1) + '.png'))
+      }
+      this.deadTexture = [PIXI.Texture.from('army4.png')];
+    }
+
+    if (this.armymen.length > 0) {
+      for (var i=0; i < this.armymen.length; i++) {
+        characterContainer.removeChild(this.armymen[i]);
+      }
+      this.armymen = [];
+    }
+
+    var maxArmy = this.getMaxArmy();
+  
+    for (var i=0; i < maxArmy; i++) {
+      var armyman = new PIXI.AnimatedSprite(this.walkTexture);
+      armyman.deadTexture = this.deadTexture;
+      armyman.animationSpeed = 0.2;
+      armyman.anchor = {x:0.5,y:1};
+      var poi = getRandomElementFromArray(Humans.pointsOfInterest, Math.random());
+      armyman.position = {x:poi.x + (Math.random() * poi.width), y: poi.y + (Math.random() * poi.height)};
+      armyman.zIndex = armyman.position.y;
+      armyman.xSpeed = 0;
+      armyman.ySpeed = 0;
+      armyman.maxSpeed = this.maxWalkSpeed;
+      armyman.visionDistance = this.visionDistance;
+      armyman.visible = true;
+      armyman.health = this.baseHealth;
+      armyman.timeToScan = Math.random() * Humans.scanTime;
+      armyman.timeStanding = Math.random() * Humans.randomSecondsToStand();
+      armyman.state = this.states.standing;
+      armyman.attackTimer = this.attackSpeed;
+      armyman.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
+      this.armymen.push(armyman);
+      characterContainer.addChild(armyman);
+    }
+  },
+
+  update(timeDiff) {
+    for (var i=0; i < this.armymen.length; i++) {
+      this.updateArmy(this.armymen[i], timeDiff);
+      if (!this.armymen[i].dead)
+        Humans.aliveHumans.push(this.armymen[i]);
+    }
+  },
+
+  decideStateOnZombieDistance(armyman) {
+    if (armyman.zombieTarget && !armyman.zombieTarget.dead) {
+      armyman.target = armyman.zombieTarget;
+      var distanceToTarget = distanceBetweenPoints(armyman.position.x, armyman.position.y, armyman.target.x, armyman.target.y);
+
+      if (distanceToTarget > this.shootDistance) {
+        this.changeState(armyman, this.states.running);
+        return;
+      }
+
+      if (distanceToTarget < this.attackDistance) {
+        this.changeState(armyman, this.states.attacking);
+        return;
+      }
+      this.changeState(armyman, this.states.shooting);
+    }
+  },
+
+  changeState(armyman, state) {
+    switch(state) {
+      case this.states.standing:
+          armyman.gotoAndStop(0);
+        break;
+      case this.states.walking:
+          armyman.play();
+          armyman.maxSpeed = this.maxWalkSpeed;
+        break;
+      case this.states.running:
+          armyman.play();
+          armyman.maxSpeed = this.maxRunSpeed;
+        break;
+      case this.states.shooting:
+          armyman.gotoAndStop(0);
+        break;
+      case this.states.attacking:
+          armyman.play();
+        break;
+    }
+    armyman.state = state;
+  },
+
+  updateArmy(armyman, timeDiff) {
+    
+    if (armyman.dead)
+      return Humans.updateDeadHumanFading(armyman, timeDiff);
+
+    armyman.attackTimer -= timeDiff;
+    armyman.timeToScan -= timeDiff;
+
+    if ((!armyman.zombieTarget || armyman.zombieTarget.dead) && armyman.timeToScan < 0) {
+      Humans.scanForZombies(armyman);
+    }
+
+    this.decideStateOnZombieDistance(armyman);
+
+    switch (armyman.state) {
+
+      case this.states.standing:
+        armyman.timeStanding -= timeDiff;
+        if (armyman.timeStanding < 0) {
+          Humans.assignRandomTarget(armyman);
+          this.changeState(armyman, this.states.walking);
+        }
+
+        break;
+      case this.states.walking:
+
+        if (distanceBetweenPoints(armyman.position.x, armyman.position.y, armyman.target.x, armyman.target.y) < this.attackDistance) {
+          armyman.target = false;
+          armyman.zombieTarget = false;
+          armyman.timeStanding = Humans.randomSecondsToStand();
+          this.changeState(armyman, this.states.standing);
+        } else {
+          Humans.updateHumanSpeed(armyman, timeDiff);
+          armyman.scale = {x:armyman.xSpeed > 0 ? this.scaling : -this.scaling, y:this.scaling};
+        }
+
+        break;
+      case this.states.running:
+
+        if (armyman.zombieTarget && !armyman.zombieTarget.dead) {
+          Humans.updateHumanSpeed(armyman, timeDiff);
+          armyman.scale = {x:armyman.xSpeed > 0 ? this.scaling : -this.scaling, y:this.scaling};
+        } else {
+          this.changeState(armyman, this.states.standing);
+        }
+        break;
+      case this.states.attacking:
+        if (armyman.zombieTarget && !armyman.zombieTarget.dead) {
+          if (armyman.attackTimer < 0) {
+            Zombies.damageZombie(armyman.zombieTarget, this.attackDamage);
+            armyman.attackTimer = this.attackSpeed;
+          }
+        } else {
+          this.changeState(armyman, this.states.standing);
+        }
+
+        break;
+      case this.states.shooting:
+        if (armyman.zombieTarget && !armyman.zombieTarget.dead) {
+          if (armyman.attackTimer < 0) {
+            armyman.shotsLeft = this.shotsPerBurst;
+            armyman.attackTimer = this.attackSpeed;
+            armyman.shotTimer = 0;
+          }
+          if (armyman.shotsLeft > 0) {
+            armyman.shotTimer -= timeDiff;
+            if (armyman.shotTimer < 0) {
+              armyman.shotTimer = 0.15;
+              Bullets.newBullet(armyman.x, armyman.y, armyman.zombieTarget, this.attackDamage);
+              armyman.shotsLeft--;
+            }
+          }
+        } else {
+          this.changeState(armyman, this.states.standing);
+        }
+
+        break;
+    }
+  }
+
+}

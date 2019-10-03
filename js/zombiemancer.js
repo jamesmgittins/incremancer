@@ -119,6 +119,7 @@ function update(timeDiff) {
   Humans.update(timeDiff);
   Zombies.update(timeDiff);
   Blood.update(timeDiff);
+  Bullets.update(timeDiff);
   Exclamations.update(timeDiff);
 }
 
@@ -146,6 +147,8 @@ function startGame() {
     .add('sprites/grass.png')
     .add('sprites/whiteguy.json')
     .add('sprites/blackguy.json')
+    .add('sprites/cop.json')
+    .add('sprites/army.json')
     .add('sprites/zombie.json')
     .add('sprites/objects.json')
     .load(function(){
@@ -158,6 +161,7 @@ function startGame() {
     GameModel.loadData();
 
     Blood.initialize();
+    Bullets.initialize();
     Exclamations.initialize();
     centerGameContainer();
 

@@ -14,7 +14,6 @@ GameModel = {
   riseFromTheDeadChance:0,
 
   level:1,
-  humanCount:0,
   zombieCount:0,
 
   currentState : "startGame",
@@ -68,6 +67,10 @@ GameModel = {
       this.persistentData.brains = this.brainsMax;
   },
 
+  getHumanCount(){
+    return Humans.aliveHumans.length;
+  },
+
   update(timeDiff, updateTime) {
     this.addEnergy(this.energyRate * timeDiff);
 
@@ -78,7 +81,7 @@ GameModel = {
         this.lastSave = updateTime;
       }
   
-      if (this.humanCount <= 0) {
+      if (this.getHumanCount() <= 0) {
         this.currentState = this.states.levelCompleted;
         this.persistentData.levelUnlocked = this.level + 1;
       }
@@ -88,7 +91,6 @@ GameModel = {
   },
 
   setupLevel() {
-    this.humanCount = 0;
     setGameFieldSizeForLevel();
     Humans.populate();
     Zombies.populate();
