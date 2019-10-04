@@ -10,6 +10,7 @@ Upgrades = {
     brainsCap:"brainsCap",
     brainRecoverChance:"brainRecoverChance",
     riseFromTheDeadChance:"riseFromTheDeadChance",
+    graveyard:"graveyard",
     boneCollectorCapacity:"boneCollectorCapacity"
   },
 
