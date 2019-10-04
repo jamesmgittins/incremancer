@@ -111,8 +111,8 @@ function setupContainers(app) {
 function centerGameContainer() {
   gameContainer.scale.x = 1;
   gameContainer.scale.y = 1;
-  gameContainer.x = (canvasSize.x - gameContainer.width) / 2;
-  gameContainer.y = (canvasSize.y - gameContainer.height) / 2;
+  gameContainer.x = (canvasSize.x - gameFieldSize.x) / 2;
+  gameContainer.y = (canvasSize.y - gameFieldSize.y) / 2;
 }
 
 function update(timeDiff) {
@@ -163,6 +163,8 @@ function startGame() {
     backgroundContainer.addChild(grass);
 
     GameModel.loadData();
+
+    setGameFieldSizeForLevel();
 
     Blood.initialize();
     Bullets.initialize();

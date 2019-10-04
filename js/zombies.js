@@ -114,10 +114,10 @@ Zombies = {
 
       zombie.scanTime -= timeDiff;
       
-      if (distanceBetweenPoints(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y) > this.attackDistance)
+      if (fastDistance(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y) > this.attackDistance)
         this.searchClosestTarget(zombie);
      
-      if (distanceBetweenPoints(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y) < this.attackDistance) {
+      if (fastDistance(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y) < this.attackDistance) {
         if (zombie.attackTimer < 0) {
           Humans.damageHuman(zombie.target, GameModel.zombieDamage);
           zombie.attackTimer = this.attackSpeed;
@@ -141,7 +141,7 @@ Zombies = {
     for (var i = 0; i < Humans.aliveHumans.length; i++) {
       if (Math.abs(Humans.aliveHumans[i].x - zombie.x) < this.targetDistance) {
         if (Math.abs(Humans.aliveHumans[i].y - zombie.y) < this.targetDistance) {
-          var distanceToHuman = distanceBetweenPoints(zombie.x, zombie.y, Humans.aliveHumans[i].x, Humans.aliveHumans[i].y);
+          var distanceToHuman = fastDistance(zombie.x, zombie.y, Humans.aliveHumans[i].x, Humans.aliveHumans[i].y);
           if (distanceToHuman < distanceToTarget) {
             zombie.target = Humans.aliveHumans[i];
             distanceToTarget = distanceToHuman;
@@ -183,9 +183,8 @@ Zombies = {
   isSpaceToMove(zombie, x, y) {
     for (var i=0; i < Zombies.aliveZombies.length; i++) {
       if (Zombies.aliveZombies[i].zombieId != zombie.zombieId && Math.abs(Zombies.aliveZombies[i].x - x) < this.spaceNeeded) {
-        if (Math.abs(Zombies.aliveZombies[i].y - y) < this.spaceNeeded) {
-          if (distanceBetweenPoints(x, y, Zombies.aliveZombies[i].x, Zombies.aliveZombies[i].y) < distanceBetweenPoints(zombie.x, zombie.y, Zombies.aliveZombies[i].x, Zombies.aliveZombies[i].y))
-            return false;
+        if (Math.abs(Zombies.aliveZombies[i].y - y) < this.spaceNeeded && Math.abs(Zombies.aliveZombies[i].x - x) < this.spaceNeeded) {
+          return false;
         }
       }
     }

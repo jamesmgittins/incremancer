@@ -17,6 +17,8 @@ GameModel = {
 
   humanCount : 50,
   zombieCount:0,
+  endLevelTimer : 3,
+  endLevelDelay : 3,
   
   level:1,
   
@@ -99,15 +101,20 @@ GameModel = {
       }
   
       if (this.getHumanCount() <= 0) {
-        this.currentState = this.states.levelCompleted;
-        this.persistentData.levelUnlocked = this.level + 1;
-      }
 
+        if (this.endLevelTimer < 0) {
+          this.currentState = this.states.levelCompleted;
+          this.persistentData.levelUnlocked = this.level + 1;
+        } else {
+          this.endLevelTimer -= timeDiff;
+        } 
+      }
     }
     
   },
 
   setupLevel() {
+    this.endLevelTimer = this.endLevelDelay;
     setGameFieldSizeForLevel();
     Humans.populate();
     Zombies.populate();

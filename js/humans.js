@@ -38,11 +38,11 @@ Humans = {
 
   isValidPosition(position) {
 
-    if (distanceBetweenPoints(position.x, position.y, gameFieldSize.x / 2, gameFieldSize.y / 2) < gameFieldSize.x * 0.25)
+    if (fastDistance(position.x, position.y, gameFieldSize.x / 2, gameFieldSize.y / 2) < gameFieldSize.x * 0.25)
       return false;
 
     for (var i=0; i < this.pointsOfInterest.length; i++) {
-      if (distanceBetweenPoints(position.x, position.y, this.pointsOfInterest[i].x, this.pointsOfInterest[i].y) < gameFieldSize.x * 0.2)
+      if (fastDistance(position.x, position.y, this.pointsOfInterest[i].x, this.pointsOfInterest[i].y) < gameFieldSize.x * 0.2)
         return false;
     }
 
@@ -260,7 +260,7 @@ Humans = {
         break;
       case this.states.walking:
       case this.states.fleeing:
-        if (distanceBetweenPoints(human.position.x, human.position.y, human.target.x, human.target.y) < this.attackDistance) {
+        if (fastDistance(human.position.x, human.position.y, human.target.x, human.target.y) < this.attackDistance) {
           human.target = false;
           human.zombieTarget = false;
           this.changeState(human, this.states.standing);
@@ -270,7 +270,7 @@ Humans = {
         }
         break;
       case this.states.attacking:
-        if (distanceBetweenPoints(human.position.x, human.position.y, human.target.x, human.target.y) < this.attackDistance) {
+        if (fastDistance(human.position.x, human.position.y, human.target.x, human.target.y) < this.attackDistance) {
           if (human.zombieTarget && !human.zombieTarget.dead) {
             if (human.attackTimer < 0) {
               Zombies.damageZombie(human.zombieTarget, this.attackDamage);
@@ -390,7 +390,7 @@ Police = {
   decideStateOnZombieDistance(police) {
     if (police.zombieTarget && !police.zombieTarget.dead) {
       police.target = police.zombieTarget;
-      var distanceToTarget = distanceBetweenPoints(police.position.x, police.position.y, police.target.x, police.target.y);
+      var distanceToTarget = fastDistance(police.position.x, police.position.y, police.target.x, police.target.y);
 
       if (distanceToTarget > this.shootDistance) {
         this.changeState(police, this.states.running);
@@ -435,7 +435,7 @@ Police = {
 
     for (var i=0; i < this.police.length; i++) {
       if (!this.police[i].dead && (!this.police[i].zombieTarget || this.police[i].zombieTarget.dead)) {
-        var distance = distanceBetweenPoints(police.x, police.y, this.police[i].x, this.police[i].y);
+        var distance = fastDistance(police.x, police.y, this.police[i].x, this.police[i].y);
         if (distance < closestDistance) {
           closestPolice = this.police[i];
           closestDistance = distance;
@@ -481,7 +481,7 @@ Police = {
         break;
       case this.states.walking:
 
-        if (distanceBetweenPoints(police.position.x, police.position.y, police.target.x, police.target.y) < this.attackDistance) {
+        if (fastDistance(police.position.x, police.position.y, police.target.x, police.target.y) < this.attackDistance) {
           police.target = false;
           police.zombieTarget = false;
           police.timeStanding = Humans.randomSecondsToStand();
@@ -614,7 +614,7 @@ Army = {
   decideStateOnZombieDistance(armyman) {
     if (armyman.zombieTarget && !armyman.zombieTarget.dead) {
       armyman.target = armyman.zombieTarget;
-      var distanceToTarget = distanceBetweenPoints(armyman.position.x, armyman.position.y, armyman.target.x, armyman.target.y);
+      var distanceToTarget = fastDistance(armyman.position.x, armyman.position.y, armyman.target.x, armyman.target.y);
 
       if (distanceToTarget > this.shootDistance) {
         this.changeState(armyman, this.states.running);
@@ -678,7 +678,7 @@ Army = {
         break;
       case this.states.walking:
 
-        if (distanceBetweenPoints(armyman.position.x, armyman.position.y, armyman.target.x, armyman.target.y) < this.attackDistance) {
+        if (fastDistance(armyman.position.x, armyman.position.y, armyman.target.x, armyman.target.y) < this.attackDistance) {
           armyman.target = false;
           armyman.zombieTarget = false;
           armyman.timeStanding = Humans.randomSecondsToStand();

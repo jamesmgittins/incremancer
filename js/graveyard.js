@@ -90,7 +90,7 @@ BoneCollectors = {
     var distanceToNearest = 2000;
     for (var i=0; i < Bones.uncollected.length; i++) {
       if (!Bones.uncollected[i].collected && !Bones.uncollected[i].collector) {
-        var distance = distanceBetweenPoints(boneCollector.position.x, boneCollector.position.y, Bones.uncollected[i].x, Bones.uncollected[i].y);
+        var distance = fastDistance(boneCollector.position.x, boneCollector.position.y, Bones.uncollected[i].x, Bones.uncollected[i].y);
         if (distance < distanceToNearest) {
           distanceToNearest = distance;
           nearestBone = Bones.uncollected[i];
@@ -118,7 +118,7 @@ BoneCollectors = {
           this.findNearestBone(boneCollector);
         }
         if (boneCollector.target && !boneCollector.target.collected) {
-          if (distanceBetweenPoints(boneCollector.position.x, boneCollector.position.y, boneCollector.target.x, boneCollector.target.y) < this.collectDistance) {
+          if (fastDistance(boneCollector.position.x, boneCollector.position.y, boneCollector.target.x, boneCollector.target.y) < this.collectDistance) {
             boneCollector.bones++;
             boneCollector.target.collected = true;
             boneCollector.xSpeed = 0;
@@ -133,7 +133,7 @@ BoneCollectors = {
         break;
 
       case this.states.returning:
-        if (distanceBetweenPoints(boneCollector.position.x, boneCollector.position.y, boneCollector.target.x, boneCollector.target.y) < this.collectDistance) {
+        if (fastDistance(boneCollector.position.x, boneCollector.position.y, boneCollector.target.x, boneCollector.target.y) < this.collectDistance) {
           boneCollector.xSpeed = 0;
           boneCollector.ySpeed = 0;
           boneCollector.target = false;

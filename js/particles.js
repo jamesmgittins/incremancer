@@ -281,7 +281,7 @@ Exclamations = {
 Bullets = {
   maxParts : 200,
   speed : 150,
-  hitbox : 8,
+  hitbox : 12,
   container : null,
   sprites : [],
   discardedSprites : [],
@@ -318,7 +318,7 @@ Bullets = {
 		}
   },
   updatePart(sprite, timeDiff) {
-    if (distanceBetweenPoints(sprite.x, sprite.y + 8, sprite.target.x, sprite.target.y) < this.hitbox) {
+    if (fastDistance(sprite.x, sprite.y + 8, sprite.target.x, sprite.target.y) < this.hitbox) {
       Zombies.damageZombie(sprite.target, sprite.damage);
       sprite.visible = false;
       this.discardedSprites.push(sprite);
@@ -328,7 +328,7 @@ Bullets = {
       sprite.zIndex = sprite.y;
     }
 
-    if (sprite.x > gameContainer.width + 100 || sprite.x < -100 || sprite.y < -100 || sprite.y > gameContainer.height + 100) {
+    if (sprite.x > gameFieldSize.x + 100 || sprite.x < -100 || sprite.y < -100 || sprite.y > gameFieldSize.y + 100) {
       sprite.visible = false;
       this.discardedSprites.push(sprite);
     }
@@ -342,12 +342,19 @@ Bullets = {
       sprite.target = target;
       sprite.damage = damage;
       sprite.visible = true;
+
+      var xVector = target.x - x;
+      var yVector = target.y - y;
+      var ax = Math.abs(xVector);
+      var ay = Math.abs(yVector);
+      var ratio = 1 / Math.max(ax, ay);
+      ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
       
-      var aimAngle = Math.atan2(x - target.x, target.y - y);
-      var bulletSpeed = RotateVector2d(0, this.speed, aimAngle);
+      // var aimAngle = Math.atan2(x - target.x, target.y - y);
+      // var bulletSpeed = RotateVector2d(0, this.speed, aimAngle);
       
-      sprite.xSpeed = bulletSpeed.x;
-      sprite.ySpeed = bulletSpeed.y;
+      sprite.xSpeed = xVector * ratio * this.speed;
+      sprite.ySpeed = yVector * ratio * this.speed;
     }
   }
 };
