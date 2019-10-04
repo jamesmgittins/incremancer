@@ -42,7 +42,6 @@ BoneCollectors = {
 
   sprites:[],
   maxSpeed:75,
-  boneCapacity:10,
   texture:false,
   scaling:2,
   collectDistance:10,
@@ -126,7 +125,7 @@ BoneCollectors = {
             boneCollector.ySpeed = 0;
           }
         }
-        if (boneCollector.bones >= this.boneCapacity || !boneCollector.target) {
+        if (boneCollector.bones >= GameModel.boneCollectorCapacity || !boneCollector.target) {
           boneCollector.state = this.states.returning;
           boneCollector.target = Graveyard.sprite;
           return;

@@ -139,7 +139,7 @@ function startGame() {
   PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
   const app = new PIXI.Application({
-    width: canvasSize.x, height: canvasSize.y, backgroundColor: 0x107733, resolution: window.devicePixelRatio || 1, antialias:false
+    width: canvasSize.x, height: canvasSize.y, backgroundColor: 0x104510, resolution: window.devicePixelRatio || 1, antialias:false
   });
   document.body.appendChild(app.view);
 

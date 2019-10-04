@@ -12,13 +12,14 @@ GameModel = {
   zombieSpeed : 10,
   brainRecoverChance:0,
   riseFromTheDeadChance:0,
-  humanCount : 50,
-
   graveyard : 0,
+  boneCollectorCapacity:10,
 
-  level:1,
+  humanCount : 50,
   zombieCount:0,
-
+  
+  level:1,
+  
   currentState : "startGame",
 
   states : {
@@ -38,7 +39,8 @@ GameModel = {
     brainRecoverChance : 0,
     riseFromTheDeadChance : 0,
     level : 1,
-    graveyard : 0
+    graveyard : 0,
+    boneCollectorCapacity : 10
   },
 
   resetToBaseStats() {
@@ -52,6 +54,7 @@ GameModel = {
     this.brainRecoverChance = this.baseStats.brainRecoverChance;
     this.riseFromTheDeadChance = this.baseStats.riseFromTheDeadChance;
     this.graveyard = this.baseStats.graveyard;
+    this.boneCollectorCapacity = this.baseStats.boneCollectorCapacity;
   },
 
   addEnergy(value) {

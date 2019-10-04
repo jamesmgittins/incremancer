@@ -10,7 +10,7 @@ Upgrades = {
     brainsCap:"brainsCap",
     brainRecoverChance:"brainRecoverChance",
     riseFromTheDeadChance:"riseFromTheDeadChance",
-    graveyard:"gravyard"
+    boneCollectorCapacity:"boneCollectorCapacity"
   },
 
   costs : {
@@ -59,6 +59,9 @@ Upgrades = {
       case this.types.graveyard:
         GameModel.graveyard = 1;
         return;
+      case this.types.boneCollectorCapacity:
+        GameModel.boneCollectorCapacity += upgrade.effect * upgrade.rank;
+        return;
     }
   },
 
@@ -84,6 +87,8 @@ Upgrades = {
         return Math.round(GameModel.riseFromTheDeadChance * 100) + "% chance for human corpses to turn into zombies";
       case this.types.graveyard:
         return GameModel.graveyard > 0 ? "You have unlocked the Cursed Graveyard" : "You have yet to unlock the Cursed Graveyard";
+      case this.types.boneCollectorCapacity:
+          return "Bone collector capacity: " + GameModel.boneCollectorCapacity;
     }
   },
 
@@ -179,6 +184,8 @@ Upgrades.upgrades = [
 
 Upgrades.boneUpgrades =[
   new Upgrades.Upgrade("Bone Throne", Upgrades.types.energyCap, Upgrades.costs.bones, 50, 2, 10, 10, "Sitting atop your throne of bones you can finally think clearly. Each rank increases maximum energy by 10."),
-  new Upgrades.Upgrade("Crown of Bones", Upgrades.types.energyRate, Upgrades.costs.bones, 200, 1.5, 0.1, 100, "Not just dapper, these spikes help channel your energy. Each rank increases energy rate by 0.1 per second."),
-  new Upgrades.Upgrade("Bone Reinforced Blood Tanks", Upgrades.types.bloodCap, Upgrades.costs.bones, 1000, 1.3, 1000, 100, "Finally now we have a solid construction material we can get to work building better storage for our other resources. Each rank increases blood storage by 1000."),
+  new Upgrades.Upgrade("Crown of Bones", Upgrades.types.energyRate, Upgrades.costs.bones, 200, 1.5, 0.2, 25, "Not just dapper, these spikes help channel your energy. Each rank increases energy rate by 0.2 per second."),
+  new Upgrades.Upgrade("Bonebarrows", Upgrades.types.boneCollectorCapacity, Upgrades.costs.bones, 300, 1.5, 5, 20, "Your bone collectors are struggling to carry all these bones. Maybe it's time we gave them an upgrade? Each rank increases their carrying capacity by 5."),
+  new Upgrades.Upgrade("Bone Reinforced Blood Tanks", Upgrades.types.bloodCap, Upgrades.costs.bones, 500, 1.2, 1000, 50, "Finally! Now that we have a solid construction material we can get to work building better storage for our other resources. Each rank increases blood storage by 1000."),
+  new Upgrades.Upgrade("Brain Cage", Upgrades.types.brainsCap, Upgrades.costs.bones, 650, 1.2, 200, 50, "There's nothing I love more than a mind enslaved. Now we can put these brains where they belong. In cages! Each rank increases brain storage by 200."),
 ];
