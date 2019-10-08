@@ -4,6 +4,14 @@ html,body {
   width: 100%;
   margin: 0;
   color:#fff;
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
 }
 canvas {
   height: 100%;
@@ -21,15 +29,34 @@ div.top-bar {
   background-color: rgba(0,0,0,0.4);
 }
 
+div.top-bar div.resources {
+  white-space: nowrap;
+}
+
 div.shop {
+  touch-action: manipulation;
   position: absolute;
   top:0;
   right:0;
   padding:15px;
-  height: calc(100% - 35px);
-  overflow-y: scroll;
+  height: calc(100% - 30px);
   background-color: rgba(10,60,10,0.8);
   width:25%;
+  display: flex;
+  flex-direction: column;
+}
+div.shop div.tabs button {
+  margin-right: 5px;
+}
+div.shop button.active {
+  box-shadow: inset 0 0 5px #ffee10;
+  text-shadow: 0 0 1px #ffee10;
+}
+
+div.shop div.upgrades {
+  overflow-y: scroll;
+  flex:1;
+  margin-top:15px;
 }
 
 div.shop.mobile {
@@ -55,33 +82,67 @@ div.start-game ul > li {
   line-height: 26px;
 }
 
+button {
+  background: rgba(0,0,0,0.4);
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  text-shadow: 2px 2px #000;
+  font-size: 20px;
+}
+
+button:hover:not(:disabled) {
+  background: rgba(0,0,0,0.8);
+  color: #ff3;
+  box-shadow: 0 0 5px #ffee10;
+  text-shadow: 0 0 5px #ffee10;
+}
+button:hover:disabled {
+  /* color: #f33; */
+  box-shadow: inset 0 0 5px #f33;
+}
+button:disabled {
+  color:#666;
+}
+button:focus {outline:0;}
+
 div.start-game button, 
 div.end-level button,
 div.shop button {
   padding:10px 20px;
   font-size: 20px;
-  color:#000;
+}
+div.shop div.shop-title h2 {
+  float:left;
+}
+div.shop div.shop-title button {
+  float:right;
+  margin: 10px;
+  padding: 15px;
 }
 
 div.shop div.upgrade, div.shop div.bone-collectors {
-  background-color: rgba(0,0,0,0.8);
+  background-color: rgba(20,30,20,0.8);
   padding:15px;
-  margin:15px;
+  margin-bottom:15px;
   line-height: 25px;
 }
 
 div.shop div.bone-collectors button {
   margin: 10px;
-  padding : 5px 15px;
+  padding : 8px 15px;
 }
-
+div.shop h3 {
+  margin:0 0 10px 0;
+}
 div.shop div.upgrade h4, div.shop div.bone-collectors h4 {
   font-size: 24px;
   margin: 0;
 }
 
 div.shop div.upgrade p, div.shop div.bone-collectors p{
-  margin:10px 0;
+  margin:5px 0;
+  font-style: italic;
 }
 
 
@@ -93,6 +154,8 @@ div.shop div.upgrade label, div.shop div.bone-collectors label {
 div.top-bar label {
   font-size:24px;
   margin: 15px;
+  white-space: nowrap;
+  text-shadow: 2px 2px #000;
 }
 div.top-bar div.stats {
   padding-top:10px;
@@ -101,10 +164,41 @@ div.top-bar div.stats label {
   font-size:20px;
 }
 
-div.top-bar button {
-  padding: 5px 10px;
+div.zoom-buttons {
+  position: absolute;
+  bottom:0;
+  left:0;
+  padding:10px;
+}
+
+div.zoom-buttons button {
+  padding:10px 15px;
+  font-size:20px;
+}
+
+div.buttons {
+  position: absolute;
+  top:20%;
+  right:0;
+  padding:10px;
+}
+
+div.buttons button {
+  display:block;
+  padding: 10px 25px;
   font-size: 20px;
-  margin: 0 5px;
+  margin: 5px 5px 0 0;
+  width:100%;
+  background: rgba(0,0,0,0.4);
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  text-shadow: 2px 2px #000;
+}
+
+div.buttons button:hover {
+  background: rgba(0,0,0,0.8);
+  color: #ff3;
 }
 
 .energy {
@@ -121,4 +215,49 @@ div.top-bar button {
 
 .bones {
   color: #ccc;
+}
+
+ul {
+  padding-inline-start: 20px;
+}
+
+@media screen and (max-width: 1040px) {
+  div.top-bar {
+    width:100%;
+  }
+  div.top-bar div.resources {
+    white-space: normal;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  div.top-bar label {
+    margin:5px;
+    font-size:16px;
+  }
+  div.top-bar div.resources label {
+    width:240px;
+    display: inline-block;
+    margin: 5px 0;
+  }
+  div.top-bar div.stats label {
+    font-size : 16px;
+  }
+  div.top-bar div.stats {
+    padding-top:5px;
+    clear:both;
+  }
+  div.start-game, div.end-level {
+    width: 90%;
+  }
+  div.shop {
+    width:80%;
+  }
+  div.buttons {
+    top:auto;
+    bottom:0;
+  }
+  div.buttons button {
+    padding: 5px 10px;
+  }
 }

@@ -1,6 +1,7 @@
 Blood = {
   maxParts : 1000,
-  partsPerSplatter : 10,
+  partsPerSplatter : 8,
+  ecoPartsPerSplatter : 4,
   container : null,
   sprites : [],
   discardedSprites : [],
@@ -76,8 +77,14 @@ Blood = {
     }
   },
   newSplatter(x,y) {
-    for (var i=0; i<this.partsPerSplatter; i++) {
-      this.newPart(x,y);
+    if (this.discardedSprites.length < 100) {
+      for (var i=0; i<this.ecoPartsPerSplatter; i++) {
+        this.newPart(x,y);
+      }
+    } else {
+      for (var i=0; i<this.partsPerSplatter; i++) {
+        this.newPart(x,y);
+      }
     }
   }
 };
@@ -147,8 +154,7 @@ Bones = {
       
       sprite.fadeTime -= timeDiff;
 
-      if (sprite.fadeTime < 0) {
-        sprite.collector = true;
+      if (sprite.fadeTime < 0 && !sprite.collector) {
         sprite.alpha -= this.fadeSpeed * timeDiff;
         if (sprite.alpha <= 0) {
           sprite.visible = false;
@@ -201,7 +207,7 @@ Bones = {
 Exclamations = {
   sprites : [],
   discardedSprites : [],
-  maxSprites : 50,
+  maxSprites : 100,
   container:null,
   exclamationTexture:null,
   radioTexture:null,
@@ -215,6 +221,7 @@ Exclamations = {
 
     this.exclamationTexture = PIXI.Texture.from("exclamation.png");
     this.radioTexture = PIXI.Texture.from("radio.png");
+    this.fireTexture = PIXI.Texture.from("fire.png");
 
 		for (var i = 0; i < this.maxSprites; i++) {
 
@@ -227,10 +234,10 @@ Exclamations = {
     this.discardedSprites = this.sprites.slice();
   },
 
-  newExclamation(target) {
+  newIcon(target, texture) {
     if (this.discardedSprites.length > 0) {
       var sprite = this.discardedSprites.pop();
-      sprite.texture = this.exclamationTexture;
+      sprite.texture = texture;
       sprite.target = target;
       sprite.x = target.x;
       sprite.y = target.y - this.height;
@@ -241,18 +248,16 @@ Exclamations = {
     }
   },
 
+  newExclamation(target) {
+    this.newIcon(target, this.exclamationTexture);
+  },
+
   newRadio(target) {
-    if (this.discardedSprites.length > 0) {
-      var sprite = this.discardedSprites.pop();
-      sprite.texture = this.radioTexture;
-      sprite.target = target;
-      sprite.x = target.x;
-      sprite.y = target.y - this.height;
-      sprite.visible = true;
-      sprite.time = this.displayTime;
-      sprite.alpha = 1;
-      sprite.scale = {x:1.5,y:1.5};
-    }
+    this.newIcon(target, this.radioTexture);
+  },
+
+  newFire(target) {
+    this.newIcon(target, this.fireTexture);
   },
 
   update(timeDiff) {
@@ -285,6 +290,7 @@ Bullets = {
   container : null,
   sprites : [],
   discardedSprites : [],
+  fadeSpeed : 0.2,
 	getTexture() {
 		var blast = document.createElement('canvas');
 		blast.width = 1;
@@ -327,12 +333,11 @@ Bullets = {
       sprite.y += sprite.ySpeed * timeDiff;
       sprite.zIndex = sprite.y;
     }
-
-    if (sprite.x > gameFieldSize.x + 100 || sprite.x < -100 || sprite.y < -100 || sprite.y > gameFieldSize.y + 100) {
+    sprite.alpha -= this.fadeSpeed * timeDiff;
+    if (sprite.alpha < 0) {
       sprite.visible = false;
       this.discardedSprites.push(sprite);
     }
-    
   },
   newBullet(x,y,target,damage) {
     if (this.discardedSprites.length > 0) {
@@ -342,6 +347,7 @@ Bullets = {
       sprite.target = target;
       sprite.damage = damage;
       sprite.visible = true;
+      sprite.alpha = 1;
 
       var xVector = target.x - x;
       var yVector = target.y - y;

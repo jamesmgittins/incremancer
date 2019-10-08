@@ -23,6 +23,10 @@ function getRandomElementFromArray(array, random) {
   return array[Math.floor(random * array.length)];
 }
 
+function rgbToHex(r,g,b) {
+	return b | (g << 8) | (r << 16);
+}
+
 function format2Places(input) {
   return formatNumber(input, 2);
 }

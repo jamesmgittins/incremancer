@@ -1,6 +1,6 @@
 {
   "frames": {
-    "zombie1.png":
+    "zombie1_1.png":
     {
       "frame":{"x":0,"y":0,"w":8,"h":8},
       "rotated":false,
@@ -8,7 +8,31 @@
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
       "sourceSize":{"w":8,"h":8}
     },
-    "zombie2.png":
+    "zombie1_2.png":
+    {
+      "frame":{"x":8,"y":0,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
+    },
+    "zombie1_3.png":
+    {
+      "frame":{"x":16,"y":0,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
+    },
+    "zombie1_dead.png":
+    {
+      "frame":{"x":24,"y":0,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
+    },
+    "zombie2_1.png":
     {
       "frame":{"x":0,"y":8,"w":8,"h":8},
       "rotated":false,
@@ -16,7 +40,31 @@
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
       "sourceSize":{"w":8,"h":8}
     },
-    "zombie3.png":
+    "zombie2_2.png":
+    {
+      "frame":{"x":8,"y":8,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
+    },
+    "zombie2_3.png":
+    {
+      "frame":{"x":16,"y":8,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
+    },
+    "zombie2_dead.png":
+    {
+      "frame":{"x":24,"y":8,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
+    },
+    "zombie3_1.png":
     {
       "frame":{"x":0,"y":16,"w":8,"h":8},
       "rotated":false,
@@ -24,9 +72,25 @@
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
       "sourceSize":{"w":8,"h":8}
     },
-    "zombie4.png":
+    "zombie3_2.png":
     {
-      "frame":{"x":0,"y":24,"w":8,"h":8},
+      "frame":{"x":8,"y":16,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
+    },
+    "zombie3_3.png":
+    {
+      "frame":{"x":16,"y":16,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
+    },
+    "zombie3_dead.png":
+    {
+      "frame":{"x":24,"y":16,"w":8,"h":8},
       "rotated":false,
       "trimmed":false,
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},

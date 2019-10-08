@@ -4,6 +4,10 @@ Graveyard = {
 
   initialize() {
 
+    if (typeof GameModel.persistentData.graveyardZombies == 'undefined') {
+      GameModel.persistentData.graveyardZombies = 1;
+    }
+
     if (!this.sprite) {
       this.sprite = new PIXI.TilingSprite(PIXI.Texture.from('sprites/graveyard2.png'));
       this.sprite.width = 32;
@@ -30,7 +34,9 @@ Graveyard = {
     this.sprite.visible = true;
 
     if (GameModel.energy >= GameModel.energyMax) {
-      Zombies.spawnZombie(this.sprite.x,this.sprite.y);
+      for (var i = 0; i < GameModel.persistentData.graveyardZombies; i ++)  {
+        Zombies.spawnZombie(this.sprite.x,this.sprite.y);
+      }
     }
 
     Bones.update(timeDiff);
@@ -41,14 +47,16 @@ Graveyard = {
 BoneCollectors = {
 
   sprites:[],
-  maxSpeed:75,
+  maxSpeed:125,
   texture:false,
   scaling:2,
   collectDistance:10,
+  fastDistance : fastDistance,
 
   states : {
     collecting:"collecting",
-    returning:"returning"
+    returning:"returning",
+    waiting:"waiting"
   },
 
   populate() {
@@ -75,6 +83,7 @@ BoneCollectors = {
       sprite.xSpeed = 0;
       sprite.ySpeed = 0;
       sprite.bones = 0;
+      sprite.speedFactor = 0;
       sprite.state = this.states.collecting;
       sprite.play();
       this.sprites.push(sprite);
@@ -86,23 +95,43 @@ BoneCollectors = {
   },
 
   findNearestBone(boneCollector) {
-    var nearestBone = false;
-    var distanceToNearest = 2000;
-    for (var i=0; i < Bones.uncollected.length; i++) {
-      if (!Bones.uncollected[i].collected && !Bones.uncollected[i].collector) {
-        var distance = fastDistance(boneCollector.position.x, boneCollector.position.y, Bones.uncollected[i].x, Bones.uncollected[i].y);
-        if (distance < distanceToNearest) {
-          distanceToNearest = distance;
-          nearestBone = Bones.uncollected[i];
+
+    if (!boneCollector.boneList) {
+      boneCollector.boneList = [];
+    }
+
+    if (boneCollector.boneList.length == 0) {
+      var x = boneCollector.x;
+      var y = boneCollector.y;
+      for (var j = 0; j < 3; j++) {
+        var nearestBone = false;
+        var distanceToNearest = 2000;
+        for (var i=0; i < Bones.uncollected.length; i++) {
+          if (!Bones.uncollected[i].collected && !Bones.uncollected[i].collector) {
+            var distance = this.fastDistance(x, y, Bones.uncollected[i].x, Bones.uncollected[i].y);
+            if (distance < distanceToNearest) {
+              distanceToNearest = distance;
+              nearestBone = Bones.uncollected[i];
+            }
+          }
+        }
+        if (nearestBone) {
+          boneCollector.boneList.push(nearestBone);
+          nearestBone.collector = true;
+          x = nearestBone.x;
+          y = nearestBone.y;
+        } else {
+          break;
         }
       }
     }
-    if (nearestBone) {
-      boneCollector.target = nearestBone;
-      nearestBone.collector = true;
+
+    if (boneCollector.boneList.length > 0) {
+      boneCollector.target = boneCollector.boneList.shift();
     } else {
       boneCollector.target = false;
     }
+    
   },
 
   updateBoneCollector(boneCollector, timeDiff) {
@@ -114,15 +143,14 @@ BoneCollectors = {
 
       case this.states.collecting:
         
-        if (!boneCollector.target || boneCollector.target.collected || boneCollector.target.graveyard || !boneCollector.target.visible) {
+        if (!boneCollector.target || boneCollector.target.collected || !boneCollector.target.visible) {
           this.findNearestBone(boneCollector);
         }
         if (boneCollector.target && !boneCollector.target.collected) {
-          if (fastDistance(boneCollector.position.x, boneCollector.position.y, boneCollector.target.x, boneCollector.target.y) < this.collectDistance) {
+          if (this.fastDistance(boneCollector.position.x, boneCollector.position.y, boneCollector.target.x, boneCollector.target.y) < this.collectDistance) {
             boneCollector.bones++;
             boneCollector.target.collected = true;
-            boneCollector.xSpeed = 0;
-            boneCollector.ySpeed = 0;
+            boneCollector.speedFactor = 0;
           }
         }
         if (boneCollector.bones >= GameModel.boneCollectorCapacity || !boneCollector.target) {
@@ -133,13 +161,12 @@ BoneCollectors = {
         break;
 
       case this.states.returning:
-        if (fastDistance(boneCollector.position.x, boneCollector.position.y, boneCollector.target.x, boneCollector.target.y) < this.collectDistance) {
-          boneCollector.xSpeed = 0;
-          boneCollector.ySpeed = 0;
+        if (this.fastDistance(boneCollector.position.x, boneCollector.position.y, boneCollector.target.x, boneCollector.target.y) < this.collectDistance) {
           boneCollector.target = false;
           GameModel.addBones(boneCollector.bones);
           boneCollector.bones = 0;
           boneCollector.state = this.states.collecting;
+          boneCollector.speedFactor = 0;
         }
         break;
     }
@@ -147,16 +174,19 @@ BoneCollectors = {
 
   updateSpeed(boneCollector, timeDiff) {
 
-    var accelX = boneCollector.target.x - boneCollector.position.x;
-    var accelY = boneCollector.target.y - boneCollector.position.y;
-    var factor = this.maxSpeed * 2 / (magnitude(accelX, accelY) || 1);
-    boneCollector.xSpeed += accelX * factor * timeDiff;
-    boneCollector.ySpeed += accelY * factor * timeDiff;
-  
-    if (magnitude(boneCollector.xSpeed, boneCollector.ySpeed) > this.maxSpeed) {
-      boneCollector.xSpeed -= boneCollector.xSpeed * timeDiff * 8;
-      boneCollector.ySpeed -= boneCollector.ySpeed * timeDiff * 8;
-    }
+    boneCollector.speedFactor = Math.min(1, boneCollector.speedFactor += timeDiff * 2);
+    var xVector = boneCollector.target.x - boneCollector.x;
+    var yVector = boneCollector.target.y - boneCollector.y;
+    var ax = Math.abs(xVector);
+    var ay = Math.abs(yVector);
+    if (Math.max(ax, ay) == 0)
+      return;
+    var ratio = 1 / Math.max(ax, ay);
+    ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
+    
+    boneCollector.xSpeed = xVector * ratio * this.maxSpeed * boneCollector.speedFactor;
+    boneCollector.ySpeed = yVector * ratio * this.maxSpeed * boneCollector.speedFactor;
+
     boneCollector.position.x += boneCollector.xSpeed * timeDiff;
     boneCollector.position.y += boneCollector.ySpeed * timeDiff;
     boneCollector.zIndex = boneCollector.position.y;

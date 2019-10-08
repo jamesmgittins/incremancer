@@ -14,7 +14,7 @@ GameModel = {
   riseFromTheDeadChance:0,
   graveyard : 0,
   boneCollectorCapacity:10,
-
+  frameRate : 0,
   humanCount : 50,
   zombieCount:0,
   endLevelTimer : 3,
@@ -44,6 +44,9 @@ GameModel = {
     graveyard : 0,
     boneCollectorCapacity : 10
   },
+
+  zoom : zoom,
+  centerGameContainer : centerGameContainer,
 
   resetToBaseStats() {
     this.energyRate = this.baseStats.energyRate;
@@ -105,12 +108,30 @@ GameModel = {
         if (this.endLevelTimer < 0) {
           this.currentState = this.states.levelCompleted;
           this.persistentData.levelUnlocked = this.level + 1;
+          this.startTimer = 3;
         } else {
           this.endLevelTimer -= timeDiff;
         } 
       }
     }
+    if (this.currentState == this.states.levelCompleted) {
+      this.startTimer -= timeDiff;
+      if (this.startTimer < 0 && this.persistentData.autoStart) {
+        this.nextLevel();
+      }
+    }
     
+  },
+
+  startGame() {
+    this.setupLevel();
+    this.currentState = this.states.playingLevel;
+  },
+
+  nextLevel() {
+    this.level++;
+    this.setupLevel();
+    this.currentState = this.states.playingLevel;
   },
 
   setupLevel() {
@@ -120,18 +141,23 @@ GameModel = {
     Zombies.populate();
     Graveyard.initialize();
     centerGameContainer();
+    Upgrades.applyUpgrades();
   },
 
   lastSave:0,
 
   persistentData : {
+    autoStart : false,
     levelUnlocked : 1,
     blood : 0,
     brains : 0,
     bones: 0,
     bonesTotal : 0,
     upgrades : [],
-    boneCollectors : 0
+    boneCollectors : 0,
+    graveyardZombies : 1,
+    resolution : 0.5,
+    zoomButtons : false
   },
 
   saveData() {
@@ -146,9 +172,7 @@ GameModel = {
     try {
       if (localStorage.getItem(this.storageName) !== null) {
         this.persistentData = JSON.parse(localStorage.getItem(this.storageName));
-        this.level = this.persistentData.levelUnlocked;
-        this.setupLevel();
-        Upgrades.applyUpgrades();
+        this.level = this.persistentData.levelUnlocked;        
       } 
     } catch (e) {
       console.log(e);
@@ -163,5 +187,18 @@ GameModel = {
     this.resetToBaseStats();
     this.setupLevel();
     window.location.reload();
+  },
+
+  setResolution(resolution) {
+    if(!this.app)
+      return;
+
+    this.app.renderer.resolution = resolution;
+
+    if (this.app.renderer.rootRenderTarget)
+      this.app.renderer.rootRenderTarget.resolution = resolution;
+
+    this.app.renderer.plugins.interaction.resolution = resolution;
+    this.app.renderer.resize(document.body.clientWidth, document.body.clientHeight);
   }
 };

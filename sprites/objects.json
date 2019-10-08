@@ -16,7 +16,7 @@
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
       "sourceSize":{"w":8,"h":8}
     },
-    "chest.png":
+    "fire.png":
     {
       "frame":{"x":0,"y":16,"w":8,"h":8},
       "rotated":false,
