@@ -236,7 +236,7 @@ ul {
     font-size:16px;
   }
   div.top-bar div.resources label {
-    width:240px;
+    width:40%;
     display: inline-block;
     margin: 5px 0;
   }
