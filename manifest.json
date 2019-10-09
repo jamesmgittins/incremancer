@@ -13,9 +13,9 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "http://incremancer.gti.nz",
+  "start_url": "https://incremancer.gti.nz",
   "background_color": "#3367D6",
   "display": "fullscreen",
-  "scope": "http://incremancer.gti.nz",
+  "scope": "https://incremancer.gti.nz",
   "theme_color": "#3367D6"
 }

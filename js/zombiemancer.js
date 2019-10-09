@@ -1,6 +1,6 @@
 var canvas;
 var renderer;
-var gameContainer,backgroundContainer,characterContainer,uiContainer;
+var gameContainer,backgroundContainer,characterContainer,uiContainer,foregroundContainer;
 var grass;
 var canvasSize = {x:800,y:600};
 var gameFieldSize = {x:600,y:600};
@@ -133,10 +133,12 @@ function setupContainers(app) {
   backgroundContainer = new PIXI.Container();
   characterContainer = new PIXI.Container();
   characterContainer.sortableChildren = true;
+  foregroundContainer = new PIXI.Container();
   uiContainer = new PIXI.Container();
 
   gameContainer.addChild(backgroundContainer);
   gameContainer.addChild(characterContainer);
+  gameContainer.addChild(foregroundContainer);
 
   app.stage.addChild(gameContainer);
   app.stage.addChild(uiContainer);

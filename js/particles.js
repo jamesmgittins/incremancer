@@ -217,7 +217,7 @@ Exclamations = {
 
   initialize() {
     this.container = new PIXI.Container();
-    characterContainer.addChild(this.container);
+    foregroundContainer.addChild(this.container);
 
     this.exclamationTexture = PIXI.Texture.from("exclamation.png");
     this.radioTexture = PIXI.Texture.from("radio.png");
@@ -271,7 +271,6 @@ Exclamations = {
   updateSprite(sprite, timeDiff) {
     sprite.x = sprite.target.x;
     sprite.y = sprite.target.y - this.height;
-    sprite.zIndex = sprite.target.y;
     sprite.time -= timeDiff;
     if (sprite.time < 0) {
       sprite.alpha -= timeDiff * this.fadeSpeed;

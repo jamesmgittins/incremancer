@@ -49,7 +49,7 @@ Zombies = {
       this.zombieCursor = new PIXI.Sprite(PIXI.Texture.from('zombie1_1.png'));
       this.zombieCursor.alpha = 0.6;
       this.zombieCursor.scale.x = this.zombieCursor.scale.y = this.zombieCursorScale;
-      this.zombieCursor.anchor = {x:0.5, y:1};
+      this.zombieCursor.anchor = {x:35/80, y:1};
       uiContainer.addChild(this.zombieCursor);
     }
   },
@@ -60,7 +60,7 @@ Zombies = {
     zombie.textureId = textureId;
     zombie.dead = false;
     zombie.animationSpeed = 0.15;
-    zombie.anchor = {x:0.5,y:1};
+    zombie.anchor = {x:35/80,y:1};
     zombie.position = {x:x,y:y};
     zombie.zIndex = zombie.position.y;
     zombie.visible = true;

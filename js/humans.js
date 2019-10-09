@@ -113,7 +113,7 @@ Humans = {
       human.torchBearer = torchBearer;
       human.deadTexture = this.textures[textureId].dead;
       human.animationSpeed = 0.15;
-      human.anchor = {x:0.5,y:1};
+      human.anchor = {x:35/80,y:1};
       human.currentPoi = this.map.getRandomBuilding();
       human.position = this.map.randomPositionInBuilding(human.currentPoi);
       human.zIndex = human.position.y;
@@ -151,24 +151,10 @@ Humans = {
     human.xSpeed = vector.x * ratio * human.maxSpeed;
     human.ySpeed = vector.y * ratio * human.maxSpeed;
 
-    var newPosition = {x:human.position.x + human.xSpeed * timeDiff, y:human.position.y + human.ySpeed * timeDiff};
-
-    var collision = this.map.checkCollisions(human.position, newPosition);
-    if (collision) {
-      if (collision.x) {
-        human.xSpeed = 0;
-        human.position.x = collision.validX;
-      }
-      if (collision.y) {
-        human.ySpeed = 0;
-        human.position.y = collision.validY;
-      }
-    }
-
     human.position.x += human.xSpeed * timeDiff;
     human.position.y += human.ySpeed * timeDiff;
     human.zIndex = human.position.y;
-    if (Math.abs(human.xSpeed) > 0.5)
+    if (Math.abs(human.xSpeed) > 1)
       human.scale.x = human.xSpeed > 0 ? this.scaling : -this.scaling;
   },
 
@@ -410,7 +396,7 @@ Police = {
       var police = new PIXI.AnimatedSprite(this.walkTexture);
       police.deadTexture = this.deadTexture;
       police.animationSpeed = 0.2;
-      police.anchor = {x:0.5,y:1};
+      police.anchor = {x:35/80,y:1};
       police.currentPoi = this.map.getRandomBuilding();
       police.position = this.map.randomPositionInBuilding(police.currentPoi);
       police.zIndex = police.position.y;
@@ -650,7 +636,7 @@ Army = {
       var armyman = new PIXI.AnimatedSprite(this.walkTexture);
       armyman.deadTexture = this.deadTexture;
       armyman.animationSpeed = 0.2;
-      armyman.anchor = {x:0.5,y:1};
+      armyman.anchor = {x:35/80,y:1};
       armyman.currentPoi = this.map.getRandomBuilding();
       armyman.position = this.map.randomPositionInBuilding(armyman.currentPoi);
       armyman.zIndex = armyman.position.y;

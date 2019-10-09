@@ -23,11 +23,8 @@ Map = {
 
   isValidPosition(position) {
 
-    if (GameModel.graveyard) {
-  
-      if (!this.roomNoOverlap(position, this.graveYardPosition))
-        return false;
-    }
+    if (!this.roomNoOverlap(position, this.graveYardPosition))
+      return false;
 
     for (var i=0; i < this.buildings.length; i++) {
       if (!this.roomNoOverlap(position, this.buildings[i]))
@@ -299,7 +296,7 @@ Map = {
     return x > poi.x - wall && x < poi.x + poi.width + wall && y > poi.y - wall && y < poi.y + poi.height + wall;
   },
 
-  wallCollisionBuffer : 2,
+  wallCollisionBuffer : 3,
 
   checkWall(wall, start, end, collision) {
     if (start.y > wall.y && start.y < wall.y + wall.height) {
@@ -329,9 +326,6 @@ Map = {
     var closeBuilding = this.findBuilding(start);
 
     if (!closeBuilding)
-      return false;
-
-    if (this.fastDistance(start.x, start.y, closeBuilding.entrance.x, closeBuilding.entrance.y) < this.entranceWidth)
       return false;
 
     var collision = {
@@ -366,21 +360,30 @@ Map = {
     };
   },
 
+  isBuildingClose(position, building) {
+    return position.x > building.x - this.cornerDistance && 
+            position.x < building.x + building.width + this.cornerDistance && 
+            position.y > building.y - this.cornerDistance && 
+            position.y < building.y + building.height + this.cornerDistance;
+  },
+
   findBuilding(position) {
+
+    if (position.lastKnownBuilding) {
+      if(this.isBuildingClose(position, position.lastKnownBuilding)) {
+        return position.lastKnownBuilding;
+      }
+    }
+
     var buildingsToCheck = this.buildings;
 
     for (var i = 0; i < buildingsToCheck.length; i++) {
-     
-      var isBuilding =  position.x > buildingsToCheck[i].x - this.cornerDistance && 
-                        position.x < buildingsToCheck[i].x + buildingsToCheck[i].width + this.cornerDistance && 
-                        position.y > buildingsToCheck[i].y - this.cornerDistance && 
-                        position.y < buildingsToCheck[i].y + buildingsToCheck[i].height + this.cornerDistance;
-                        
-      if (isBuilding) {
-        return buildingsToCheck[i];
-      }
-        
+      if (this.isBuildingClose(position, buildingsToCheck[i])) {
+        position.lastKnownBuilding = buildingsToCheck[i];
+        return position.lastKnownBuilding;
+      } 
     }
+    position.lastKnownBuilding = false;
     return false;
   },
 
@@ -413,6 +416,19 @@ Map = {
   },
 
   willVectorHitBuilding(start, end, building) {
+
+    var dx = end.x - start.x;
+    var dy = end.y - start.y;
+
+    if (dx < 0 && start.x < building.x - 4)
+      return false;
+    if (dx > 0 && start.x > building.x + building.width + 4)
+      return false;
+    if (dy < 0 && start.y < building.y - 4)
+      return false;
+    if(dy > 0 && start.y > building.y + building.width + 4)
+      return false;
+
     var step = this.pathStepCalc(start, end);
     var stepsToTake = 10;
     var hasHit = false;
@@ -518,6 +534,7 @@ Map = {
     }
 
     var targetCloseBuilding = this.findBuilding(targetPosition);
+    
     if (targetCloseBuilding) {
       insideBuilding = this.isInsidePoi(targetPosition.x, targetPosition.y, targetCloseBuilding, 0);
 
