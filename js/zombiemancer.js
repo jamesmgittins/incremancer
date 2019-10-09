@@ -116,7 +116,7 @@ function zoom(change, coords) {
 }
 
 function onWheel(event) {
-
+  event.preventDefault();
   var coords = {
     x:event.clientX * (canvasSize.x / document.body.clientWidth),
     y:event.clientY * (canvasSize.y / document.body.clientHeight)

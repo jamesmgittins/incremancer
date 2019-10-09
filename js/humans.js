@@ -169,7 +169,7 @@ Humans = {
     human.position.y += human.ySpeed * timeDiff;
     human.zIndex = human.position.y;
     if (Math.abs(human.xSpeed) > 0.5)
-      human.scale = {x:human.xSpeed > 0 ? this.scaling : -this.scaling, y:this.scaling};
+      human.scale.x = human.xSpeed > 0 ? this.scaling : -this.scaling;
   },
 
   drawTargets : false,
@@ -309,7 +309,7 @@ Humans = {
         }
         break;
       case this.states.attacking:
-
+        human.scale.x = human.target.x > human.x ? this.scaling : -this.scaling;
         if (human.zombieTarget && !human.zombieTarget.dead) {
           var distanceToTarget = fastDistance(human.position.x, human.position.y, human.target.x, human.target.y);
           if (distanceToTarget < this.attackDistance) {
@@ -558,6 +558,7 @@ Police = {
         break;
       case this.states.attacking:
         if (police.zombieTarget && !police.zombieTarget.dead) {
+          police.scale.x = police.zombieTarget.x > police.x ? this.scaling : -this.scaling;
           if (police.attackTimer < 0) {
             Zombies.damageZombie(police.zombieTarget, this.attackDamage);
             police.attackTimer = this.attackSpeed;
@@ -569,6 +570,7 @@ Police = {
         break;
       case this.states.shooting:
         if (police.zombieTarget && !police.zombieTarget.dead) {
+          police.scale.x = police.zombieTarget.x > police.x ? this.scaling : -this.scaling;
           if (police.attackTimer < 0) {
             Bullets.newBullet(police.x, police.y, police.zombieTarget, this.attackDamage);
             police.attackTimer = this.attackSpeed;
@@ -763,6 +765,7 @@ Army = {
         break;
       case this.states.attacking:
         if (armyman.zombieTarget && !armyman.zombieTarget.dead) {
+          armyman.scale.x = armyman.zombieTarget.x > armyman.x ? this.scaling : -this.scaling;
           if (armyman.attackTimer < 0) {
             Zombies.damageZombie(armyman.zombieTarget, this.attackDamage);
             armyman.attackTimer = this.attackSpeed;
@@ -774,6 +777,7 @@ Army = {
         break;
       case this.states.shooting:
         if (armyman.zombieTarget && !armyman.zombieTarget.dead) {
+          armyman.scale.x = armyman.zombieTarget.x > armyman.x ? this.scaling : -this.scaling;
           if (armyman.attackTimer < 0) {
             armyman.shotsLeft = this.shotsPerBurst;
             armyman.attackTimer = this.attackSpeed;

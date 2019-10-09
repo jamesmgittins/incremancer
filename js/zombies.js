@@ -198,6 +198,7 @@ Zombies = {
 
       case this.states.attackingTarget:
         if (this.fastDistance(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y) < this.attackDistance) {
+          zombie.scale.x = zombie.target.x > zombie.x ? this.scaling : -this.scaling;
           if (zombie.attackTimer < 0) {
             Humans.damageHuman(zombie.target, GameModel.zombieDamage);
             zombie.attackTimer = this.attackSpeed;
@@ -288,7 +289,7 @@ Zombies = {
       zombie.position = newPosition;
       zombie.zIndex = zombie.position.y;
     }
-    zombie.scale = {x:zombie.xSpeed > 0 ? this.scaling : -this.scaling, y:this.scaling};
+    zombie.scale.x = zombie.xSpeed > 0 ? this.scaling : -this.scaling;
     
   },
 
