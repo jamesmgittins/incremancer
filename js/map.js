@@ -290,6 +290,11 @@ Map = {
     }
   },
 
+  randomPositionInBuilding(building) {
+    var wallBuffer = 5;
+    return {x:building.x + wallBuffer + (Math.random() * (building.width - wallBuffer * 2)), y: building.y + wallBuffer + (Math.random() * (building.height - wallBuffer * 2))};
+  },
+
   isInsidePoi(x, y, poi, wall = 0) {
     return x > poi.x - wall && x < poi.x + poi.width + wall && y > poi.y - wall && y < poi.y + poi.height + wall;
   },
@@ -514,7 +519,7 @@ Map = {
 
     var targetCloseBuilding = this.findBuilding(targetPosition);
     if (targetCloseBuilding) {
-      insideBuilding = this.isInsidePoi(targetPosition.x, targetPosition.y, closeBuilding, 0);
+      insideBuilding = this.isInsidePoi(targetPosition.x, targetPosition.y, targetCloseBuilding, 0);
 
       if (insideBuilding) {
         // I need to go inside

@@ -5,12 +5,12 @@ Humans = {
   maxRunSpeed : 35,
   baseHealth: 100,
   minSecondsTostand : 1,
-  maxSecondsToStand : 60,
-  chanceToStayInCurrentBuilding : 0.95,
+  maxSecondsToStand : 60, // 60
+  chanceToStayInCurrentBuilding : 0.95, // 0.95
   textures : [],
   humans : [],
   aliveHumans : [],
-  humansPerLevel : 50,
+  humansPerLevel : 50, // 50
   maxHumans : 1000,
   scaling: 2,
   visionDistance : 60,
@@ -53,8 +53,7 @@ Humans = {
     if (Math.random() > this.chanceToStayInCurrentBuilding || human.timeFleeing > 0) {
       human.currentPoi = this.map.getRandomBuilding();
     }
-    var wallBuffer = 2;
-    human.target = {x:human.currentPoi.x + wallBuffer + (Math.random() * (human.currentPoi.width - wallBuffer * 2)), y: human.currentPoi.y + wallBuffer + (Math.random() * (human.currentPoi.height - wallBuffer * 2))};
+    human.target = this.map.randomPositionInBuilding(human.currentPoi);
     human.maxSpeed = human.timeFleeing > 0 ? this.maxRunSpeed : this.maxWalkSpeed;
     human.xSpeed = 0;
     human.ySpeed = 0;
@@ -116,7 +115,7 @@ Humans = {
       human.animationSpeed = 0.15;
       human.anchor = {x:0.5,y:1};
       human.currentPoi = this.map.getRandomBuilding();
-      human.position = {x:human.currentPoi.x + (Math.random() * human.currentPoi.width), y: human.currentPoi.y + (Math.random() * human.currentPoi.height)};
+      human.position = this.map.randomPositionInBuilding(human.currentPoi);
       human.zIndex = human.position.y;
       human.xSpeed = 0;
       human.ySpeed = 0;
@@ -413,7 +412,7 @@ Police = {
       police.animationSpeed = 0.2;
       police.anchor = {x:0.5,y:1};
       police.currentPoi = this.map.getRandomBuilding();
-      police.position = {x:police.currentPoi.x + (Math.random() * police.currentPoi.width), y: police.currentPoi.y + (Math.random() * police.currentPoi.height)};
+      police.position = this.map.randomPositionInBuilding(police.currentPoi);
       police.zIndex = police.position.y;
       police.xSpeed = 0;
       police.ySpeed = 0;
@@ -651,7 +650,7 @@ Army = {
       armyman.animationSpeed = 0.2;
       armyman.anchor = {x:0.5,y:1};
       armyman.currentPoi = this.map.getRandomBuilding();
-      armyman.position = {x:armyman.currentPoi.x + (Math.random() * armyman.currentPoi.width), y: armyman.currentPoi.y + (Math.random() * armyman.currentPoi.height)};
+      armyman.position = this.map.randomPositionInBuilding(armyman.currentPoi);
       armyman.zIndex = armyman.position.y;
       armyman.xSpeed = 0;
       armyman.ySpeed = 0;
