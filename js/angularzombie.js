@@ -199,7 +199,7 @@ angular.module('zombieApp', [])
     }
 
     zm.getResolution = function() {
-      return GameModel.persistentData.resolution || 0.5;
+      return GameModel.persistentData.resolution || 1;
     }
 
     zm.toggleZoomButtons = function() {

@@ -223,7 +223,7 @@ function startGame() {
   PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
   const app = new PIXI.Application({
-    width: canvasSize.x, height: canvasSize.y, backgroundColor: 0x104510, resolution: GameModel.persistentData.resolution || 0.5, antialias:false, resizeTo: window
+    width: canvasSize.x, height: canvasSize.y, backgroundColor: 0x104510, resolution: GameModel.persistentData.resolution || 1, antialias:false, resizeTo: window
   });
   document.body.appendChild(app.view);
 

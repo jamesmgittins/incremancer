@@ -156,7 +156,7 @@ GameModel = {
     upgrades : [],
     boneCollectors : 0,
     graveyardZombies : 1,
-    resolution : 0.5,
+    resolution : 1,
     zoomButtons : false
   },
 
