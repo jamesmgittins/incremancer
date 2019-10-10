@@ -58,14 +58,16 @@ function onDragMove(event) {
 }
 
 function preventGameContainerLeavingBounds(gc) {
+  var gcWidth = gameFieldSize.x * gc.scale.x;
+  var gcHeight = gameFieldSize.y * gc.scale.y;
   if (gc.x > canvasSize.x * 0.5)
     gc.x = canvasSize.x * 0.5;
-  if (gc.x + gc.width < canvasSize.x * 0.5)
-    gc.x = canvasSize.x * 0.5 - gc.width;
+  if (gc.x + gcWidth < canvasSize.x * 0.5)
+    gc.x = canvasSize.x * 0.5 - gcWidth;
   if (gc.y > canvasSize.y * 0.5)
     gc.y = canvasSize.y * 0.5;
-  if (gc.y + gc.height < canvasSize.y * 0.5)
-    gc.y = canvasSize.y * 0.5 - gc.height;
+  if (gc.y + gcHeight < canvasSize.y * 0.5)
+    gc.y = canvasSize.y * 0.5 - gcHeight;
 }
 
 function onClickTap(event) {
@@ -83,8 +85,8 @@ function zoom(change, coords) {
     coords = {x:canvasSize.x * 0.5, y:canvasSize.y * 0.5};
   }
 
-  var gcWidth = gc.width;
-  var gcHeight = gc.height;
+  var gcWidth = gameFieldSize.x * gc.scale.x;
+  var gcHeight = gameFieldSize.y * gc.scale.y;
 
   if (coords.x > gc.x + gcWidth)
     coords.x = gc.x + gcWidth;
@@ -101,10 +103,12 @@ function zoom(change, coords) {
   };
 
   if (change > 0) {
-    gc.scale.x = gc.scale.y = gc.scale.x * 1.1;
-    Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 1.1
+    if (gc.scale.x < 10) {
+      gc.scale.x = gc.scale.y = gc.scale.x * 1.1;
+      Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 1.1
+    }
   } else {
-    if (gc.scale.x > 0.15) {
+    if (gcWidth > Math.min(canvasSize.y, canvasSize.x)) {
       gc.scale.x = gc.scale.y = gc.scale.x * 0.9;
       Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 0.9;
     }

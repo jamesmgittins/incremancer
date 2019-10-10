@@ -70,7 +70,11 @@ BoneCollectors = {
 
   update(timeDiff) {
     if (this.sprites.length > GameModel.persistentData.boneCollectors) {
-      characterContainer.removeChild(this.sprites.pop());
+      var boneCollector = this.sprites.pop();
+      for (var i = 0; i < boneCollector.boneList.length; i++){
+        boneCollector.boneList[i].collector = false;
+      }
+      characterContainer.removeChild(boneCollector);
     }
     if (this.sprites.length < GameModel.persistentData.boneCollectors) {
       var sprite = new PIXI.AnimatedSprite(this.texture);

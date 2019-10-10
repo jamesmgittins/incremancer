@@ -42,6 +42,7 @@ div.shop {
   height: calc(100% - 30px);
   background-color: rgba(10,60,10,0.8);
   width:25%;
+  min-width: 320px;
   display: flex;
   flex-direction: column;
 }
@@ -228,6 +229,9 @@ ul {
   div.top-bar div.resources {
     white-space: normal;
   }
+  div.start-game, div.end-level {
+    width: 90%;
+  }
 }
 
 @media screen and (max-width: 500px) {
@@ -246,9 +250,6 @@ ul {
   div.top-bar div.stats {
     padding-top:5px;
     clear:both;
-  }
-  div.start-game, div.end-level {
-    width: 90%;
   }
   div.shop {
     width:80%;
