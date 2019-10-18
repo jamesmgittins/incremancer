@@ -20,7 +20,6 @@ Blood = {
 		return PIXI.Texture.from(blast);
 	},
 	initialize() {
-
     this.container = new PIXI.Container();
     backgroundContainer.addChild(this.container);
 
@@ -196,7 +195,7 @@ Bones = {
     }
   },
   newBones(x,y) {
-    if (GameModel.graveyard == 0)
+    if (!GameModel.constructions.graveyard)
       return;
     for (var i=0; i<this.partsPerSplatter; i++) {
       this.newPart(x,y);
@@ -222,6 +221,8 @@ Exclamations = {
     this.exclamationTexture = PIXI.Texture.from("exclamation.png");
     this.radioTexture = PIXI.Texture.from("radio.png");
     this.fireTexture = PIXI.Texture.from("fire.png");
+    this.shieldTexture = PIXI.Texture.from("shield.png");
+    this.poisonTexture = PIXI.Texture.from("poison.png");
 
 		for (var i = 0; i < this.maxSprites; i++) {
 
@@ -235,10 +236,11 @@ Exclamations = {
   },
 
   newIcon(target, texture) {
-    if (this.discardedSprites.length > 0) {
+    if (this.discardedSprites.length > 0 && !target.hasIcon) {
       var sprite = this.discardedSprites.pop();
       sprite.texture = texture;
       sprite.target = target;
+      sprite.target.hasIcon = true;
       sprite.x = target.x;
       sprite.y = target.y - this.height;
       sprite.visible = true;
@@ -260,6 +262,14 @@ Exclamations = {
     this.newIcon(target, this.fireTexture);
   },
 
+  newShield(target) {
+    this.newIcon(target, this.shieldTexture);
+  },
+
+  newPoison(target) {
+    this.newIcon(target, this.poisonTexture);
+  },
+
   update(timeDiff) {
     for (var i=0; i < this.sprites.length; i++) {
       if (this.sprites[i].visible) {
@@ -276,6 +286,7 @@ Exclamations = {
       sprite.alpha -= timeDiff * this.fadeSpeed;
       if (sprite.alpha < 0) {
         sprite.visible = false;
+        sprite.target.hasIcon = false;
         this.discardedSprites.push(sprite);
       }
     }
@@ -283,7 +294,7 @@ Exclamations = {
 };
 
 Bullets = {
-  maxParts : 200,
+  maxParts : 300,
   speed : 150,
   hitbox : 12,
   container : null,

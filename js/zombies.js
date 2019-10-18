@@ -25,6 +25,7 @@ Zombies = {
   },
 
   populate() {
+    this.graveyard = Graveyard;
     GameModel.zombieCount = 0;
     if (this.textures.length == 0) {
       for (var i=0; i < 3; i++) {
@@ -87,6 +88,10 @@ Zombies = {
   },
 
   damageZombie(zombie, damage) {
+    if (this.graveyard.isWithinFence(zombie)) {
+      damage *= 0.5;
+      Exclamations.newShield(zombie);
+    }
     zombie.health -= damage;
     Blood.newSplatter(zombie.x, zombie.y);
     if (zombie.health <= 0 && !zombie.dead) {

@@ -1,7 +1,8 @@
 Graveyard = {
 
   sprite : false,
-
+  fenceRadius : 50,
+  fastDistance : fastDistance,
   initialize() {
 
     if (typeof GameModel.persistentData.graveyardZombies == 'undefined') {
@@ -17,19 +18,57 @@ Graveyard = {
       this.sprite.zIndex = 0;
       this.sprite.visible = false;
       this.sprite.graveyard = true;
-      characterContainer.addChild(this.sprite);
+      backgroundContainer.addChild(this.sprite);
     }
 
     this.sprite.x = gameFieldSize.x / 2;
     this.sprite.y = gameFieldSize.y / 2;
 
+    this.drawFence();
     Bones.initialize();
     BoneCollectors.populate();
   },
 
+  drawFence : function() {
+
+    if (this.fence) {
+      backgroundContainer.removeChild(this.fence);
+    }
+
+    this.fenceRadius = GameModel.fenceRadius;
+    this.fence = new PIXI.Container();
+    this.fence.anchor = {x:0,y:0};
+    this.fence.visible = false;
+    backgroundContainer.addChild(this.fence);
+
+    var textures = [];
+    for (var i=0; i < 4; i++) {
+      textures.push(PIXI.Texture.from('fencepost' + (i + 1) + '.png'));
+    }
+
+    var numPosts = Math.round(this.fenceRadius * 0.4);
+    var radiansPerFencePost = Math.PI * 2 / numPosts;
+    for (var i = 0; i < numPosts; i++) {
+      var postSprite = new PIXI.Sprite(getRandomElementFromArray(textures, Math.random()));
+      this.fence.addChild(postSprite);
+      postSprite.anchor = {x:0.5,y:1};
+      postSprite.scale.x = Math.random() > 0.5 ? 1 : -1;
+      var positionWobble = -5 + Math.random() * 10;
+      postSprite.position = RotateVector2d(0, this.fenceRadius + positionWobble, radiansPerFencePost * i);
+    }
+    this.fence.cacheAsBitmap = true;
+
+    this.fence.x = gameFieldSize.x / 2;
+    this.fence.y = gameFieldSize.y / 2;
+  },
+
   update(timeDiff) {
-    if (!GameModel.graveyard || GameModel.currentState != GameModel.states.playingLevel)
+    BoneCollectors.addAndRemoveBoneCollectors();
+    
+    if (!GameModel.constructions.graveyard || GameModel.currentState != GameModel.states.playingLevel) {
+      this.sprite.visible = false;
       return;
+    }
 
     this.sprite.visible = true;
 
@@ -41,6 +80,26 @@ Graveyard = {
 
     Bones.update(timeDiff);
     BoneCollectors.update(timeDiff);
+
+    if(!GameModel.constructions.fence || GameModel.currentState != GameModel.states.playingLevel) {
+      this.fence.visible = false;
+    } else {
+      this.fence.visible = true;
+      if (this.fenceRadius !== GameModel.fenceRadius) {
+        this.drawFence();
+      }
+    }
+  },
+
+  isWithinFence(position) {
+    if(!GameModel.constructions.fence || GameModel.currentState != GameModel.states.playingLevel) {
+      return false;
+    }
+    if (position.x > this.fence.x - this.fenceRadius && position.x < this.fence.x + this.fenceRadius && 
+        position.y > this.fence.y - this.fenceRadius && position.y < this.fence.y + this.fenceRadius) {
+      return this.fastDistance(position.x, position.y, this.fence.x, this.fence.y) <= this.fenceRadius;
+    }
+    return false;
   }
 };
 
@@ -68,7 +127,7 @@ BoneCollectors = {
     }
   },
 
-  update(timeDiff) {
+  addAndRemoveBoneCollectors() {
     if (this.sprites.length > GameModel.persistentData.boneCollectors) {
       var boneCollector = this.sprites.pop();
       for (var i = 0; i < boneCollector.boneList.length; i++){
@@ -93,6 +152,9 @@ BoneCollectors = {
       this.sprites.push(sprite);
       characterContainer.addChild(sprite);
     }
+  },
+
+  update(timeDiff) {
     for (var i=0; i< this.sprites.length; i++) {
       this.updateBoneCollector(this.sprites[i], timeDiff);
     }

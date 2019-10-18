@@ -9,36 +9,48 @@ angular.module('zombieApp', [])
     var zm = this;
     zm.model = GameModel;
 
+    zm.messageTimer = 4;
+    zm.message = false;
     zm.lastUpdate = 0;
-    zm.shopOpen = false;
-    zm.graveyardOpen = false;
-    zm.optionsOpen = false;
+    zm.sidePanels = {};
     zm.upgrades = [];
-
     zm.currentShopFilter = "blood";
 
-    zm.toggleShop = function() {
-      zm.optionsOpen = false;
-      zm.graveyardOpen = false;
-      zm.upgrades = Upgrades.upgrades.filter(upgrade => upgrade.costType == zm.currentShopFilter);
-      zm.shopOpen = !zm.shopOpen;
+    zm.closeSidePanels = function() {
+      zm.sidePanels.options = false;
+      zm.sidePanels.graveyard = false;
+      zm.sidePanels.prestige = false;
+      zm.sidePanels.construction = false;
+      zm.sidePanels.shop = false;
+    }
+
+    zm.openSidePanel = function(type) {
+      zm.closeSidePanels();
+      switch (type) {
+        case "shop":
+          zm.upgrades = Upgrades.upgrades.filter(upgrade => upgrade.costType == zm.currentShopFilter);
+          zm.sidePanels.shop = true;
+          break;
+        case "construction":
+          zm.upgrades = Upgrades.getAvailableConstructions();
+          zm.sidePanels.construction = true;
+          break;
+        case "graveyard":
+          zm.sidePanels.graveyard = true;
+          break;
+        case "prestige":
+          zm.upgrades = Upgrades.prestigeUpgrades;
+          zm.sidePanels.prestige = true;
+          break;
+        case "options":
+          zm.sidePanels.options = true;
+          break;
+      }
     }
 
     zm.filterShop = function(type) {
       zm.currentShopFilter = type;
       zm.upgrades = Upgrades.upgrades.filter(upgrade => upgrade.costType == zm.currentShopFilter);
-    }
-
-    zm.toggleGraveyard = function() {
-      zm.optionsOpen = false;
-      zm.shopOpen = false;
-      zm.graveyardOpen = !zm.graveyardOpen;
-    }
-
-    zm.toggleOptions = function() {
-      zm.shopOpen = false;
-      zm.graveyardOpen = false;
-      zm.optionsOpen = !zm.optionsOpen;
     }
 
     zm.resetGame = function() {
@@ -67,9 +79,6 @@ angular.module('zombieApp', [])
     }
 
     zm.upgradePrice = function(upgrade) {
-      if (!zm.shopOpen)
-        return 0;
-
       return Upgrades.upgradePrice(upgrade);
     }
 
@@ -79,10 +88,34 @@ angular.module('zombieApp', [])
       }
     }
 
-    zm.upgradeSubtitle = function(upgrade) {
-      if (!zm.shopOpen)
-        return "";
+    zm.constructionPercent = function() {
+      if (GameModel.persistentData.currentConstruction) {
+        var time = GameModel.persistentData.currentConstruction.time - GameModel.persistentData.currentConstruction.timeRemaining;
+        return Math.round(time / GameModel.persistentData.currentConstruction.time * 100);
+      }
+      return 0;
+    }
 
+    zm.updateConstructionUpgrades = function() {
+      if (zm.sidePanels.construction == true)
+        zm.upgrades = Upgrades.getAvailableConstructions();
+    }
+
+    zm.startConstruction = function(upgrade) {
+      Upgrades.startConstruction(upgrade, zm);
+      zm.upgrades = Upgrades.getAvailableConstructions();
+    }
+
+    zm.playPauseConstruction = function() {
+      Upgrades.playPauseConstruction();
+    }
+
+    zm.cancelConstruction = function() {
+      Upgrades.cancelConstruction();
+      zm.upgrades = Upgrades.getAvailableConstructions();
+    }
+
+    zm.upgradeSubtitle = function(upgrade) {
       switch (upgrade.type) {
         case Upgrades.types.energyRate:
           return "+" + upgrade.effect + " energy per second";
@@ -102,8 +135,6 @@ angular.module('zombieApp', [])
           return "+" + Math.round(upgrade.effect * 100) + "% chance to recover brain";
         case Upgrades.types.riseFromTheDeadChance:
           return "+" + Math.round(upgrade.effect * 100) + "% chance for corpse to become zombie";
-        case Upgrades.types.graveyard:
-          return "Unlock Graveyard";
         case Upgrades.types.boneCollectorCapacity:
           return "+" + upgrade.effect + " bone collector capacity";
       }
@@ -111,40 +142,18 @@ angular.module('zombieApp', [])
     }
 
     zm.currentRank = function(upgrade) {
-      if (!zm.shopOpen)
-        return 0;
-
       return Upgrades.currentRank(upgrade);
     }
 
-    zm.upgradeVisible = function(upgrade) {
-      if (!zm.shopOpen)
-        return false;
-
-      switch(upgrade.costType) {
-        case Upgrades.costs.energy:
-          return GameModel.energyMax >= upgrade.basePrice;
-        case Upgrades.costs.blood:
-          return GameModel.bloodMax >= upgrade.basePrice;
-        case Upgrades.costs.brains:
-          return GameModel.brainsMax >= upgrade.basePrice;
-        case Upgrades.costs.bones:
-          return GameModel.persistentData.bonesTotal >= upgrade.basePrice;
-      }
-      return true;
+    zm.currentRankConstruction = function(upgrade) {
+      return Upgrades.currentRankConstruction(upgrade);
     }
 
     zm.upgradeTooExpensive = function(upgrade) {
-      if (!zm.shopOpen)
-        return true;
-
       return !Upgrades.canAffordUpgrade(upgrade) || Upgrades.currentRank(upgrade) >= upgrade.cap;
     }
 
     zm.requiredForUpgrade = function(upgrade) {
-      if (!zm.shopOpen)
-        return "";
-
       var cost = zm.upgradePrice(upgrade);
 
       switch (upgrade.costType) {
@@ -156,13 +165,12 @@ angular.module('zombieApp', [])
           return formatWhole(cost - GameModel.persistentData.brains) + ' brains required';
         case Upgrades.costs.bones:
           return formatWhole(cost - GameModel.persistentData.bones) + ' bones required';
+        case Upgrades.costs.prestigePoints:
+          return formatWhole(cost - GameModel.persistentData.prestigePointsToSpend) + ' prestige points required';
       }
     }
 
     zm.purchaseText = function(upgrade) {
-      if (!zm.shopOpen)
-        return "";
-
       return 'Purchase (' + formatWhole(zm.upgradePrice(upgrade)) + ' ' + upgrade.costType + ')';
     }
 
@@ -171,9 +179,6 @@ angular.module('zombieApp', [])
     }
 
     zm.upgradeStatInfo = function(upgrade) {
-      if (!zm.shopOpen)
-        return "";
-
       return Upgrades.displayStatValue(upgrade);
     }
 
@@ -215,7 +220,17 @@ angular.module('zombieApp', [])
     }
 
     zm.toggleShowFps = function() {
-      GameModel.showfps = !GameModel.showfps;
+      zm.model.persistentData.showfps = !zm.model.persistentData.showfps;
+    }
+
+    zm.isShowPrestige = function() {
+      if (typeof zm.model.persistentData.prestigePointsEarned  === 'undefined')
+        return false;
+      return zm.model.persistentData.prestigePointsEarned > 10 || zm.model.persistentData.prestigePointsToSpend > 0 || zm.model.persistentData.upgrades.filter(upgrade => upgrade.costType == Upgrades.costs.prestigePoints).length > 0
+    }
+
+    zm.doPrestige = function() {
+      zm.model.prestige();
     }
 
     zm.howToPlay = [
@@ -227,6 +242,31 @@ angular.module('zombieApp', [])
       "You can zoom in and out using your mouse wheel. Pinch to zoom on mobile."
     ];
 
+    zm.updateMessages = function(timeDiff) {
+      if (zm.message) {
+        zm.messageTimer -= timeDiff;
+        if (zm.messageTimer < 0) {
+          zm.message = false;
+          zm.messageTimer = 4;
+        }
+      } else {
+        if (zm.model.messageQueue.length > 0) {
+          zm.message = zm.model.messageQueue.shift();
+          zm.messageTimer = 4;
+        }
+      }
+    }
+
+    zm.energyPercent = function() {
+      return Math.round(zm.model.energy / zm.model.energyMax * 100);
+    }
+    zm.bloodPercent = function() {
+      return Math.round(zm.model.persistentData.blood / zm.model.bloodMax * 100);
+    }
+    zm.brainsPercent = function() {
+      return Math.round(zm.model.persistentData.brains / zm.model.brainsMax * 100);
+    }
+
     function update() {
       var updateTime = new Date().getTime();
       var timeDiff = (Math.min(1000, Math.max(updateTime - zm.lastUpdate,0))) / 1000;
@@ -236,10 +276,12 @@ angular.module('zombieApp', [])
 
     function innerUpdate(timeDiff, updateTime) {
       zm.model.update(timeDiff, updateTime);
+      zm.updateMessages(timeDiff);
     }
 
     $document.ready(function(){
-      $scope.updatePromise = $interval(update, 200);
+      $scope.updatePromise = $interval(update, 100);
+      Upgrades.angularModel = zm;
     });
 
   }]);

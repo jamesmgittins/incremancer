@@ -108,7 +108,7 @@ function zoom(change, coords) {
       Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 1.1
     }
   } else {
-    if (gcWidth > Math.min(canvasSize.y, canvasSize.x)) {
+    if (gcWidth > Math.min(canvasSize.y, canvasSize.x) * 0.8) {
       gc.scale.x = gc.scale.y = gc.scale.x * 0.9;
       Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 0.9;
     }
@@ -203,7 +203,7 @@ function update(timeDiff) {
   Bullets.update(timeDiff);
   Exclamations.update(timeDiff);
 
-  if (GameModel.showfps) {
+  if (GameModel.persistentData.showfps) {
     frames++;
     timeSinceLastFrameCount -= timeDiff;
     if (timeSinceLastFrameCount < 0) {
@@ -245,6 +245,7 @@ function startGame() {
     .add('sprites/zombie.json')
     .add('sprites/bonecollector.json')
     .add('sprites/objects.json')
+    .add('sprites/fenceposts.json')
     .load(function(){
 
     grass = new PIXI.TilingSprite(PIXI.Texture.from('sprites/grass.png'));
@@ -281,6 +282,7 @@ function setSizes() {
 
 window.onload = function() {
   GameModel.loadData();
+  GameModel.onReady();
   setSizes()
   startGame();
 };

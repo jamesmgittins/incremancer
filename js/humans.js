@@ -3,7 +3,7 @@ Humans = {
   map : Map,
   maxWalkSpeed : 15,
   maxRunSpeed : 35,
-  baseHealth: 100,
+  baseHealth: 60,
   minSecondsTostand : 1,
   maxSecondsToStand : 60, // 60
   chanceToStayInCurrentBuilding : 0.95, // 0.95
@@ -11,7 +11,7 @@ Humans = {
   humans : [],
   aliveHumans : [],
   humansPerLevel : 50, // 50
-  maxHumans : 1000,
+  maxHumans : 1000, // 1000
   scaling: 2,
   visionDistance : 60,
   fleeChancePerZombie : 0.1,
@@ -71,11 +71,11 @@ Humans = {
   },
 
   getBaseHealth() {
-    return this.baseHealth + GameModel.level;
+    return this.baseHealth + (GameModel.level * 5);
   },
 
   getAttackDamage() {
-    this.attackDamage = Math.round(5 + (GameModel.level / 10));
+    this.attackDamage = Math.round(5 + (GameModel.level / 5));
   },
 
   populate() {
@@ -248,7 +248,7 @@ Humans = {
         Exclamations.newFire(zombie);
         zombie.burnDamage = this.attackDamage;
       } else {
-        zombie.burnDamage++;
+        zombie.burnDamage += this.attackDamage;
       }
       zombie.burning = true;
     }
@@ -335,7 +335,7 @@ Police = {
   map:Map,
   maxWalkSpeed : 15,
   maxRunSpeed : 40,
-  baseHealth : 200,
+  baseHealth : 130,
   police : [],
   walkTexture : [],
   deadTexture :[],
@@ -367,11 +367,11 @@ Police = {
   },
 
   getBaseHealth() {
-    return this.baseHealth + (2 * GameModel.level);
+    return this.baseHealth + (5 * GameModel.level);
   },
 
   getAttackDamage() {
-    this.attackDamage = Math.round(16 + (GameModel.level / 10));
+    this.attackDamage = Math.round(13 + (GameModel.level / 5));
   },
 
   populate() {
@@ -575,7 +575,7 @@ Army = {
   map:Map,
   maxWalkSpeed : 20,
   maxRunSpeed : 50,
-  baseHealth : 300,
+  baseHealth : 200,
   armymen : [],
   walkTexture : [],
   deadTexture :[],
@@ -607,11 +607,11 @@ Army = {
   },
 
   getBaseHealth() {
-    return this.baseHealth + (GameModel.level * 2);
+    return this.baseHealth + (GameModel.level * 5);
   },
 
   getAttackDamage() {
-    this.attackDamage = Math.round(20 + GameModel.level / 10);
+    this.attackDamage = Math.round(20 + GameModel.level / 5);
   },
 
   populate() {

@@ -5,6 +5,7 @@
     <meta name="description" content="Zombie necromancer idle game">
     <meta name="keywords" content="zombie,game,idle,javascript">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#104510" />
     <link rel="manifest" href="manifest.json">
     <!-- <script src="js/pixi.min.js"></script> -->
     <script src="js/pixi-legacy.min.js"></script>
@@ -25,23 +26,28 @@
   <body ng-controller="ZombieController as zm">
     <div class="top-bar">
       <div class="resources">
-          <label class="energy">Energy: {{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}</label>
-          <label class="blood">Blood: {{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}</label>
-          <label class="brains">Brains: {{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}</label>
-          <label class="bones" ng-if="zm.model.graveyard">Bones: {{zm.model.persistentData.bones|whole}}</label>
+          <label class="energy">Energy: {{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}<span class="percent" ng-style="{'width':zm.energyPercent() + '%'}"></span></label>
+          <label class="blood">Blood: {{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}<span class="percent" ng-style="{'width':zm.bloodPercent() + '%'}"></span></label>
+          <label class="brains">Brains: {{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}<span class="percent" ng-style="{'width':zm.brainsPercent() + '%'}"></span></label>
+          <label class="bones" ng-if="zm.model.constructions.graveyard">Bones: {{zm.model.persistentData.bones|whole}}</label>
       </div>
       <div class="stats">
         <label>Level: {{zm.model.level}}</label>
         <label>Humans: {{zm.model.getHumanCount()}}</label>
         <label>Zombies: {{zm.model.zombieCount}}</label>
-        <label ng-if="zm.model.showfps">FPS: {{zm.model.frameRate}}</label>
+        <label ng-if="zm.model.persistentData.showfps">FPS: {{zm.model.frameRate}}</label>
       </div>
+      <div class="message" ng-if="zm.message">
+          <p>{{zm.message}}</p>
+        </div>
     </div>
 
     <div class="buttons">
-      <button ng-click="zm.toggleShop();">Shop</button>
-      <button ng-click="zm.toggleGraveyard();" ng-if="zm.model.graveyard" class="graveyard">Graveyard</button>
-      <button ng-click="zm.toggleOptions();" class="options">Options</button>
+      <button ng-click="zm.openSidePanel('shop');">Shop</button>
+      <button ng-click="zm.openSidePanel('construction');" ng-if="zm.model.construction"><span ng-if="zm.model.persistentData.currentConstruction" class="tag">{{zm.constructionPercent()}}%</span>Construction</button>
+      <button ng-click="zm.openSidePanel('graveyard');" ng-if="zm.model.constructions.graveyard">Graveyard</button>
+      <button ng-click="zm.openSidePanel('prestige');" ng-if="zm.isShowPrestige()">Prestige</button>
+      <button ng-click="zm.openSidePanel('options');" class="options">Options</button>
     </div>
 
     <div class="zoom-buttons" ng-if="zm.model.persistentData.zoomButtons">
@@ -50,21 +56,42 @@
       <button ng-click="zm.zoom(+1);">+</button>
     </div>
 
-    <div class="shop" ng-if="zm.shopOpen">
+    <div class="shop" ng-if="zm.sidePanels.prestige">
+      <div class="shop-title">
+        <h2>Prestige Menu</h2>
+        <button ng-click="zm.closeSidePanels()">Close</button>
+      </div>
+      <h3>Prestige now to unlock {{zm.model.persistentData.prestigePointsEarned|whole}} prestige points</h3>
+      <p>This will reset your game progress but grant you powerful prestige points to spend.</p>
+      <button ng-click="zm.doPrestige();" ng-disabled="zm.model.persistentData.prestigePointsEarned <= 0">Prestige Now</button>
+      <p>You currently have {{zm.model.persistentData.prestigePointsToSpend|whole}} prestige points to spend</p>
+      <div class="upgrades">
+        <div ng-repeat="upgrade in zm.upgrades" class="upgrade {{upgrade.costType}}">
+          <h4>{{upgrade.name}}</h4>
+          <label>{{zm.upgradeSubtitle(upgrade)}}</label>
+          <p>{{upgrade.description}}</p>
+          <label>Cost: {{zm.upgradePrice(upgrade)|whole}} Prestige Points</label>
+          <p>Current Rank: {{zm.currentRank(upgrade)}} / {{upgrade.cap}} - {{zm.upgradeStatInfo(upgrade)}}</p>
+          <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{zm.currentRank(upgrade) >= upgrade.cap ? 'Sold Out' : zm.upgradeTooExpensive(upgrade) ? zm.requiredForUpgrade(upgrade) : zm.purchaseText(upgrade)}}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="shop" ng-if="zm.sidePanels.shop">
       <div class="shop-title">
         <h2>Shop</h2>
-        <button ng-click="zm.toggleShop();">Close</button>
+        <button ng-click="zm.closeSidePanels();">Close</button>
       </div>
 
       <div class="tabs">
         <h3>What would you like to pay with?</h3>
         <button ng-click="zm.filterShop('blood');" class="blood {{zm.currentShopFilter == 'blood' ? 'active' : ''}}">Blood</button>
         <button ng-click="zm.filterShop('brains');" class="brains {{zm.currentShopFilter == 'brains' ? 'active' : ''}}">Brains</button>
-        <button ng-click="zm.filterShop('bones');" class="bones {{zm.currentShopFilter == 'bones' ? 'active' : ''}}" ng-if="zm.model.graveyard">Bones</button>
+        <button ng-click="zm.filterShop('bones');" class="bones {{zm.currentShopFilter == 'bones' ? 'active' : ''}}" ng-if="zm.model.constructions.graveyard">Bones</button>
       </div>
 
       <div class="upgrades">
-        <div ng-repeat="upgrade in zm.upgrades" class="upgrade {{upgrade.costType}}" ng-if="zm.upgradeVisible(upgrade);">
+        <div ng-repeat="upgrade in zm.upgrades" class="upgrade {{upgrade.costType}}">
           <h4>{{upgrade.name}}</h4>
           <label>{{zm.upgradeSubtitle(upgrade)}}</label>
           <p>{{upgrade.description}}</p>
@@ -75,10 +102,58 @@
       </div>
     </div>
 
-    <div class="shop" ng-if="zm.graveyardOpen">
+    <div class="shop" ng-if="zm.sidePanels.construction">
+      <div class="shop-title">
+        <h2>Unholy Construction</h2>
+        <button ng-click="zm.closeSidePanels();">Close</button>
+      </div>
+      <div class="upgrade current-construction" ng-if="zm.model.persistentData.currentConstruction">
+        <h4>Building - {{zm.model.persistentData.currentConstruction.name}}</h4>
+        <p>Consuming 
+          <span ng-if="zm.model.persistentData.currentConstruction.costPerTick.energy" class="energy">{{zm.model.persistentData.currentConstruction.costPerTick.energy|decimal}} energy</span> 
+          <span ng-if="zm.model.persistentData.currentConstruction.costPerTick.blood" class="blood">{{zm.model.persistentData.currentConstruction.costPerTick.blood|decimal}} blood</span>
+          <span ng-if="zm.model.persistentData.currentConstruction.costPerTick.brains" class="brains">{{zm.model.persistentData.currentConstruction.costPerTick.brains|decimal}} brains</span>
+          <span ng-if="zm.model.persistentData.currentConstruction.costPerTick.bones" class="bones">{{zm.model.persistentData.currentConstruction.costPerTick.bones|decimal}} bones</span>
+          each second
+        </p>
+        <div class="progress {{zm.model.persistentData.currentConstruction.state == 'building' ? 'active' : 'stopped'}}">
+          <div ng-style="{'width':zm.constructionPercent() + '%'}"></div>
+          <span>{{zm.constructionPercent()}}%</span>
+        </div>
+        <p ng-if="!zm.model.persistentData.currentConstruction.shortfall"><strong>Time Remaining: {{zm.model.persistentData.currentConstruction.timeRemaining}}</strong></p>
+        <p ng-if="zm.model.persistentData.currentConstruction.shortfall">
+          <strong>Production stopped, need more
+          <span ng-if="zm.model.persistentData.currentConstruction.shortfall.energy" class="energy">energy</span>
+          <span ng-if="zm.model.persistentData.currentConstruction.shortfall.blood" class="blood">blood</span>
+          <span ng-if="zm.model.persistentData.currentConstruction.shortfall.brains" class="brains">brains</span>
+          <span ng-if="zm.model.persistentData.currentConstruction.shortfall.bones" class="bones">bones</span>
+          </strong>
+        </p>
+        <button ng-click="zm.playPauseConstruction();">{{zm.model.persistentData.currentConstruction.state == 'paused' ? 'Resume' : 'Pause'}}</button>
+        <button ng-click="zm.cancelConstruction();">Cancel</button>
+      </div>
+      <div class="upgrades">
+        <div ng-repeat="upgrade in zm.upgrades" class="upgrade">
+          <h4>{{upgrade.name}}</h4>
+          <p>{{upgrade.description}}</p>
+          <label>Time to build: {{upgrade.time}} seconds</label>
+          <div>
+            <label>Total Cost: </label>
+            <label ng-if="upgrade.costs.energy" class="energy">{{upgrade.costs.energy}} energy</label>
+            <label ng-if="upgrade.costs.blood" class="blood">{{upgrade.costs.blood}} blood</label>
+            <label ng-if="upgrade.costs.brains" class="brains">{{upgrade.costs.brains}} brains</label>
+            <label ng-if="upgrade.costs.bones" class="bones">{{upgrade.costs.bones}} bones</label>
+          </div>
+          <p>Current Rank: {{zm.currentRankConstruction(upgrade)}} / {{upgrade.cap}}</p>
+          <button ng-click="zm.startConstruction(upgrade);" ng-disabled="zm.model.persistentData.currentConstruction">Begin Construction</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="shop" ng-if="zm.sidePanels.graveyard">
       <div class="shop-title">
         <h2>Cursed Graveyard</h2>
-        <button ng-click="zm.toggleGraveyard();">Close</button>
+        <button ng-click="zm.closeSidePanels();">Close</button>
       </div>
       <div class="upgrades">
         <div class="bone-collectors bones">
@@ -95,10 +170,10 @@
       </div>
     </div>
 
-    <div class="shop" ng-if="zm.optionsOpen">
+    <div class="shop" ng-if="zm.sidePanels.options">
       <div class="shop-title">
         <h2>Options</h2>
-        <button ng-click="zm.toggleOptions();">Close</button>
+        <button ng-click="zm.closeSidePanels();">Close</button>
       </div>
       <div class="upgrades">
         <div class="upgrade">
@@ -135,7 +210,7 @@
         <div class="upgrade">
           <h4>Show Framerate Counter</h4>
           <p>Used for performance testing</p>
-          <button ng-click="zm.toggleShowFps();">{{zm.model.showfps ? "On" : "Off"}}</button>
+          <button ng-click="zm.toggleShowFps();">{{zm.model.persistentData.showfps ? "On" : "Off"}}</button>
         </div>
         <div class="upgrade">
           <h4>Reset Game</h4>
@@ -153,9 +228,11 @@
       </ul>
       <button ng-click="zm.startGame();">Start Game</button>
     </div>
+
     <div class="end-level" ng-if="zm.model.currentState == zm.model.states.levelCompleted">
       <h2>Level {{zm.model.level}} Complete</h2>
       <h4>All the humans are either dead or undead!</h4>
+      <h4>You have earned {{zm.model.level}} prestige points</h4>
       <button ng-click="zm.nextLevel();">Start Level {{zm.model.level + 1}}</button>
     </div>
   </body>
