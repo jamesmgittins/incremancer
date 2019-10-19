@@ -42,12 +42,12 @@
         </div>
     </div>
 
-    <div class="buttons">
-      <button ng-click="zm.openSidePanel('shop');">Shop</button>
-      <button ng-click="zm.openSidePanel('construction');" ng-if="zm.model.construction"><span ng-if="zm.model.persistentData.currentConstruction" class="tag">{{zm.constructionPercent()}}%</span>Construction</button>
-      <button ng-click="zm.openSidePanel('graveyard');" ng-if="zm.model.constructions.graveyard">Graveyard</button>
-      <button ng-click="zm.openSidePanel('prestige');" ng-if="zm.isShowPrestige()">Prestige</button>
-      <button ng-click="zm.openSidePanel('options');" class="options">Options</button>
+    <div class="buttons {{zm.sidePanels.open ? 'open' : ''}}">
+      <button ng-click="zm.openSidePanel('shop');" class="{{zm.sidePanels.shop ? 'active' : ''}}">Shop</button>
+      <button ng-click="zm.openSidePanel('construction');" ng-if="zm.model.construction" class="{{zm.sidePanels.construction ? 'active' : ''}}"><span ng-if="zm.model.persistentData.currentConstruction" class="tag">{{zm.constructionPercent()}}%</span>Construction</button>
+      <button ng-click="zm.openSidePanel('graveyard');" ng-if="zm.model.constructions.graveyard" class="{{zm.sidePanels.graveyard ? 'active' : ''}}">Graveyard</button>
+      <button ng-click="zm.openSidePanel('prestige');" ng-if="zm.isShowPrestige()" class="{{zm.sidePanels.prestige ? 'active' : ''}}">Prestige</button>
+      <button ng-click="zm.openSidePanel('options');" class="{{zm.sidePanels.options ? 'active' : ''}}">Options</button>
     </div>
 
     <div class="zoom-buttons" ng-if="zm.model.persistentData.zoomButtons">
@@ -62,15 +62,15 @@
         <button ng-click="zm.closeSidePanels()">Close</button>
       </div>
       <h3>Prestige now to unlock {{zm.model.persistentData.prestigePointsEarned|whole}} prestige points</h3>
-      <p>This will reset your game progress but grant you powerful prestige points to spend.</p>
+      <p class="prestige-info">This will reset your game progress but grant you powerful prestige points to spend.</p>
       <button ng-click="zm.doPrestige();" ng-disabled="zm.model.persistentData.prestigePointsEarned <= 0">Prestige Now</button>
-      <p>You currently have {{zm.model.persistentData.prestigePointsToSpend|whole}} prestige points to spend</p>
+      <p class="prestige-info">You currently have {{zm.model.persistentData.prestigePointsToSpend|whole}} prestige points to spend</p>
       <div class="upgrades">
         <div ng-repeat="upgrade in zm.upgrades" class="upgrade {{upgrade.costType}}">
           <h4>{{upgrade.name}}</h4>
+          <h4 class="cost">Cost: {{zm.upgradePrice(upgrade)|whole}} Points</h4>
           <label>{{zm.upgradeSubtitle(upgrade)}}</label>
           <p>{{upgrade.description}}</p>
-          <label>Cost: {{zm.upgradePrice(upgrade)|whole}} Prestige Points</label>
           <p>Current Rank: {{zm.currentRank(upgrade)}} / {{upgrade.cap}} - {{zm.upgradeStatInfo(upgrade)}}</p>
           <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{zm.currentRank(upgrade) >= upgrade.cap ? 'Sold Out' : zm.upgradeTooExpensive(upgrade) ? zm.requiredForUpgrade(upgrade) : zm.purchaseText(upgrade)}}</button>
         </div>
@@ -88,16 +88,19 @@
         <button ng-click="zm.filterShop('blood');" class="blood {{zm.currentShopFilter == 'blood' ? 'active' : ''}}">Blood</button>
         <button ng-click="zm.filterShop('brains');" class="brains {{zm.currentShopFilter == 'brains' ? 'active' : ''}}">Brains</button>
         <button ng-click="zm.filterShop('bones');" class="bones {{zm.currentShopFilter == 'bones' ? 'active' : ''}}" ng-if="zm.model.constructions.graveyard">Bones</button>
+        <button ng-click="zm.filterShop('completed');" class="bones {{zm.currentShopFilter == 'completed' ? 'active' : ''}}">Completed</button>
       </div>
 
       <div class="upgrades">
         <div ng-repeat="upgrade in zm.upgrades" class="upgrade {{upgrade.costType}}">
           <h4>{{upgrade.name}}</h4>
+          <h4 class="cost">{{zm.upgradePrice(upgrade)|whole}} {{upgrade.costType}}</h4>
           <label>{{zm.upgradeSubtitle(upgrade)}}</label>
-          <p>{{upgrade.description}}</p>
-          <label>Cost: {{zm.upgradePrice(upgrade)|whole}} {{upgrade.costType}}</label>
-          <p>Current Rank: {{zm.currentRank(upgrade)}} / {{upgrade.cap}} - {{zm.upgradeStatInfo(upgrade)}}</p>
-          <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{zm.currentRank(upgrade) >= upgrade.cap ? 'Sold Out' : zm.upgradeTooExpensive(upgrade) ? zm.requiredForUpgrade(upgrade) : zm.purchaseText(upgrade)}}</button>
+          <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{zm.upgradeButtonText(upgrade)}}</button>
+          <button ng-click="upgrade.selected = !upgrade.selected" class="info  {{upgrade.selected ? 'active' : ''}}">Info</button>
+          <p ng-show="upgrade.selected">{{upgrade.description}}</p>
+          <p ng-show="upgrade.selected">Current Rank: {{zm.currentRank(upgrade)}} / {{upgrade.cap}} - {{zm.upgradeStatInfo(upgrade)}}</p>
+          <span class="percent" ng-style="{'width':zm.upgradePercent(upgrade) + '%'}"></span>
         </div>
       </div>
     </div>

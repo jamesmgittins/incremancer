@@ -22,13 +22,14 @@ angular.module('zombieApp', [])
       zm.sidePanels.prestige = false;
       zm.sidePanels.construction = false;
       zm.sidePanels.shop = false;
+      zm.sidePanels.open = false;
     }
 
     zm.openSidePanel = function(type) {
       zm.closeSidePanels();
       switch (type) {
         case "shop":
-          zm.upgrades = Upgrades.upgrades.filter(upgrade => upgrade.costType == zm.currentShopFilter);
+          zm.filterShop(zm.currentShopFilter);
           zm.sidePanels.shop = true;
           break;
         case "construction":
@@ -46,11 +47,16 @@ angular.module('zombieApp', [])
           zm.sidePanels.options = true;
           break;
       }
+      zm.sidePanels.open = true;
     }
 
     zm.filterShop = function(type) {
       zm.currentShopFilter = type;
-      zm.upgrades = Upgrades.upgrades.filter(upgrade => upgrade.costType == zm.currentShopFilter);
+      if (zm.currentShopFilter == "completed") {
+        zm.upgrades = Upgrades.upgrades.filter(upgrade => zm.currentRank(upgrade) >= upgrade.cap);
+      } else {
+        zm.upgrades = Upgrades.upgrades.filter(upgrade => upgrade.costType == zm.currentShopFilter && zm.currentRank(upgrade) < upgrade.cap);
+      }
     }
 
     zm.resetGame = function() {
@@ -265,6 +271,50 @@ angular.module('zombieApp', [])
     }
     zm.brainsPercent = function() {
       return Math.round(zm.model.persistentData.brains / zm.model.brainsMax * 100);
+    }
+
+    zm.costAboveCap = function(upgrade, price) {
+      switch(upgrade.costType) {
+        case "blood":
+          if (price > zm.model.bloodMax) {
+            return "Blood capacity too low";
+          }
+          break;
+        case "brains":
+          if (price > zm.model.brainsMax) {
+            return "Brains capacity too low";
+          }
+          break;
+      }
+      return false;
+    }
+
+    zm.upgradeButtonText = function(upgrade) {
+      if (zm.currentRank(upgrade) >= upgrade.cap)
+        return "Sold Out";
+        
+      var price = zm.upgradePrice(upgrade);
+
+      if (zm.upgradeTooExpensive(upgrade)) {
+        var aboveCap = zm.costAboveCap(upgrade, price);
+        if (aboveCap)
+          return aboveCap;
+        return zm.requiredForUpgrade(upgrade)
+      }
+        
+      return zm.purchaseText(upgrade, price)
+    }
+
+    zm.upgradePercent = function(upgrade) {
+      switch(upgrade.costType) {
+        case "blood":
+          return Math.round(Math.min(1, zm.model.persistentData.blood / zm.upgradePrice(upgrade)) * 100);
+        case "brains":
+          return Math.round(Math.min(1, zm.model.persistentData.brains / zm.upgradePrice(upgrade)) * 100);
+        case "bones":
+          return Math.round(Math.min(1, zm.model.persistentData.bones / zm.upgradePrice(upgrade)) * 100);
+      }
+      
     }
 
     function update() {

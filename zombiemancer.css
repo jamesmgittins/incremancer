@@ -16,6 +16,10 @@ html,body {
 canvas {
   height: 100%;
   width: 100%;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 div.top-bar {
@@ -34,11 +38,10 @@ div.top-bar div.message {
   left: 50%;
   transform: translate(-50%,100%);
   bottom: -15px;
-  padding: 0 50px;
   background-color: rgba(0,0,0,0.4);
   font-size: 24px;
   line-height: 34px;
-  width: 50%;
+  width: 100%;
 }
 
 div.top-bar div.resources {
@@ -50,11 +53,11 @@ div.shop {
   position: absolute;
   top:0;
   right:0;
-  padding:15px;
-  height: calc(100% - 30px);
+  padding:10px;
+  height: calc(100% - 20px);
   background-color: rgba(10,60,10,0.8);
-  width:25%;
-  min-width: 320px;
+  width:20%;
+  min-width: 310px;
   display: flex;
   flex-direction: column;
   color: #ddd;
@@ -62,15 +65,15 @@ div.shop {
 div.shop div.tabs button {
   margin-right: 5px;
 }
-div.shop button.active {
+button.active {
   box-shadow: inset 0 0 5px #ffee10;
   text-shadow: 0 0 1px #ffee10;
 }
 
 div.shop div.upgrades {
-  overflow-y: scroll;
+  overflow-y: auto;
   flex:1;
-  margin-top:15px;
+  margin-top:5px;
 }
 
 div.shop div.upgrade div.progress {
@@ -137,23 +140,26 @@ button:focus {outline:0;}
 div.start-game button, 
 div.end-level button,
 div.shop button {
-  padding:10px 20px;
-  font-size: 20px;
+  padding: 8px 10px;
+  font-size: 18px;
 }
 div.shop div.shop-title h2 {
   float:left;
+  margin: 8px 0;
 }
 div.shop div.shop-title button {
   float:right;
-  margin: 10px;
-  padding: 15px;
+}
+
+button.info {
+  float: right;
 }
 
 div.shop div.upgrade, div.shop div.bone-collectors {
   background-color: rgba(20,30,20,0.8);
-  padding:15px;
-  margin-bottom:15px;
-  line-height: 25px;
+  padding:10px;
+  margin-bottom:10px;
+  position: relative;
 }
 
 div.shop div.bone-collectors button {
@@ -161,22 +167,43 @@ div.shop div.bone-collectors button {
   padding : 8px 15px;
 }
 div.shop h3 {
-  margin:0 0 10px 0;
+  margin: 0 0 5px 0;
+  font-size: 18px;
+}
+div.shop div.upgrade h4 {
+  float:left;
 }
 div.shop div.upgrade h4, div.shop div.bone-collectors h4 {
-  font-size: 24px;
-  margin: 0;
+  font-size: 18px;
+  line-height: 18px;
+  margin: 0 0 5px 0;
 }
 
 div.shop div.upgrade:not(.current-construction) p, div.shop div.bone-collectors p{
   margin:5px 0;
   font-style: italic;
+  line-height: 20px;
+  clear:both;
 }
 
+div.shop div.upgrade p {
+  clear:both;
+}
+div.shop div.upgrade label {
+  display: block;
+}
 
 div.shop div.upgrade label, div.shop div.bone-collectors label {
   font-weight: bold;
-  font-size: 18px;
+  font-size: 16px;
+  margin-bottom: 5px;
+  clear:both;
+}
+
+div.shop div.upgrade h4.cost {
+  float: right;
+  clear: none;
+  margin-bottom: 0;
 }
 
 div.top-bar label {
@@ -186,7 +213,7 @@ div.top-bar label {
   white-space: nowrap;
   text-shadow: 2px 2px #000;
 }
-div.top-bar label span.percent {
+span.percent {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -213,16 +240,19 @@ div.zoom-buttons button {
 
 div.buttons {
   position: absolute;
-  top:20%;
+  top:90px;
   right:0;
   padding:10px;
+}
+div.buttons.open {
+  right:calc(20% + 15px);
 }
 
 div.buttons button {
   position: relative;
   display:block;
-  padding: 10px 25px;
-  font-size: 20px;
+  padding: 8px 10px;
+  font-size: 18px;
   margin: 5px 5px 0 0;
   width:100%;
   background: rgba(0,0,0,0.4);
@@ -232,7 +262,7 @@ div.buttons button {
   text-shadow: 2px 2px #000;
 }
 
-div.buttons button:hover {
+div.buttons button:hover, div.buttons button.active {
   background: rgba(0,0,0,0.8);
   color: #ff3;
 }
@@ -241,6 +271,10 @@ div.buttons button span.tag {
   left: -4px;
   position: absolute;
   transform: translateX(-100%);
+}
+
+p.prestige-info {
+  margin:5px 0;
 }
 
 .energy {
@@ -273,6 +307,30 @@ div.buttons button span.tag {
 
 ul {
   padding-inline-start: 20px;
+  clear:both;
+}
+
+@media screen and (max-width: 1800px) {
+  div.shop div.tabs button {
+    margin-right: 0;
+    font-size: 16px;
+  }
+  div.top-bar label {
+    font-size:20px;
+  }
+
+  div.top-bar div.stats label {
+    font-size:18px;
+  }
+  div.start-game button, div.end-level button, div.shop button {
+    padding: 8px 10px;
+    font-size: 16px;
+  }
+}
+@media screen and (max-width: 1276px) {
+  div.buttons.open {
+    right: 325px;
+  }
 }
 
 @media screen and (max-width: 1040px) {
@@ -287,7 +345,7 @@ ul {
   }
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 579px) {
   div.top-bar label {
     margin:5px;
     font-size:16px;
@@ -311,6 +369,9 @@ ul {
     top:auto;
     bottom:0;
   }
+  div.buttons.open {
+    right:0;
+  }
   div.buttons button {
     padding: 5px 10px;
   }
@@ -321,6 +382,11 @@ ul {
     padding: 0 20px;
     width:80%;
   }
+  div.start-game button, div.end-level button, div.shop button {
+    padding:10px;
+  }
+
+  
 }
 
 .message > p {
@@ -342,4 +408,21 @@ ul {
 @keyframes width-animation {
   0% {width:100%;}
   100% {width:0%;}
+}
+
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ccc;
 }

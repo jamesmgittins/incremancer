@@ -97,8 +97,9 @@ Bones = {
   uncollected : [],
   gravity : 100,
   spraySpeed : 20,
-  fadeTime : 15,
+  fadeTime : 30,
   fadeSpeed : 0.2,
+  fadeBones : false,
 	getTexture() {
 		var blast = document.createElement('canvas');
 		blast.width = 4;
@@ -142,6 +143,7 @@ Bones = {
       }
     }
     this.uncollected = uncollectedBones;
+    this.fadeBones = uncollectedBones.length > 500;
   },
   updatePart(sprite, timeDiff) {
     if (sprite.collected) {
@@ -151,7 +153,8 @@ Bones = {
     }
     if (sprite.hitFloor) {
       
-      sprite.fadeTime -= timeDiff;
+      if (this.fadeBones)
+        sprite.fadeTime -= timeDiff;
 
       if (sprite.fadeTime < 0 && !sprite.collector) {
         sprite.alpha -= this.fadeSpeed * timeDiff;
@@ -177,7 +180,7 @@ Bones = {
       var sprite = this.discardedSprites.pop();
       sprite.x = x;
       sprite.y = y - (8 + Math.random() * 10);
-      sprite.fadeTime = this.fadeTime;
+      sprite.fadeTime = Math.random() * this.fadeTime;
       sprite.rotation = Math.random() * 5
       sprite.rotSpeed =  -2 + Math.random() * 4;
       sprite.floor = y;
