@@ -71,8 +71,8 @@
           <h4 class="cost">Cost: {{zm.upgradePrice(upgrade)|whole}} Points</h4>
           <label>{{zm.upgradeSubtitle(upgrade)}}</label>
           <p>{{upgrade.description}}</p>
-          <p>Current Rank: {{zm.currentRank(upgrade)}} / {{upgrade.cap}} - {{zm.upgradeStatInfo(upgrade)}}</p>
-          <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{zm.currentRank(upgrade) >= upgrade.cap ? 'Sold Out' : zm.upgradeTooExpensive(upgrade) ? zm.requiredForUpgrade(upgrade) : zm.purchaseText(upgrade)}}</button>
+          <p>Current Rank: {{zm.currentRank(upgrade)}}{{upgrade.cap != 0 ? ' / ' + upgrade.cap : ''}} - {{zm.upgradeStatInfo(upgrade)}}</p>
+          <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{upgrade.cap != 0 && zm.currentRank(upgrade) >= upgrade.cap ? 'Sold Out' : zm.upgradeTooExpensive(upgrade) ? zm.requiredForUpgrade(upgrade) : zm.purchaseText(upgrade)}}</button>
         </div>
       </div>
     </div>
@@ -84,7 +84,7 @@
       </div>
 
       <div class="tabs">
-        <h3>What would you like to pay with?</h3>
+        <!-- <h3>What would you like to pay with?</h3> -->
         <button ng-click="zm.filterShop('blood');" class="blood {{zm.currentShopFilter == 'blood' ? 'active' : ''}}">Blood</button>
         <button ng-click="zm.filterShop('brains');" class="brains {{zm.currentShopFilter == 'brains' ? 'active' : ''}}">Brains</button>
         <button ng-click="zm.filterShop('bones');" class="bones {{zm.currentShopFilter == 'bones' ? 'active' : ''}}" ng-if="zm.model.constructions.graveyard">Bones</button>
@@ -99,7 +99,7 @@
           <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{zm.upgradeButtonText(upgrade)}}</button>
           <button ng-click="upgrade.selected = !upgrade.selected" class="info  {{upgrade.selected ? 'active' : ''}}">Info</button>
           <p ng-show="upgrade.selected">{{upgrade.description}}</p>
-          <p ng-show="upgrade.selected">Current Rank: {{zm.currentRank(upgrade)}} / {{upgrade.cap}} - {{zm.upgradeStatInfo(upgrade)}}</p>
+          <p ng-show="upgrade.selected">Current Rank: {{zm.currentRank(upgrade)}}{{upgrade.cap != 0 ? ' / ' + upgrade.cap : ''}} - {{zm.upgradeStatInfo(upgrade)}}</p>
           <span class="percent" ng-style="{'width':zm.upgradePercent(upgrade) + '%'}"></span>
         </div>
       </div>
@@ -109,6 +109,10 @@
       <div class="shop-title">
         <h2>Unholy Construction</h2>
         <button ng-click="zm.closeSidePanels();">Close</button>
+      </div>
+      <div class="tabs">
+        <button ng-click="zm.filterConstruction('available');" class="{{zm.currentConstructionFilter == 'available' ? 'active' : ''}}">Available</button>
+        <button ng-click="zm.filterConstruction('completed');" class="{{zm.currentConstructionFilter == 'completed' ? 'active' : ''}}">Completed</button>
       </div>
       <div class="upgrade current-construction" ng-if="zm.model.persistentData.currentConstruction">
         <h4>Building - {{zm.model.persistentData.currentConstruction.name}}</h4>
@@ -147,8 +151,9 @@
             <label ng-if="upgrade.costs.brains" class="brains">{{upgrade.costs.brains}} brains</label>
             <label ng-if="upgrade.costs.bones" class="bones">{{upgrade.costs.bones}} bones</label>
           </div>
+          <label ng-if="zm.constructionLeadsTo(upgrade)">Required for: {{zm.constructionLeadsTo(upgrade)}}</label>
           <p>Current Rank: {{zm.currentRankConstruction(upgrade)}} / {{upgrade.cap}}</p>
-          <button ng-click="zm.startConstruction(upgrade);" ng-disabled="zm.model.persistentData.currentConstruction">Begin Construction</button>
+          <button ng-click="zm.startConstruction(upgrade);" ng-disabled="zm.model.persistentData.currentConstruction" ng-show="zm.currentRankConstruction(upgrade) < upgrade.cap">Begin Construction</button>
         </div>
       </div>
     </div>
@@ -193,7 +198,7 @@
         <div class="upgrade">
           <h4>Render Resolution</h4>
           <p>Choose your preferred resolution to render the game.</p>
-          <p>50% will run better on slower harder but may look blurry.</p>
+          <p>50% will run better on slower hardware but may look blurry.</p>
           <p>100% will pixel match the resolution reported by your browser.</p>
           <p>200% will double the reported values which may look better on retina devices or smartphones.</p>
           <button ng-click="zm.toggleResolution(0.5);" class="{{zm.getResolution() == 0.5 ? 'active' : ''}}">50%</button>

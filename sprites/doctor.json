@@ -1,6 +1,6 @@
 {
   "frames": {
-    "healing.png":
+    "doctor1.png":
     {
       "frame":{"x":0,"y":0,"w":8,"h":8},
       "rotated":false,
@@ -8,7 +8,7 @@
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
       "sourceSize":{"w":8,"h":8}
     },
-    "exclamation.png":
+    "doctor2.png":
     {
       "frame":{"x":0,"y":8,"w":8,"h":8},
       "rotated":false,
@@ -16,7 +16,7 @@
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
       "sourceSize":{"w":8,"h":8}
     },
-    "fire.png":
+    "doctor3.png":
     {
       "frame":{"x":0,"y":16,"w":8,"h":8},
       "rotated":false,
@@ -24,25 +24,9 @@
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
       "sourceSize":{"w":8,"h":8}
     },
-    "radio.png":
+    "doctor4.png":
     {
       "frame":{"x":0,"y":24,"w":8,"h":8},
-      "rotated":false,
-      "trimmed":false,
-      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
-      "sourceSize":{"w":8,"h":8}
-    },
-    "shield.png":
-    {
-      "frame":{"x":0,"y":32,"w":8,"h":8},
-      "rotated":false,
-      "trimmed":false,
-      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
-      "sourceSize":{"w":8,"h":8}
-    },
-    "poison.png":
-    {
-      "frame":{"x":0,"y":40,"w":8,"h":8},
       "rotated":false,
       "trimmed":false,
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
@@ -50,9 +34,9 @@
     }
   },
   "meta": {
-    "image":"objects.png",
+    "image":"doctor.png",
     "format":"RGBA8888",
-    "size":{"w":8,"h":48},
+    "size":{"w":8,"h":32},
     "scale":1
   }
 }

@@ -195,6 +195,7 @@ var frames = 0;
 var timeSinceLastFrameCount = 1;
 
 function update(timeDiff) {
+  timeDiff *= GameModel.gameSpeed;
   scrollGameContainer(timeDiff);
   Graveyard.update(timeDiff);
   Humans.update(timeDiff);
@@ -202,6 +203,8 @@ function update(timeDiff) {
   Blood.update(timeDiff);
   Bullets.update(timeDiff);
   Exclamations.update(timeDiff);
+  Blasts.update(timeDiff);
+  Smoke.update(timeDiff);
 
   if (GameModel.persistentData.showfps) {
     frames++;
@@ -237,15 +240,19 @@ function startGame() {
 
   app.loader
     .add('sprites/grass.png')
-    .add('sprites/graveyard.png')
+    .add('sprites/megagraveyard.png')
+    .add('sprites/graveyard.json')
     .add('sprites/buildings.json')
     .add('sprites/humans.json')
     .add('sprites/cop.json')
     .add('sprites/army.json')
+    .add('sprites/doctor.json')
     .add('sprites/zombie.json')
     .add('sprites/bonecollector.json')
     .add('sprites/objects.json')
     .add('sprites/fenceposts.json')
+    .add('sprites/trees.json')
+    .add('sprites/fortress.json')
     .load(function(){
 
     grass = new PIXI.TilingSprite(PIXI.Texture.from('sprites/grass.png'));
@@ -260,6 +267,8 @@ function startGame() {
     Blood.initialize();
     Bullets.initialize();
     Exclamations.initialize();
+    Blasts.initialize();
+    Smoke.initialize();
     centerGameContainer();
     GameModel.app = app;
 
@@ -271,12 +280,14 @@ function startGame() {
 }
 
 function setSizes() {
+  var x = document.body.clientWidth;
+  var y = document.body.clientHeight;
   canvasSize = {
-    x: document.body.clientWidth, 
-    y: document.body.clientHeight,
-    defaultScale: Math.max(document.body.clientWidth, document.body.clientHeight) / 1000
+    x: x, 
+    y: y,
+    defaultScale: Math.max(x, y) / 1000
   };
-  KeysPressed.scrollSpeed = Math.max(document.body.clientWidth, document.body.clientHeight) / 4;
+  KeysPressed.scrollSpeed = Math.max(x, y) / 4;
 }
 
 

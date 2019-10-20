@@ -15,6 +15,7 @@ angular.module('zombieApp', [])
     zm.sidePanels = {};
     zm.upgrades = [];
     zm.currentShopFilter = "blood";
+    zm.currentConstructionFilter = "available";
 
     zm.closeSidePanels = function() {
       zm.sidePanels.options = false;
@@ -33,7 +34,7 @@ angular.module('zombieApp', [])
           zm.sidePanels.shop = true;
           break;
         case "construction":
-          zm.upgrades = Upgrades.getAvailableConstructions();
+          zm.filterConstruction(zm.currentConstructionFilter);
           zm.sidePanels.construction = true;
           break;
         case "graveyard":
@@ -52,15 +53,25 @@ angular.module('zombieApp', [])
 
     zm.filterShop = function(type) {
       zm.currentShopFilter = type;
-      if (zm.currentShopFilter == "completed") {
-        zm.upgrades = Upgrades.upgrades.filter(upgrade => zm.currentRank(upgrade) >= upgrade.cap);
-      } else {
-        zm.upgrades = Upgrades.upgrades.filter(upgrade => upgrade.costType == zm.currentShopFilter && zm.currentRank(upgrade) < upgrade.cap);
+      zm.upgrades = Upgrades.getUpgrades(type);
+    }
+
+    zm.filterConstruction = function(type) {
+      zm.currentConstructionFilter = type;
+      switch(type) {
+        case "available":
+          zm.upgrades = Upgrades.getAvailableConstructions();
+          break;
+        case "completed":
+          zm.upgrades = Upgrades.getCompletedConstructions();
+          break;
       }
     }
 
     zm.resetGame = function() {
-      GameModel.resetData();
+      if (confirm("Are you sure you want to reset everything?")) {
+        zm.model.resetData();
+      }
     }
 
     zm.addBoneCollector = function() {
@@ -95,9 +106,9 @@ angular.module('zombieApp', [])
     }
 
     zm.constructionPercent = function() {
-      if (GameModel.persistentData.currentConstruction) {
-        var time = GameModel.persistentData.currentConstruction.time - GameModel.persistentData.currentConstruction.timeRemaining;
-        return Math.round(time / GameModel.persistentData.currentConstruction.time * 100);
+      if (zm.model.persistentData.currentConstruction) {
+        var time = zm.model.persistentData.currentConstruction.time - zm.model.persistentData.currentConstruction.timeRemaining;
+        return Math.round(time / zm.model.persistentData.currentConstruction.time * 100);
       }
       return 0;
     }
@@ -141,6 +152,10 @@ angular.module('zombieApp', [])
           return "+" + Math.round(upgrade.effect * 100) + "% chance to recover brain";
         case Upgrades.types.riseFromTheDeadChance:
           return "+" + Math.round(upgrade.effect * 100) + "% chance for corpse to become zombie";
+        case Upgrades.types.infectedBite:
+          return "+" + Math.round(upgrade.effect * 100) + "% chance for zombies to infect their targets";
+        case Upgrades.types.infectedBlast:
+          return "+" + Math.round(upgrade.effect * 100) + "% chance for zombies to explode on death";
         case Upgrades.types.boneCollectorCapacity:
           return "+" + upgrade.effect + " bone collector capacity";
       }
@@ -156,7 +171,7 @@ angular.module('zombieApp', [])
     }
 
     zm.upgradeTooExpensive = function(upgrade) {
-      return !Upgrades.canAffordUpgrade(upgrade) || Upgrades.currentRank(upgrade) >= upgrade.cap;
+      return !Upgrades.canAffordUpgrade(upgrade) || (upgrade.cap != 0 && Upgrades.currentRank(upgrade) >= upgrade.cap);
     }
 
     zm.requiredForUpgrade = function(upgrade) {
@@ -164,15 +179,15 @@ angular.module('zombieApp', [])
 
       switch (upgrade.costType) {
         case Upgrades.costs.energy:
-          return formatWhole(cost - GameModel.energy) + ' energy required';
+          return formatWhole(cost - zm.model.energy) + ' energy required';
         case Upgrades.costs.blood:
-          return formatWhole(cost - GameModel.persistentData.blood) + ' blood required';
+          return formatWhole(cost - zm.model.persistentData.blood) + ' blood required';
         case Upgrades.costs.brains:
-          return formatWhole(cost - GameModel.persistentData.brains) + ' brains required';
+          return formatWhole(cost - zm.model.persistentData.brains) + ' brains required';
         case Upgrades.costs.bones:
-          return formatWhole(cost - GameModel.persistentData.bones) + ' bones required';
+          return formatWhole(cost - zm.model.persistentData.bones) + ' bones required';
         case Upgrades.costs.prestigePoints:
-          return formatWhole(cost - GameModel.persistentData.prestigePointsToSpend) + ' prestige points required';
+          return formatWhole(cost - zm.model.persistentData.prestigePointsToSpend) + ' prestige points required';
       }
     }
 
@@ -189,40 +204,40 @@ angular.module('zombieApp', [])
     }
 
     zm.startGame = function() {
-      GameModel.startGame();
+      zm.model.startGame();
     }
 
     zm.nextLevel = function() {
-      GameModel.nextLevel();
+      zm.model.nextLevel();
     }
 
     zm.toggleAutoStart = function() {
-      if (GameModel.persistentData.autoStart) {
-        GameModel.persistentData.autoStart = false;
+      if (zm.model.persistentData.autoStart) {
+        zm.model.persistentData.autoStart = false;
       } else {
-        GameModel.persistentData.autoStart = true;
+        zm.model.persistentData.autoStart = true;
       }
     }
 
     zm.toggleResolution = function(resolution) {
-      GameModel.persistentData.resolution = resolution;
-      GameModel.setResolution(GameModel.persistentData.resolution);
+      zm.model.persistentData.resolution = resolution;
+      zm.model.setResolution(zm.model.persistentData.resolution);
     }
 
     zm.getResolution = function() {
-      return GameModel.persistentData.resolution || 1;
+      return zm.model.persistentData.resolution || 1;
     }
 
     zm.toggleZoomButtons = function() {
-      GameModel.persistentData.zoomButtons = !GameModel.persistentData.zoomButtons;
+      zm.model.persistentData.zoomButtons = !zm.model.persistentData.zoomButtons;
     }
 
     zm.zoom = function(zoom) {
-      GameModel.zoom(zoom);
+      zm.model.zoom(zoom);
     }
 
     zm.resetZoom = function() {
-      GameModel.centerGameContainer();
+      zm.model.centerGameContainer();
     }
 
     zm.toggleShowFps = function() {
@@ -236,8 +251,14 @@ angular.module('zombieApp', [])
     }
 
     zm.doPrestige = function() {
-      zm.model.prestige();
+      if (confirm("Are you sure?")) {
+        zm.model.prestige();
+      }
     }
+
+    zm.constructionLeadsTo = function(upgrade) {
+      return Upgrades.constructionLeadsTo(upgrade);
+    } 
 
     zm.howToPlay = [
       "Energy refills over time. You need 10 energy to spawn a zombie by clicking on the ground.",
@@ -264,13 +285,13 @@ angular.module('zombieApp', [])
     }
 
     zm.energyPercent = function() {
-      return Math.round(zm.model.energy / zm.model.energyMax * 100);
+      return Math.min(Math.round(zm.model.energy / zm.model.energyMax * 100),100);
     }
     zm.bloodPercent = function() {
-      return Math.round(zm.model.persistentData.blood / zm.model.bloodMax * 100);
+      return Math.min(Math.round(zm.model.persistentData.blood / zm.model.bloodMax * 100), 100);
     }
     zm.brainsPercent = function() {
-      return Math.round(zm.model.persistentData.brains / zm.model.brainsMax * 100);
+      return Math.min(Math.round(zm.model.persistentData.brains / zm.model.brainsMax * 100), 100);
     }
 
     zm.costAboveCap = function(upgrade, price) {
@@ -290,7 +311,7 @@ angular.module('zombieApp', [])
     }
 
     zm.upgradeButtonText = function(upgrade) {
-      if (zm.currentRank(upgrade) >= upgrade.cap)
+      if (upgrade.cap != 0 && zm.currentRank(upgrade) >= upgrade.cap)
         return "Sold Out";
         
       var price = zm.upgradePrice(upgrade);
@@ -320,6 +341,7 @@ angular.module('zombieApp', [])
     function update() {
       var updateTime = new Date().getTime();
       var timeDiff = (Math.min(1000, Math.max(updateTime - zm.lastUpdate,0))) / 1000;
+      timeDiff *= zm.model.gameSpeed;
       innerUpdate(timeDiff, updateTime);
       zm.lastUpdate = updateTime;
     }

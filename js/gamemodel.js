@@ -19,6 +19,8 @@ GameModel = {
   zombieSpeed : 10,
   brainRecoverChance:0,
   riseFromTheDeadChance:0,
+  infectedBiteChance:0,
+  infectedBlastChance:0,
   constructions : {},
   construction : 0,
   boneCollectorCapacity:10,
@@ -28,6 +30,8 @@ GameModel = {
   endLevelTimer : 3,
   endLevelDelay : 3,
   messageQueue : [],
+
+  gameSpeed : 1,
   
   level:1,
   
@@ -47,8 +51,6 @@ GameModel = {
     zombieHealth : 100,
     zombieDamage : 10,
     zombieSpeed : 10,
-    brainRecoverChance : 0,
-    riseFromTheDeadChance : 0,
     level : 1,
     graveyard : 0,
     construction : 0,
@@ -66,8 +68,10 @@ GameModel = {
     this.zombieHealth = this.baseStats.zombieHealth;
     this.zombieDamage = this.baseStats.zombieDamage;
     this.zombieSpeed = this.baseStats.zombieSpeed;
-    this.brainRecoverChance = this.baseStats.brainRecoverChance;
-    this.riseFromTheDeadChance = this.baseStats.riseFromTheDeadChance;
+    this.brainRecoverChance = 0;
+    this.riseFromTheDeadChance = 0;
+    this.infectedBiteChance = 0;
+    this.infectedBlastChance = 0;
     this.construction = this.baseStats.construction;
     this.constructions = {};
     this.boneCollectorCapacity = this.baseStats.boneCollectorCapacity;
@@ -172,6 +176,7 @@ GameModel = {
     if (!GameModel.persistentData.constructions) {
       GameModel.persistentData.constructions = [];
     }
+    Upgrades.upgradeIdCheck();
   },
 
   lastSave:0,

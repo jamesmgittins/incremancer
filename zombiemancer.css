@@ -185,6 +185,9 @@ div.shop div.upgrade:not(.current-construction) p, div.shop div.bone-collectors 
   line-height: 20px;
   clear:both;
 }
+div.shop div.upgrade.current-construction {
+  margin-top:5px;
+}
 
 div.shop div.upgrade p {
   clear:both;
@@ -305,6 +308,10 @@ p.prestige-info {
   color: #ccc;
 }
 
+.bones span.percent {
+  background-color: #ccc;
+}
+
 ul {
   padding-inline-start: 20px;
   clear:both;
@@ -385,8 +392,6 @@ ul {
   div.start-game button, div.end-level button, div.shop button {
     padding:10px;
   }
-
-  
 }
 
 .message > p {
@@ -409,7 +414,6 @@ ul {
   0% {width:100%;}
   100% {width:0%;}
 }
-
 
 ::-webkit-scrollbar {
   width: 5px;
