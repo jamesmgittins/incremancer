@@ -89,7 +89,7 @@ Humans = {
   },
 
   getAttackDamage() {
-    this.attackDamage = 5 + GameModel.level;
+    this.attackDamage = Math.round(5 + (GameModel.level / 5));
   },
 
   populate() {
@@ -427,7 +427,7 @@ Police = {
   },
 
   getAttackDamage() {
-    this.attackDamage = 5 + (GameModel.level * 1.3);
+    this.attackDamage = Math.round(13 + (GameModel.level / 5));
   },
 
   populate() {
@@ -671,7 +671,7 @@ Army = {
   },
 
   getAttackDamage() {
-    this.attackDamage = 10 + GameModel.level * 1.4;
+    this.attackDamage = Math.round(20 + GameModel.level / 5);
   },
 
   populate() {
