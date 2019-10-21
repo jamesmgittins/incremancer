@@ -61,6 +61,7 @@ div.shop {
   display: flex;
   flex-direction: column;
   color: #ddd;
+  z-index: 100;
 }
 div.shop div.tabs button {
   margin-right: 5px;

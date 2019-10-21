@@ -234,7 +234,7 @@
       <ul>
         <li ng-repeat="text in zm.howToPlay">{{text}}</li>
       </ul>
-      <button ng-click="zm.startGame();">Start Game</button>
+      <button ng-click="zm.startGame();">Start Level {{zm.model.level}}</button>
     </div>
 
     <div class="end-level" ng-if="zm.model.currentState == zm.model.states.levelCompleted">
@@ -242,6 +242,15 @@
       <h4>All the humans are either dead or undead!</h4>
       <h4>You have earned {{zm.model.level}} prestige points</h4>
       <button ng-click="zm.nextLevel();">Start Level {{zm.model.level + 1}}</button>
+    </div>
+
+    <div class="start-game" ng-if="zm.model.currentState == zm.model.states.prestiged">
+      <h2>You have prestiged!</h2>
+      <p>It's time to start from the beginning again, but this time stronger and faster.</p>
+      <h4>You have {{zm.model.persistentData.prestigePointsToSpend}} prestige points to spend</h4>
+      <p>It is recommended to spend your points before clicking start game</p>
+      <p>as some of their effects will only activate when a new level is started.</p>
+      <button ng-click="zm.startGame();">Start Level {{zm.model.level}}</button>
     </div>
   </body>
 </html>

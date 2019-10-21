@@ -17,6 +17,7 @@ GameModel = {
   zombieDamage : 10,
   zombieDamagePCMod : 1,
   zombieSpeed : 10,
+  startingPCMod : 0,
   brainRecoverChance:0,
   riseFromTheDeadChance:0,
   infectedBiteChance:0,
@@ -40,7 +41,8 @@ GameModel = {
   states : {
     playingLevel : "playingLevel",
     levelCompleted : "levelCompleted",
-    startGame : "startGame"
+    startGame : "startGame",
+    prestiged : "prestiged"
   },
 
   baseStats : {
@@ -82,6 +84,7 @@ GameModel = {
     this.brainsStorePCMod = 1;
     this.zombieHealthPCMod = 1;
     this.zombieDamagePCMod = 1;
+    this.startingPCMod = 0;
     this.fenceRadius = 50;
   },
 
@@ -151,14 +154,16 @@ GameModel = {
   },
 
   startGame() {
-    this.setupLevel();
     this.currentState = this.states.playingLevel;
+    this.setupLevel();
+    this.updatePlayingLevel();
   },
 
   nextLevel() {
     this.level++;
-    this.setupLevel();
     this.currentState = this.states.playingLevel;
+    this.setupLevel();
+    this.updatePlayingLevel();
   },
 
   setupLevel() {
@@ -169,7 +174,25 @@ GameModel = {
     Graveyard.initialize();
     centerGameContainer();
     Upgrades.applyUpgrades();
+    this.addStartLevelResources();
+  },
+
+  updatePlayingLevel() {
+    this.persistentData.levelStarted = this.level;
+    this.saveData();
+  },
+
+  addStartLevelResources() {
     this.energy = this.energyMax;
+
+    if (this.currentState == this.states.playingLevel && this.persistentData.levelStarted != this.level && this.startingPCMod > 0) {
+      this.persistentData.blood += this.startingPCMod * this.bloodMax;
+      this.persistentData.brains += this.startingPCMod * this.brainsMax;
+      if (this.persistentData.blood > this.bloodMax)
+        this.persistentData.blood = this.bloodMax;
+      if (this.persistentData.brains > this.brainsMax)
+        this.persistentData.brains = this.brainsMax;
+    }
   },
 
   onReady() {
@@ -184,6 +207,7 @@ GameModel = {
   persistentData : {
     autoStart : false,
     levelUnlocked : 1,
+    levelStarted : 0,
     blood : 0,
     brains : 0,
     bones: 0,
@@ -209,6 +233,7 @@ GameModel = {
   prestige() {
     if (this.persistentData.prestigePointsEarned > 0) {
       this.persistentData.levelUnlocked = 1;
+      this.persistentData.levelStarted = 0;
       this.persistentData.blood = 0;
       this.persistentData.brains = 0;
       this.persistentData.bones = 0;
@@ -221,8 +246,9 @@ GameModel = {
       this.persistentData.prestigePointsEarned = 0;
       BoneCollectors.update(0.1);
       this.level = 1;
+      this.currentState = this.states.prestiged;
       this.setupLevel();
-      this.currentState = this.states.playingLevel;
+      this.saveData();
     }
   },
 

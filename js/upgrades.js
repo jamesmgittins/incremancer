@@ -21,7 +21,8 @@ Upgrades = {
     brainsStoragePC : "brainsStoragePC",
     bonesGainPC : "bonesGainPC",
     zombieDmgPC : "zombieDmgPC",
-    zombieHealthPC : "zombieHealthPC"
+    zombieHealthPC : "zombieHealthPC",
+    startingPC : "startingPC",
   },
 
   costs : {
@@ -127,6 +128,9 @@ Upgrades = {
       case this.types.zombieHealthPC:
         GameModel.zombieHealthPCMod += upgrade.effect * upgrade.rank;
         return;
+      case this.types.startingPC:
+        GameModel.startingPCMod += upgrade.effect * upgrade.rank;
+        return;
     }
   },
 
@@ -204,6 +208,8 @@ Upgrades = {
         return "Zombie Damage: " + Math.round(GameModel.zombieDamagePCMod * 100) + "%";
       case this.types.zombieHealthPC:
         return "Zombie Health: " + Math.round(GameModel.zombieHealthPCMod * 100) + "%";
+      case this.types.startingPC:
+        return "Starting resources: " + Math.round(GameModel.startingPCMod * 100) + "%";
     }
   },
 
@@ -529,6 +535,7 @@ Upgrades.constructionUpgrades = [
 ];
 
 Upgrades.prestigeUpgrades = [
+  new Upgrades.Upgrade(108, "A Small Investment", Upgrades.types.startingPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.1, 10, "Each rank gives you 10% of your blood and brains capacity as free resources when starting a new level."),
   new Upgrades.Upgrade(101, "Blood Storage", Upgrades.types.bloodStoragePC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% blood storage for each rank."),
   new Upgrades.Upgrade(102, "Blood Rate", Upgrades.types.bloodGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% blood income rate for each rank."),
   new Upgrades.Upgrade(103, "Brain Storage", Upgrades.types.brainsStoragePC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% brain storage for each rank."),
