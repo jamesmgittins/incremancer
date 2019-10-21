@@ -17,7 +17,7 @@ GameModel = {
   zombieDamage : 10,
   zombieDamagePCMod : 1,
   zombieSpeed : 10,
-  startingPCMod : 0,
+  startingResources : 0,
   brainRecoverChance:0,
   riseFromTheDeadChance:0,
   infectedBiteChance:0,
@@ -84,7 +84,7 @@ GameModel = {
     this.brainsStorePCMod = 1;
     this.zombieHealthPCMod = 1;
     this.zombieDamagePCMod = 1;
-    this.startingPCMod = 0;
+    this.startingResources = 0;
     this.fenceRadius = 50;
   },
 
@@ -133,6 +133,7 @@ GameModel = {
 
         if (this.endLevelTimer < 0) {
           this.currentState = this.states.levelCompleted;
+          this.calculateEndLevelBones();
           if (this.level == this.persistentData.levelUnlocked) {
             this.persistentData.levelUnlocked = this.level + 1;
             this.addPrestigePoints(this.level);
@@ -150,7 +151,14 @@ GameModel = {
         this.nextLevel();
       }
     }
-    
+  },
+
+  calculateEndLevelBones() {
+    this.endLevelBones = 0;
+    if (this.persistentData.boneCollectors > 0 && Bones.uncollected) {
+      this.endLevelBones = Bones.uncollected.length;
+      this.addBones(this.endLevelBones);
+    }
   },
 
   startGame() {
@@ -185,13 +193,10 @@ GameModel = {
   addStartLevelResources() {
     this.energy = this.energyMax;
 
-    if (this.currentState == this.states.playingLevel && this.persistentData.levelStarted != this.level && this.startingPCMod > 0) {
-      this.persistentData.blood += this.startingPCMod * this.bloodMax;
-      this.persistentData.brains += this.startingPCMod * this.brainsMax;
-      if (this.persistentData.blood > this.bloodMax)
-        this.persistentData.blood = this.bloodMax;
-      if (this.persistentData.brains > this.brainsMax)
-        this.persistentData.brains = this.brainsMax;
+    if (this.currentState == this.states.playingLevel && this.persistentData.levelStarted != this.level && this.startingResources > 0) {
+      this.addBlood(this.startingResources * 500);
+      this.addBrains(this.startingResources * 50);
+      this.addBones(this.startingResources * 200);
     }
   },
 

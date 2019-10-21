@@ -11,6 +11,7 @@
     <script src="js/pixi-legacy.min.js"></script>
     <script src="js/utilsfunctions.js"></script>
     <script src="js/zombiemancer.js"></script>
+    <script src="js/spells.js"></script>
     <script src="js/map.js"></script>
     <script src="js/gamemodel.js"></script>
     <script src="js/upgrades.js"></script>
@@ -29,7 +30,7 @@
           <label class="energy">Energy: {{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}<span class="percent" ng-style="{'width':zm.energyPercent() + '%'}"></span></label>
           <label class="blood">Blood: {{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}<span class="percent" ng-style="{'width':zm.bloodPercent() + '%'}"></span></label>
           <label class="brains">Brains: {{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}<span class="percent" ng-style="{'width':zm.brainsPercent() + '%'}"></span></label>
-          <label class="bones" ng-if="zm.model.constructions.graveyard">Bones: {{zm.model.persistentData.bones|whole}}</label>
+          <label class="bones" ng-if="zm.model.constructions.graveyard || zm.model.persistentData.bones > 0">Bones: {{zm.model.persistentData.bones|whole}}</label>
       </div>
       <div class="stats">
         <label>Level: {{zm.model.level}}</label>
@@ -241,6 +242,7 @@
       <h2>Level {{zm.model.level}} Complete</h2>
       <h4>All the humans are either dead or undead!</h4>
       <h4>You have earned {{zm.model.level}} prestige points</h4>
+      <h4 ng-if="zm.model.endLevelBones">Your bone collectors have gathered the remaining {{zm.model.endLevelBones}} bones from the town</h4>
       <button ng-click="zm.nextLevel();">Start Level {{zm.model.level + 1}}</button>
     </div>
 

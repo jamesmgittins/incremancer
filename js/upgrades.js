@@ -14,6 +14,7 @@ Upgrades = {
     construction:"construction",
     infectedBite:"infectedBite",
     infectedBlast:"infectedBlast",
+    unlockSpell:"unlockSpell",
     // prestige items
     bloodGainPC : "bloodGainPC",
     bloodStoragePC : "bloodStoragePC",
@@ -106,30 +107,41 @@ Upgrades = {
       case this.types.boneCollectorCapacity:
         GameModel.boneCollectorCapacity += upgrade.effect * upgrade.rank;
         return;
+      case this.types.unlockSpell:
+        Spells.unlockSpell(upgrade.effect);
+        return;
         // prestige items
       case this.types.bonesGainPC:
         GameModel.bonesPCMod += upgrade.effect * upgrade.rank;
+        // GameModel.bonesPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.bloodGainPC:
         GameModel.bloodPCMod += upgrade.effect * upgrade.rank;
+        // GameModel.bloodPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.bloodStoragePC:
         GameModel.bloodStorePCMod += upgrade.effect * upgrade.rank;
+        // GameModel.bloodStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.brainsGainPC:
         GameModel.brainsPCMod += upgrade.effect * upgrade.rank;
+        // GameModel.brainsPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.brainsStoragePC:
         GameModel.brainsStorePCMod += upgrade.effect * upgrade.rank;
+        // GameModel.brainsStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.zombieDmgPC:
         GameModel.zombieDamagePCMod += upgrade.effect * upgrade.rank;
+        // GameModel.zombieDamagePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.zombieHealthPC:
         GameModel.zombieHealthPCMod += upgrade.effect * upgrade.rank;
+        // GameModel.zombieHealthPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.startingPC:
-        GameModel.startingPCMod += upgrade.effect * upgrade.rank;
+        GameModel.startingResources += upgrade.effect * upgrade.rank;
+        // GameModel.startingPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
     }
   },
@@ -141,18 +153,24 @@ Upgrades = {
         return;
       case this.constructionTypes.crypt:
         GameModel.constructions.crypt = 1;
-        GameModel.brainsStorePCMod += 0.5;
-        GameModel.bloodStorePCMod += 0.5;
+        // GameModel.brainsStorePCMod += 0.5;
+        // GameModel.bloodStorePCMod += 0.5;
+        GameModel.brainsStorePCMod *= 1.5;
+        GameModel.bloodStorePCMod *= 1.5;
         return;
       case this.constructionTypes.fort:
         GameModel.constructions.fort = 1;
-        GameModel.brainsStorePCMod += 0.5;
-        GameModel.bloodStorePCMod += 0.5;
+        // GameModel.brainsStorePCMod += 0.5;
+        // GameModel.bloodStorePCMod += 0.5;
+        GameModel.brainsStorePCMod *= 1.5;
+        GameModel.bloodStorePCMod *= 1.5;
         return;
       case this.constructionTypes.fortress:
         GameModel.constructions.fortress = 1;
-        GameModel.brainsStorePCMod += 0.5;
-        GameModel.bloodStorePCMod += 0.5;
+        // GameModel.brainsStorePCMod += 0.5;
+        // GameModel.bloodStorePCMod += 0.5;
+        GameModel.brainsStorePCMod *= 1.5;
+        GameModel.bloodStorePCMod *= 1.5;
         return;
       case this.constructionTypes.plagueSpikes:
         GameModel.constructions.plagueSpikes = 1;
@@ -209,7 +227,7 @@ Upgrades = {
       case this.types.zombieHealthPC:
         return "Zombie Health: " + Math.round(GameModel.zombieHealthPCMod * 100) + "%";
       case this.types.startingPC:
-        return "Starting resources: " + Math.round(GameModel.startingPCMod * 100) + "%";
+        return Math.round(GameModel.startingResources * 500) + " blood, " + Math.round(GameModel.startingResources * 50) + " brains, " + Math.round(GameModel.startingResources * 200) + " bones";
     }
   },
 
@@ -535,7 +553,7 @@ Upgrades.constructionUpgrades = [
 ];
 
 Upgrades.prestigeUpgrades = [
-  new Upgrades.Upgrade(108, "A Small Investment", Upgrades.types.startingPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.1, 10, "Each rank gives you 10% of your blood and brains capacity as free resources when starting a new level."),
+  new Upgrades.Upgrade(108, "A Small Investment", Upgrades.types.startingPC, Upgrades.costs.prestigePoints, 10, 1.25, 1, 0, "Each rank gives you an additional 500 blood, 50 brains, and 200 bones when starting a new level."),
   new Upgrades.Upgrade(101, "Blood Storage", Upgrades.types.bloodStoragePC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% blood storage for each rank."),
   new Upgrades.Upgrade(102, "Blood Rate", Upgrades.types.bloodGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% blood income rate for each rank."),
   new Upgrades.Upgrade(103, "Brain Storage", Upgrades.types.brainsStoragePC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% brain storage for each rank."),
