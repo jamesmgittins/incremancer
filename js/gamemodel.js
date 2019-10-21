@@ -4,6 +4,7 @@ GameModel = {
   energy:0,
   energyMax:10,
   energyRate:1,
+  energySpellMultiplier:1,
   zombieCost:10,
   bonesPCMod : 1,
   bloodMax:500,
@@ -116,12 +117,15 @@ GameModel = {
   },
 
   getEnergyRate() {
-    return this.energyRate - this.persistentData.boneCollectors;
+    return (this.energySpellMultiplier * this.energyRate) - this.persistentData.boneCollectors;
   },
 
   update(timeDiff, updateTime) {
-    this.addEnergy(this.getEnergyRate() * timeDiff);
+    Spells.updateSpells(timeDiff);
 
+    timeDiff *= this.gameSpeed;
+
+    this.addEnergy(this.getEnergyRate() * timeDiff);
     if (this.currentState == this.states.playingLevel) {
 
       if (this.lastSave + 30000 < updateTime) {
@@ -177,6 +181,11 @@ GameModel = {
   setupLevel() {
     this.endLevelTimer = this.endLevelDelay;
     setGameFieldSizeForLevel();
+    Blood.initialize();
+    Bullets.initialize();
+    Exclamations.initialize();
+    Blasts.initialize();
+    Smoke.initialize();
     Humans.populate();
     Zombies.populate();
     Graveyard.initialize();

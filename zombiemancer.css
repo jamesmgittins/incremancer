@@ -39,9 +39,9 @@ div.top-bar div.message {
   transform: translate(-50%,100%);
   bottom: -15px;
   background-color: rgba(0,0,0,0.4);
-  font-size: 24px;
-  line-height: 34px;
-  width: 100%;
+  font-size: 20px;
+  line-height: 24px;
+  width: 75%;
 }
 
 div.top-bar div.resources {
@@ -248,6 +248,54 @@ div.buttons {
   right:0;
   padding:10px;
 }
+
+div.spells {
+  position:absolute;
+  top:90px;
+  left:0;
+  padding:10px;
+}
+
+div.spells > button.spell {
+  padding:8px 10px;
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+div.spells > button.spell.active {
+  color:#fff;
+}
+
+div.spells > button.spell.cooldown {
+  color:#555;
+}
+div.spells > button.spell span.tooltip {
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  transform: translate(100%,-50%);
+  width: 200%;
+  padding: 10px;
+  background: rgba(0,0,0,0.4);
+}
+
+div.spells > button.spell span.timer {
+  position: absolute;
+  top: 0;
+  right: -5px;
+  transform: translateX(100%);
+  width: 35px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.4);
+}
+
+div.spells > button.spell:hover span.tooltip {
+  display: block;
+}
+
 div.buttons.open {
   right:calc(20% + 15px);
 }
@@ -266,7 +314,7 @@ div.buttons button {
   text-shadow: 2px 2px #000;
 }
 
-div.buttons button:hover, div.buttons button.active {
+div.buttons button:not(.cooldown):hover, div.buttons button.active {
   background: rgba(0,0,0,0.8);
   color: #ff3;
 }

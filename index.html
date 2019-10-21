@@ -67,13 +67,15 @@
       <button ng-click="zm.doPrestige();" ng-disabled="zm.model.persistentData.prestigePointsEarned <= 0">Prestige Now</button>
       <p class="prestige-info">You currently have {{zm.model.persistentData.prestigePointsToSpend|whole}} prestige points to spend</p>
       <div class="upgrades">
-        <div ng-repeat="upgrade in zm.upgrades" class="upgrade {{upgrade.costType}}">
+        <div ng-repeat="upgrade in zm.upgrades" class="upgrade bones">
           <h4>{{upgrade.name}}</h4>
           <h4 class="cost">Cost: {{zm.upgradePrice(upgrade)|whole}} Points</h4>
           <label>{{zm.upgradeSubtitle(upgrade)}}</label>
-          <p>{{upgrade.description}}</p>
-          <p>Current Rank: {{zm.currentRank(upgrade)}}{{upgrade.cap != 0 ? ' / ' + upgrade.cap : ''}} - {{zm.upgradeStatInfo(upgrade)}}</p>
           <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{upgrade.cap != 0 && zm.currentRank(upgrade) >= upgrade.cap ? 'Sold Out' : zm.upgradeTooExpensive(upgrade) ? zm.requiredForUpgrade(upgrade) : zm.purchaseText(upgrade)}}</button>
+          <button ng-click="upgrade.selected = !upgrade.selected" class="info  {{upgrade.selected ? 'active' : ''}}">Info</button>
+          <p ng-show="upgrade.selected">{{upgrade.description}}</p>
+          <p ng-show="upgrade.selected">Current Rank: {{zm.currentRank(upgrade)}}{{upgrade.cap != 0 ? ' / ' + upgrade.cap : ''}} - {{zm.upgradeStatInfo(upgrade)}}</p>
+          <span class="percent" ng-style="{'width':zm.upgradePercent(upgrade) + '%'}"></span>
         </div>
       </div>
     </div>
@@ -144,8 +146,8 @@
         <div ng-repeat="upgrade in zm.upgrades" class="upgrade">
           <h4>{{upgrade.name}}</h4>
           <p>{{upgrade.description}}</p>
-          <label>Time to build: {{upgrade.time}} seconds</label>
-          <div>
+          <label ng-if="zm.currentRankConstruction(upgrade) < upgrade.cap">Time to build: {{upgrade.time}} seconds</label>
+          <div ng-if="zm.currentRankConstruction(upgrade) < upgrade.cap">
             <label>Total Cost: </label>
             <label ng-if="upgrade.costs.energy" class="energy">{{upgrade.costs.energy}} energy</label>
             <label ng-if="upgrade.costs.blood" class="blood">{{upgrade.costs.blood}} blood</label>
@@ -153,8 +155,8 @@
             <label ng-if="upgrade.costs.bones" class="bones">{{upgrade.costs.bones}} bones</label>
           </div>
           <label ng-if="zm.constructionLeadsTo(upgrade)">Required for: {{zm.constructionLeadsTo(upgrade)}}</label>
-          <p>Current Rank: {{zm.currentRankConstruction(upgrade)}} / {{upgrade.cap}}</p>
-          <button ng-click="zm.startConstruction(upgrade);" ng-disabled="zm.model.persistentData.currentConstruction" ng-show="zm.currentRankConstruction(upgrade) < upgrade.cap">Begin Construction</button>
+          <p ng-if="zm.currentRankConstruction(upgrade) < upgrade.cap">Current Rank: {{zm.currentRankConstruction(upgrade)}} / {{upgrade.cap}}</p>
+          <button ng-click="zm.startConstruction(upgrade);" ng-disabled="zm.model.persistentData.currentConstruction" ng-if="zm.currentRankConstruction(upgrade) < upgrade.cap">Begin Construction</button>
         </div>
       </div>
     </div>
@@ -227,6 +229,14 @@
           <button ng-click="zm.resetGame();">Reset Game</button>
         </div>
       </div>
+    </div>
+
+    <div class="spells">
+      <button ng-repeat="spell in zm.spells.getUnlockedSpells()" ng-click="zm.spells.castSpell(spell)" class="spell {{spell.active ? 'active' : (spell.onCooldown ? 'cooldown' : '')}}" ng-disabled="spell.onCooldown || spell.energyCost > zm.model.energy">
+        <span class="icon">{{spell.name}}</span>
+        <span class="timer" ng-if="spell.active || spell.onCooldown">{{spell.active ? spell.timer : spell.cooldownLeft|whole}}</span>
+        <span class="tooltip" ng-if="!spell.active && !spell.onCooldown">{{spell.tooltip}}</span>
+      </button>
     </div>
 
     <div class="start-game" ng-if="zm.model.currentState == zm.model.states.startGame">

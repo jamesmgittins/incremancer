@@ -20,11 +20,18 @@ Blood = {
 		return PIXI.Texture.from(blast);
 	},
 	initialize() {
-    this.container = new PIXI.Container();
-    backgroundContainer.addChild(this.container);
+    if (!this.container) {
+      this.container = new PIXI.Container();
+      backgroundContainer.addChild(this.container);
 
-    this.texture = this.getTexture("#ff0000");
-    this.plagueTexture = this.getTexture("#00ff00");
+      this.texture = this.getTexture("#ff0000");
+      this.plagueTexture = this.getTexture("#00ff00");
+    }
+
+    for (var i = 0; i < this.sprites.length; i++) {
+      this.container.removeChild(this.sprites[i]);
+    }
+    this.sprites = [];
 
 		for (var i = 0; i < this.maxParts; i++) {
 
@@ -129,18 +136,18 @@ Bones = {
 	},
 	initialize() {
 
+    if (!this.container) {
+      this.container = new PIXI.Container();
+      backgroundContainer.addChild(this.container);
+      this.texture = this.getTexture();
+    }
+
     for (var i = 0; i < this.sprites.length; i++) {
       this.sprites[i].collected = true;
       this.sprites[i].visible = false;
-      this.discardedSprites = this.sprites.slice();
+      this.container.removeChild(this.sprites[i]);
     }
-    if (this.container)
-      return;
-
-    this.container = new PIXI.Container();
-    backgroundContainer.addChild(this.container);
-
-    this.texture = this.getTexture();
+    this.sprites = [];
 
 		for (var i = 0; i < this.maxParts; i++) {
       var sprite = new PIXI.Sprite(this.texture);
@@ -236,15 +243,23 @@ Exclamations = {
   fadeSpeed:4,
 
   initialize() {
-    this.container = new PIXI.Container();
-    foregroundContainer.addChild(this.container);
 
-    this.healTexture = PIXI.Texture.from("healing.png");
-    this.exclamationTexture = PIXI.Texture.from("exclamation.png");
-    this.radioTexture = PIXI.Texture.from("radio.png");
-    this.fireTexture = PIXI.Texture.from("fire.png");
-    this.shieldTexture = PIXI.Texture.from("shield.png");
-    this.poisonTexture = PIXI.Texture.from("poison.png");
+    if (!this.container) {
+      this.container = new PIXI.Container();
+      foregroundContainer.addChild(this.container);
+  
+      this.healTexture = PIXI.Texture.from("healing.png");
+      this.exclamationTexture = PIXI.Texture.from("exclamation.png");
+      this.radioTexture = PIXI.Texture.from("radio.png");
+      this.fireTexture = PIXI.Texture.from("fire.png");
+      this.shieldTexture = PIXI.Texture.from("shield.png");
+      this.poisonTexture = PIXI.Texture.from("poison.png");
+    }
+    
+    for (var i = 0; i < this.sprites.length; i++) {
+      this.container.removeChild(this.sprites[i]);
+    }
+    this.sprites = [];
 
 		for (var i = 0; i < this.maxSprites; i++) {
 
@@ -331,7 +346,6 @@ Bullets = {
   maxParts : 20,
   speed : 150,
   hitbox : 12,
-  container : null,
   sprites : [],
   discardedSprites : [],
   fadeSpeed : 0.2,
@@ -348,7 +362,13 @@ Bullets = {
 	},
 	initialize() {
 
-    this.texture = this.getTexture();
+    if (!this.texture) {
+      this.texture = this.getTexture();
+    }
+    for (var i = 0; i < this.sprites.length; i++) {
+      characterContainer.removeChild(this.sprites[i]);
+    }
+    this.sprites = [];
 
 		for (var i = 0; i < this.maxParts; i++) {
 
@@ -438,7 +458,14 @@ Blasts = {
 	},
 	initialize() {
 
-    this.texture = this.getTexture();
+    if (!this.texture) {
+      this.texture = this.getTexture();
+    }
+    
+    for (var i = 0; i < this.sprites.length; i++) {
+      foregroundContainer.removeChild(this.sprites[i]);
+    }
+    this.sprites = [];
 
 		for (var i = 0; i < this.maxParts; i++) {
 
@@ -507,7 +534,15 @@ Smoke = {
     return PIXI.Texture.from(blast);
 	},
 	initialize() {
-    this.texture = this.getTexture();
+    if (!this.texture) {
+      this.texture = this.getTexture();
+    }
+
+    for (var i = 0; i < this.sprites.length; i++) {
+      foregroundContainer.removeChild(this.sprites[i]);
+    }
+    this.sprites = [];
+    
 		for (var i = 0; i < this.maxParts; i++) {
       var sprite = new PIXI.Sprite(this.texture);
       foregroundContainer.addChild(sprite);

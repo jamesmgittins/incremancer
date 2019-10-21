@@ -8,6 +8,7 @@ angular.module('zombieApp', [])
   .controller('ZombieController', ['$scope','$interval','$document',function($scope, $interval, $document) {
     var zm = this;
     zm.model = GameModel;
+    zm.spells = Spells;
 
     zm.messageTimer = 4;
     zm.message = false;
@@ -334,6 +335,8 @@ angular.module('zombieApp', [])
           return Math.round(Math.min(1, zm.model.persistentData.brains / zm.upgradePrice(upgrade)) * 100);
         case "bones":
           return Math.round(Math.min(1, zm.model.persistentData.bones / zm.upgradePrice(upgrade)) * 100);
+        case "prestigePoints":
+          return Math.round(Math.min(1, zm.model.persistentData.prestigePointsToSpend / zm.upgradePrice(upgrade)) * 100);
       }
       
     }
@@ -341,7 +344,6 @@ angular.module('zombieApp', [])
     function update() {
       var updateTime = new Date().getTime();
       var timeDiff = (Math.min(1000, Math.max(updateTime - zm.lastUpdate,0))) / 1000;
-      timeDiff *= zm.model.gameSpeed;
       innerUpdate(timeDiff, updateTime);
       zm.lastUpdate = updateTime;
     }

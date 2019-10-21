@@ -195,17 +195,7 @@ var frames = 0;
 var timeSinceLastFrameCount = 1;
 
 function update(timeDiff) {
-  timeDiff *= GameModel.gameSpeed;
-  scrollGameContainer(timeDiff);
-  Graveyard.update(timeDiff);
-  Humans.update(timeDiff);
-  Zombies.update(timeDiff);
-  Blood.update(timeDiff);
-  Bullets.update(timeDiff);
-  Exclamations.update(timeDiff);
-  Blasts.update(timeDiff);
-  Smoke.update(timeDiff);
-
+  
   if (GameModel.persistentData.showfps) {
     frames++;
     timeSinceLastFrameCount -= timeDiff;
@@ -215,6 +205,18 @@ function update(timeDiff) {
       timeSinceLastFrameCount = 1;
     }
   }
+  scrollGameContainer(timeDiff);
+  
+  timeDiff *= GameModel.gameSpeed;
+
+  Graveyard.update(timeDiff);
+  Humans.update(timeDiff);
+  Zombies.update(timeDiff);
+  Blood.update(timeDiff);
+  Bullets.update(timeDiff);
+  Exclamations.update(timeDiff);
+  Blasts.update(timeDiff);
+  Smoke.update(timeDiff);
 }
 
 function setGameFieldSizeForLevel() {
@@ -264,11 +266,6 @@ function startGame() {
     
     setGameFieldSizeForLevel();
 
-    Blood.initialize();
-    Bullets.initialize();
-    Exclamations.initialize();
-    Blasts.initialize();
-    Smoke.initialize();
     centerGameContainer();
     GameModel.app = app;
 

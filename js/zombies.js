@@ -20,6 +20,8 @@ Zombies = {
   smokeTimer : 0.3,
   fastDistance:fastDistance,
   magnitude:magnitude,
+  detonate : false,
+  super : false,
 
   states : {
     lookingForTarget:"lookingForTarget",
@@ -61,6 +63,7 @@ Zombies = {
   createZombie(x,y) {
     var textureId = Math.floor(Math.random() * this.textures.length);
     var zombie = new PIXI.AnimatedSprite(this.textures[textureId].animated);
+    zombie.super = this.super;
     zombie.textureId = textureId;
     zombie.dead = false;
     zombie.animationSpeed = 0.15;
@@ -68,9 +71,13 @@ Zombies = {
     zombie.position = {x:x,y:y};
     zombie.zIndex = zombie.position.y;
     zombie.visible = true;
-    zombie.health = GameModel.zombieHealth;
+    zombie.health = zombie.super ? GameModel.zombieHealth * 10 : GameModel.zombieHealth;
     zombie.state = this.states.lookingForTarget;
-    zombie.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
+    zombie.scaling = zombie.super ? 1.5 * this.scaling : this.scaling;
+    zombie.scale = {
+      x: Math.random() > 0.5 ? zombie.scaling : -1 * zombie.scaling,
+      y: zombie.scaling
+    };
     zombie.attackTimer = 0;
     zombie.xSpeed = 0;
     zombie.ySpeed = 0;
@@ -101,7 +108,9 @@ Zombies = {
     if (zombie.health <= 0 && !zombie.dead) {
       Bones.newBones(zombie.x, zombie.y);
       zombie.dead = true;
-      this.causePlagueExplosion(zombie);
+      if (Math.random() < GameModel.infectedBlastChance) {
+        this.causePlagueExplosion(zombie);
+      }
       zombie.textures = this.textures[zombie.textureId].dead;
       if (Math.random() < GameModel.brainRecoverChance) {
         GameModel.addBrains(1);
@@ -110,18 +119,16 @@ Zombies = {
   },
 
   causePlagueExplosion(zombie) {
-    if (Math.random() < GameModel.infectedBlastChance) {
-      var explosionRadius = 50;
-      Blood.newPlagueSplatter(zombie.x, zombie.y);
-      Blasts.newBlast(zombie.x, zombie.y - 4);
-      zombie.visible = false;
-      for (var i = 0; i < this.aliveHumans.length; i++) {
-        if (Math.abs(this.aliveHumans[i].x - zombie.x) < explosionRadius) {
-          if (Math.abs(this.aliveHumans[i].y - zombie.y) < explosionRadius) {
-            if (this.fastDistance(zombie.x, zombie.y, this.aliveHumans[i].x, this.aliveHumans[i].y) < explosionRadius) {
-              this.inflictPlague(this.aliveHumans[i]);
-              Humans.damageHuman(this.aliveHumans[i], GameModel.zombieDamage);
-            }
+    var explosionRadius = 50;
+    Blood.newPlagueSplatter(zombie.x, zombie.y);
+    Blasts.newBlast(zombie.x, zombie.y - 4);
+    zombie.visible = false;
+    for (var i = 0; i < this.aliveHumans.length; i++) {
+      if (Math.abs(this.aliveHumans[i].x - zombie.x) < explosionRadius) {
+        if (Math.abs(this.aliveHumans[i].y - zombie.y) < explosionRadius) {
+          if (this.fastDistance(zombie.x, zombie.y, this.aliveHumans[i].x, this.aliveHumans[i].y) < explosionRadius) {
+            this.inflictPlague(this.aliveHumans[i]);
+            Humans.damageHuman(this.aliveHumans[i], zombie.super ? GameModel.zombieDamage * 10 : GameModel.zombieDamage);
           }
         }
       }
@@ -178,6 +185,21 @@ Zombies = {
     }
   },
 
+  detonateZombie(zombie, timeDiff) {
+    if (!zombie.detonateTimer) {
+      zombie.detonateTimer = Math.random() * 3;  
+    }
+    zombie.detonateTimer -= timeDiff;
+    if (zombie.detonateTimer < 0) {
+      Bones.newBones(zombie.x, zombie.y);
+      zombie.dead = true;
+      this.causePlagueExplosion(zombie);
+      if (Math.random() < GameModel.brainRecoverChance) {
+        GameModel.addBrains(1);
+      }
+    }
+  },
+
   updateZombie(zombie, timeDiff) {
 
     if (zombie.dead) {
@@ -193,6 +215,10 @@ Zombies = {
     
     zombie.attackTimer -= timeDiff;
     zombie.scanTime -= timeDiff;
+
+    if (this.detonate) {
+      this.detonateZombie(zombie, timeDiff);
+    }
     
     if (zombie.burning)
       this.updateBurns(zombie, timeDiff);
@@ -230,9 +256,9 @@ Zombies = {
 
       case this.states.attackingTarget:
         if (this.fastDistance(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y) < this.attackDistance) {
-          zombie.scale.x = zombie.target.x > zombie.x ? this.scaling : -this.scaling;
+          zombie.scale.x = zombie.target.x > zombie.x ? zombie.scaling : -zombie.scaling;
           if (zombie.attackTimer < 0) {
-            Humans.damageHuman(zombie.target, GameModel.zombieDamage);
+            Humans.damageHuman(zombie.target, zombie.super ? GameModel.zombieDamage * 10 : GameModel.zombieDamage);
             if (Math.random() < GameModel.infectedBiteChance) {
               this.inflictPlague(zombie.target);
             }
@@ -249,10 +275,10 @@ Zombies = {
     if (!human.infected) {
       Exclamations.newPoison(human);
       human.plagueDamage = GameModel.zombieDamage / 2;
-      human.plagueTicks = 3;
+      human.plagueTicks = 5;
     } else {
       human.plagueDamage += GameModel.zombieDamage / 2;
-      human.plagueTicks += 3;
+      human.plagueTicks += 5;
     }
     human.infected = true;
   },
@@ -342,7 +368,7 @@ Zombies = {
       zombie.position = newPosition;
       zombie.zIndex = zombie.position.y;
     }
-    zombie.scale.x = zombie.xSpeed > 0 ? this.scaling : -this.scaling;
+    zombie.scale.x = zombie.xSpeed > 0 ? zombie.scaling : -zombie.scaling;
     
   },
 

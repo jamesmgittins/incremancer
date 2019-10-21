@@ -201,6 +201,7 @@ BoneCollectors = {
       for (var i = 0; i < boneCollector.boneList.length; i++){
         boneCollector.boneList[i].collector = false;
       }
+      GameModel.addBones(boneCollector.bones);
       characterContainer.removeChild(boneCollector);
     }
     if (this.sprites.length < GameModel.persistentData.boneCollectors) {

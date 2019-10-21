@@ -27,6 +27,7 @@ Humans = {
   plagueTickTimer : 5,
   healTickTimer : 4,
   fastDistance:fastDistance,
+  frozen : false,
 
   graveYardPosition : {},
 
@@ -168,6 +169,15 @@ Humans = {
   },
 
   updateHumanSpeed(human, timeDiff) {
+
+    if (this.frozen) {
+      human.gotoAndStop(0);
+      return;
+    } else {
+      if (!human.playing) {
+        human.play();
+      }
+    }
 
     var vector = this.map.howDoIGetToMyTarget(human, human.target);
     var ax = Math.abs(vector.x);
