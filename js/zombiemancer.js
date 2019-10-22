@@ -264,6 +264,8 @@ function startGame() {
     .add('sprites/fortress.json')
     .load(function(){
 
+    GameModel.app = app;
+
     grass = new PIXI.TilingSprite(PIXI.Texture.from('sprites/grass.png'));
     grass.width = gameFieldSize.x;
     grass.height = gameFieldSize.y;
@@ -274,8 +276,7 @@ function startGame() {
     setGameFieldSizeForLevel();
 
     centerGameContainer();
-    GameModel.app = app;
-
+    
     // Listen for animate update
     app.ticker.add((delta) => {
       update(app.ticker.deltaMS / 1000);

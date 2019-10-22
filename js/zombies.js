@@ -103,6 +103,7 @@ Zombies = {
     zombie.zombieId = this.currId++;
     this.zombies.push(zombie);
     characterContainer.addChild(zombie);
+    Smoke.newZombieSpawnCloud(x, y - 2);
   },
 
   spawnZombie(x,y) {
@@ -303,7 +304,7 @@ Zombies = {
     zombie.smokeTimer -= timeDiff;
 
     if (zombie.smokeTimer < 0) {
-      Smoke.newSmoke(zombie.x, zombie.y - 14, 3);
+      Smoke.newFireSmoke(zombie.x, zombie.y - 14);
       zombie.smokeTimer = this.smokeTimer;
     }
 

@@ -142,6 +142,7 @@ Humans = {
         }
         human.deadTexture = this.doctorDeadTexture;
         human.doctor = true;
+        human.torchBearer = false;
         human.healTickTimer = Math.random() * this.healTickTimer;
         numDoctors--;
       } else {
@@ -155,6 +156,7 @@ Humans = {
         }
         human.torchBearer = torchBearer;
         human.deadTexture = this.textures[textureId].dead;
+        human.doctor = false;
       }
       human.dead = false;
       human.animationSpeed = 0.15;

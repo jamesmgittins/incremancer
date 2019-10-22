@@ -127,7 +127,7 @@ Graveyard = {
 
     if (GameModel.energy >= GameModel.energyMax) {
       for (var i = 0; i < GameModel.persistentData.graveyardZombies; i ++)  {
-        Zombies.spawnZombie(this.sprite.x,this.sprite.y);
+        Zombies.spawnZombie(this.sprite.x,this.sprite.y + (this.level > 2 ? 5 : 0));
       }
     }
 
@@ -326,7 +326,8 @@ BoneCollectors = {
 
   updateSpeed(boneCollector, timeDiff) {
 
-    boneCollector.speedFactor = Math.min(1, boneCollector.speedFactor += timeDiff * 2);
+    boneCollector.speedFactor = Math.min(1, boneCollector.speedFactor += timeDiff * 3);
+
     var xVector = boneCollector.target.x - boneCollector.x;
     var yVector = boneCollector.target.y - boneCollector.y;
     var ax = Math.abs(xVector);

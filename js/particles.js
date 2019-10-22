@@ -522,6 +522,7 @@ Smoke = {
   maxParts:10,
   sprites:[],
   discardedSprites:[],
+  tint:0xFFFFFF,
 	getTexture() {
 		var size = 8;
     var blast = document.createElement('canvas');
@@ -539,6 +540,9 @@ Smoke = {
     return PIXI.Texture.from(blast);
 	},
 	initialize() {
+
+    this.allowTint = GameModel.app.renderer.type == 1;
+
     if (!this.texture) {
       this.texture = this.getTexture();
     }
@@ -578,7 +582,7 @@ Smoke = {
       }
     }
   },
-	newSmoke: function(x, y, variance = 0) {
+	newSmoke(x, y, variance = 0) {
     var sprite;
     if (this.discardedSprites.length > 0) {
      sprite = this.discardedSprites.pop();
@@ -586,6 +590,9 @@ Smoke = {
       sprite = new PIXI.Sprite(this.texture);
       this.sprites.push(sprite);
       sprite.anchor = {x:0.5, y:0.5};
+    }
+    if (this.allowTint) {
+      sprite.tint = this.tint;
     }
     foregroundContainer.addChild(sprite);
     var sizeVariance = 0.2;
@@ -595,9 +602,20 @@ Smoke = {
 		sprite.x = x - variance + (Math.random() * variance * 2);
 		sprite.y = y - variance + (Math.random() * variance * 2);
   },
-  newCloud : function(x, y) {
+  newFireSmoke(x, y) {
+    this.tint = 0xFFFFFF;
+    this.newSmoke(x, y, 3);
+  },
+  newCloud(x, y) {
+    this.tint = 0x00FF00;
     for (var i = 0; i < 10; i++) {
       this.newSmoke(x, y, 16);
+    }
+  },
+  newZombieSpawnCloud(x,y) {
+    this.tint = 0x00FF00;
+    for (var i = 0; i < 5; i++) {
+      this.newSmoke(x, y, 6);
     }
   }
 };
