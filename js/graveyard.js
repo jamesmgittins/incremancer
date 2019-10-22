@@ -73,10 +73,10 @@ Graveyard = {
       this.fortSprite.visible = false;
       characterContainer.addChild(this.fortSprite);
     }
+
   },
 
   drawFence() {
-
     if (this.fence) {
       backgroundContainer.removeChild(this.fence);
     }
@@ -106,6 +106,7 @@ Graveyard = {
 
     this.fence.x = gameFieldSize.x / 2;
     this.fence.y = gameFieldSize.y / 2;
+
   },
 
   update(timeDiff) {

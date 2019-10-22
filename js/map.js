@@ -87,14 +87,18 @@ Map = {
   },
 
   addBuilding(poi) {
+    poi.container = new PIXI.Container();
     poi.floorSprite = new PIXI.TilingSprite(PIXI.Texture.WHITE);
     poi.floorSprite.tint = rgbToHex(10 + Math.round(Math.random() * 50), 10 + Math.round(Math.random() * 50), 10 + Math.round(Math.random() * 50));
     poi.floorSprite.alpha = 0.2;
-    poi.floorSprite.x = poi.x;
-    poi.floorSprite.y = poi.y;
+    // poi.floorSprite.x = poi.x;
+    // poi.floorSprite.y = poi.y;
+    poi.container.x = poi.x;
+    poi.container.y = poi.y;
     poi.floorSprite.width = poi.width;
     poi.floorSprite.height = poi.height;
-    backgroundContainer.addChild(poi.floorSprite);
+    // backgroundContainer.addChild(poi.floorSprite);
+    poi.container.addChild(poi.floorSprite);
 
     var possibleEntrances = [
       {
@@ -173,13 +177,26 @@ Map = {
     poi.walls = [];
     var wallTexture = getRandomElementFromArray(this.buildingTextures.walls, Math.random());
 
-    this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.north, poi.x - 4, poi.y - 4, poi.width + 8);
-    this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.south, poi.x - 4, poi.y + poi.height, poi.width + 8);
-    this.makeVerticalWall(poi.walls, wallTexture, poi.entrance.west, poi.x - 4, poi.y - 4, poi.height + 8);
-    this.makeVerticalWall(poi.walls, wallTexture, poi.entrance.east, poi.x + poi.width, poi.y - 4, poi.height + 8);
+    // this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.north, poi.x - 4, poi.y - 4, poi.width + 8);
+    // this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.south, poi.x - 4, poi.y + poi.height, poi.width + 8);
+    // this.makeVerticalWall(poi.walls, wallTexture, poi.entrance.west, poi.x - 4, poi.y - 4, poi.height + 8);
+    // this.makeVerticalWall(poi.walls, wallTexture, poi.entrance.east, poi.x + poi.width, poi.y - 4, poi.height + 8);
+
+    this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.north, -4, -4, poi.width + 8);
+    this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.south, -4, poi.height, poi.width + 8);
+    this.makeVerticalWall(poi.walls, wallTexture, poi.entrance.west, -4, -4, poi.height + 8);
+    this.makeVerticalWall(poi.walls, wallTexture, poi.entrance.east, poi.width, -4, poi.height + 8);
 
     for (var i=0; i < poi.walls.length; i++) {
-      backgroundContainer.addChild(poi.walls[i]);
+      // backgroundContainer.addChild(poi.walls[i]);
+      poi.container.addChild(poi.walls[i]);
+    }
+    poi.container.cacheAsBitmap = true;
+    backgroundContainer.addChild(poi.container);
+
+    for (var i=0; i < poi.walls.length; i++) {
+      poi.walls[i].collisionX = poi.x + poi.walls[i].x;
+      poi.walls[i].collisionY = poi.y + poi.walls[i].y;
     }
   },
 
@@ -204,7 +221,6 @@ Map = {
   },
 
   populatePois() {
-
     if (!this.buildingTextures) {
       var floors = [];
       var walls = [];
@@ -223,9 +239,11 @@ Map = {
 
     if (this.buildings.length > 0) {
       for (var i = 0; i < this.buildings.length; i++) {
-        backgroundContainer.removeChild(this.buildings[i].floorSprite);
+        backgroundContainer.removeChild(this.buildings[i].container);
+        this.buildings[i].container.destroy();
+        // backgroundContainer.removeChild(this.buildings[i].floorSprite);
         for (var j=0; j < this.buildings[i].walls.length; j++) {
-          backgroundContainer.removeChild(this.buildings[i].walls[j]);
+          // backgroundContainer.removeChild(this.buildings[i].walls[j]);
         }
       }
     }
@@ -301,25 +319,25 @@ Map = {
   wallCollisionBuffer : 3,
 
   checkWall(wall, start, end, collision) {
-    if (start.y > wall.y && start.y < wall.y + wall.height) {
-      if (start.x < wall.x - this.wallCollisionBuffer && end.x > wall.x - this.wallCollisionBuffer) {
+    if (start.y > wall.collisionY && start.y < wall.collisionY + wall.height) {
+      if (start.x < wall.collisionX - this.wallCollisionBuffer && end.x > wall.collisionX - this.wallCollisionBuffer) {
         collision.x = true;
-        collision.validX = wall.x - this.wallCollisionBuffer - 1;
+        collision.validX = wall.collisionX - this.wallCollisionBuffer - 1;
       }
-      if (start.x > wall.x + wall.width + this.wallCollisionBuffer && end.x < wall.x + wall.width + this.wallCollisionBuffer) {
+      if (start.x > wall.collisionX + wall.width + this.wallCollisionBuffer && end.x < wall.collisionX + wall.width + this.wallCollisionBuffer) {
         collision.x = true;
-        collision.validX = wall.x + wall.width + this.wallCollisionBuffer + 1;
+        collision.validX = wall.collisionX + wall.width + this.wallCollisionBuffer + 1;
       }
     }
 
-    if (start.x > wall.x && start.x < wall.x + wall.width) {
-      if (start.y < wall.y - this.wallCollisionBuffer && end.y > wall.y - this.wallCollisionBuffer) {
+    if (start.x > wall.collisionX && start.x < wall.collisionX + wall.width) {
+      if (start.y < wall.collisionY - this.wallCollisionBuffer && end.y > wall.collisionY - this.wallCollisionBuffer) {
         collision.y = true;
-        collision.validY = wall.y - this.wallCollisionBuffer - 1;
+        collision.validY = wall.collisionY - this.wallCollisionBuffer - 1;
       } 
-      if (start.y > wall.y + wall.height + this.wallCollisionBuffer && end.y < wall.y + wall.height + this.wallCollisionBuffer) {
+      if (start.y > wall.collisionY + wall.height + this.wallCollisionBuffer && end.y < wall.collisionY + wall.height + this.wallCollisionBuffer) {
         collision.y = true;
-        collision.validY = wall.y + wall.height + this.wallCollisionBuffer + 1;
+        collision.validY = wall.collisionY + wall.height + this.wallCollisionBuffer + 1;
       }
     }
   },

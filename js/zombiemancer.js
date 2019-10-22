@@ -1,6 +1,6 @@
 var canvas;
 var renderer;
-var gameContainer,backgroundContainer,characterContainer,uiContainer,foregroundContainer;
+var gameContainer,backgroundContainer,backgroundSpriteContainer,characterContainer,uiContainer,foregroundContainer;
 var grass;
 var canvasSize = {x:800,y:600};
 var gameFieldSize = {x:600,y:600};
@@ -135,12 +135,14 @@ function onWheel(event) {
 function setupContainers(app) {
   gameContainer = new PIXI.Container();
   backgroundContainer = new PIXI.Container();
+  backgroundSpriteContainer = new PIXI.Container();
   characterContainer = new PIXI.Container();
   characterContainer.sortableChildren = true;
   foregroundContainer = new PIXI.Container();
   uiContainer = new PIXI.Container();
 
   gameContainer.addChild(backgroundContainer);
+  gameContainer.addChild(backgroundSpriteContainer);
   gameContainer.addChild(characterContainer);
   gameContainer.addChild(foregroundContainer);
 
@@ -148,6 +150,8 @@ function setupContainers(app) {
   app.stage.addChild(uiContainer);
 
   gameContainer.interactive = true;
+  gameContainer.interactiveChildren = false;
+
   gameContainer.on('pointerdown', onDragStart);
   gameContainer.on('pointerup', onDragEnd);
   gameContainer.on('pointerupoutside', onDragEnd);
@@ -195,7 +199,8 @@ var frames = 0;
 var timeSinceLastFrameCount = 1;
 
 function update(timeDiff) {
-  
+  // gameContainer.cacheAsBitmap = false;
+
   if (GameModel.persistentData.showfps) {
     frames++;
     timeSinceLastFrameCount -= timeDiff;
@@ -217,6 +222,7 @@ function update(timeDiff) {
   Exclamations.update(timeDiff);
   Blasts.update(timeDiff);
   Smoke.update(timeDiff);
+  // gameContainer.cacheAsBitmap = true;
 }
 
 function setGameFieldSizeForLevel() {
@@ -227,6 +233,7 @@ function setGameFieldSizeForLevel() {
   };
   grass.width = gameFieldSize.x;
   grass.height = gameFieldSize.y;
+  gameContainer.hitArea = new PIXI.Rectangle(0,0,gameFieldSize.x,gameFieldSize.y);
 }
 
 function startGame() {

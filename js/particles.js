@@ -22,7 +22,7 @@ Blood = {
 	initialize() {
     if (!this.container) {
       this.container = new PIXI.Container();
-      backgroundContainer.addChild(this.container);
+      backgroundSpriteContainer.addChild(this.container);
 
       this.texture = this.getTexture("#ff0000");
       this.plagueTexture = this.getTexture("#00ff00");
@@ -139,7 +139,7 @@ Bones = {
 
     if (!this.container) {
       this.container = new PIXI.Container();
-      backgroundContainer.addChild(this.container);
+      backgroundSpriteContainer.addChild(this.container);
       this.texture = this.getTexture();
     }
 

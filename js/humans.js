@@ -120,6 +120,7 @@ Humans = {
     if (this.humans.length > 0) {
       for (var i=0; i < this.humans.length; i++) {
         characterContainer.removeChild(this.humans[i]);
+        this.humans[i].stop();
       }
       this.discardedHumans = this.humans.slice();;
       this.humans.length = 0;
@@ -165,6 +166,7 @@ Humans = {
       human.ySpeed = 0;
       human.plagueTickTimer = Math.random() * this.plagueTickTimer;
       human.infected = false;
+      human.lastKnownBuilding = false;
       human.plagueDamage = 0;
       human.visionDistance = this.visionDistance;
       human.visible = true;

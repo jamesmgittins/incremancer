@@ -49,6 +49,7 @@ Zombies = {
     if (this.zombies.length > 0) {
       for (var i=0; i < this.zombies.length; i++) {
         characterContainer.removeChild(this.zombies[i]);
+        this.zombies[i].stop();
       }
       this.discardedZombies = this.zombies.slice();
       this.zombies.length = 0;
@@ -74,6 +75,9 @@ Zombies = {
     zombie.super = this.super;
     zombie.textureId = textureId;
     zombie.dead = false;
+    zombie.burnDamage = 0;
+    zombie.burning = false;
+    zombie.lastKnownBuilding = false;
     zombie.alpha = 1;
     zombie.animationSpeed = 0.15;
     zombie.anchor = {x:35/80,y:1};
