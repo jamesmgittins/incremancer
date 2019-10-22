@@ -83,6 +83,7 @@ Zombies = {
     zombie.anchor = {x:35/80,y:1};
     zombie.position = {x:x,y:y};
     zombie.zIndex = zombie.position.y;
+    zombie.leftTurner = Math.random() > 0.5;
     zombie.visible = true;
     zombie.health = zombie.super ? GameModel.zombieHealth * 10 : GameModel.zombieHealth;
     zombie.state = this.states.lookingForTarget;
@@ -347,20 +348,50 @@ Zombies = {
 
   updateZombieSpeed(zombie, timeDiff) {
 
-    var vector = this.map.howDoIGetToMyTarget(zombie, zombie.target);
+    if (!zombie.targetTimer || !zombie.targetVector) {
+      zombie.targetTimer = 0;
+    }
+    zombie.targetTimer-=timeDiff;
+    if (zombie.targetTimer <= 0) {
+      zombie.targetVector = this.map.howDoIGetToMyTarget(zombie, zombie.target);
+      zombie.targetTimer = 0.2;
+    }
+    
+    if (GameModel.gameSpeed > 1) {
+      var ax = Math.abs(zombie.targetVector.x);
+      var ay = Math.abs(zombie.targetVector.y);
+      if (Math.max(ax, ay) == 0)
+        return;
+      var ratio = 1 / Math.max(ax, ay);
+      ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
+      var zombieMaxSpeed = Math.max(this.maxSpeed * zombie.speedMultiplier, 8);
+      zombie.xSpeed = zombie.targetVector.x * ratio * zombieMaxSpeed;
+      zombie.ySpeed = zombie.targetVector.y * ratio * zombieMaxSpeed;
+    } else {
+      var factor = this.maxSpeed * 5 / (this.magnitude(zombie.targetVector.x, zombie.targetVector.y) || 1);
 
-    var factor = this.maxSpeed * 5 / (this.magnitude(vector.x, vector.y) || 1);
-
-    zombie.xSpeed += vector.x * factor * timeDiff;
-    zombie.ySpeed += vector.y * factor * timeDiff;
-  
-    var speedMagnitude = this.magnitude(zombie.xSpeed, zombie.ySpeed);
-    if (speedMagnitude > this.maxSpeed * zombie.speedMultiplier) {
-      zombie.xSpeed *= (this.maxSpeed * zombie.speedMultiplier) / speedMagnitude;
-      zombie.ySpeed *= (this.maxSpeed * zombie.speedMultiplier) / speedMagnitude;
+      zombie.xSpeed += zombie.targetVector.x * factor * timeDiff;
+      zombie.ySpeed += zombie.targetVector.y * factor * timeDiff;
+    
+      var speedMagnitude = this.magnitude(zombie.xSpeed, zombie.ySpeed);
+      var zombieMaxSpeed = Math.max(this.maxSpeed * zombie.speedMultiplier, 8);
+      if (speedMagnitude > zombieMaxSpeed) {
+        zombie.xSpeed *= zombieMaxSpeed / speedMagnitude;
+        zombie.ySpeed *= zombieMaxSpeed / speedMagnitude;
+      }
     }
 
     var newPosition = {x:zombie.position.x + zombie.xSpeed * timeDiff, y:zombie.position.y + zombie.ySpeed * timeDiff};
+
+    if (!this.isSpaceToMove(zombie, newPosition.x, newPosition.y)) {
+      if (Math.random() > 0.5) {
+        // newPosition = {x:zombie.position.x + (-zombie.ySpeed/2 + zombie.xSpeed/2) * timeDiff, y:zombie.position.y + (zombie.xSpeed/2 + zombie.ySpeed/2) * timeDiff}; // 45 degrees
+        newPosition = {x:zombie.position.x + -zombie.ySpeed * timeDiff, y:zombie.position.y + zombie.xSpeed * timeDiff}; // 90 degrees
+      } else {
+        // newPosition = {x:zombie.position.x + (zombie.ySpeed/2 + zombie.xSpeed/2) * timeDiff, y:zombie.position.y + (-zombie.xSpeed/2 + zombie.ySpeed/2) * timeDiff}; // 45 degrees
+        newPosition = {x:zombie.position.x + zombie.ySpeed * timeDiff, y:zombie.position.y + -zombie.xSpeed * timeDiff}; // 90 degrees
+      }
+    }
 
     var collision = this.map.checkCollisions(zombie.position, newPosition);
     if (collision) {
@@ -379,10 +410,8 @@ Zombies = {
       }
     }
 
-    if (Math.random() > 0.6 || this.isSpaceToMove(zombie, newPosition.x, newPosition.y)) {
-      zombie.position = newPosition;
-      zombie.zIndex = zombie.position.y;
-    }
+    zombie.position = newPosition;
+    zombie.zIndex = zombie.position.y;
     zombie.scale.x = zombie.xSpeed > 0 ? zombie.scaling : -zombie.scaling;
     
   },

@@ -196,17 +196,24 @@ Humans = {
         human.play();
       }
     }
+    if (!human.targetTimer || !human.targetVector) {
+      human.targetTimer = 0;
+    }
+    human.targetTimer-=timeDiff;
+    if (human.targetTimer <= 0) {
+      human.targetVector = this.map.howDoIGetToMyTarget(human, human.target);
+      human.targetTimer = 0.2;
+    }
 
-    var vector = this.map.howDoIGetToMyTarget(human, human.target);
-    var ax = Math.abs(vector.x);
-    var ay = Math.abs(vector.y);
+    var ax = Math.abs(human.targetVector.x);
+    var ay = Math.abs(human.targetVector.y);
     if (Math.max(ax, ay) == 0)
       return;
     var ratio = 1 / Math.max(ax, ay);
     ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
     
-    human.xSpeed = vector.x * ratio * human.maxSpeed;
-    human.ySpeed = vector.y * ratio * human.maxSpeed;
+    human.xSpeed = human.targetVector.x * ratio * human.maxSpeed;
+    human.ySpeed = human.targetVector.y * ratio * human.maxSpeed;
 
     human.position.x += human.xSpeed * timeDiff;
     human.position.y += human.ySpeed * timeDiff;

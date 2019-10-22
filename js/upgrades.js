@@ -583,7 +583,7 @@ Upgrades.upgrades = [
   // brain upgrades
   new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 15, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),
   new Upgrades.Upgrade(21, "Master Summoner", Upgrades.types.energyCap, Upgrades.costs.brains, 10, 1.5, 5, 20, "All the brains you harvested have proved fruitful in your experiments. Each rank raises your maximum energy by 5."),
-  new Upgrades.Upgrade(22, "Primal Reflexes", Upgrades.types.speed, Upgrades.costs.brains, 5, 1.6, 1, 50, "The zombies retain more of their human agility increasing run speed by 1 for each rank."),
+  new Upgrades.Upgrade(22, "Primal Reflexes", Upgrades.types.speed, Upgrades.costs.brains, 5, 1.6, 1, 20, "The zombies retain more of their human agility increasing run speed by 1 for each rank."),
   new Upgrades.Upgrade(23, "Blood Harvest", Upgrades.types.bloodCap, Upgrades.costs.brains, 50, 1.1, 500, 0, "All this brain power has enabled you to devise some superior blood storage vats. Each rank increases your maximum blood by 500."),
   new Upgrades.Upgrade(24, "Unholy Construction", Upgrades.types.construction, Upgrades.costs.brains, 75, 1, 1, 1, "Learn the art of Unholy Construction in order to build structures that will solidify your foothold on the town.", "Construction menu now available!"),
   new Upgrades.Upgrade(25, "Infected Corpse", Upgrades.types.infectedBlast, Upgrades.costs.brains, 1000, 1.4, 0.1, 10, "Fill your zombies with so much plague they are ready to explode! Each rank adds 10% chance for a zombie to explode into a cloud of plague upon death.", false, 204),

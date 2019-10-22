@@ -197,6 +197,8 @@ Map = {
     for (var i=0; i < poi.walls.length; i++) {
       poi.walls[i].collisionX = poi.x + poi.walls[i].x;
       poi.walls[i].collisionY = poi.y + poi.walls[i].y;
+      poi.walls[i].collisionWidth = poi.walls[i].width;
+      poi.walls[i].collisionHeight = poi.walls[i].height;
     }
   },
 
@@ -319,25 +321,25 @@ Map = {
   wallCollisionBuffer : 3,
 
   checkWall(wall, start, end, collision) {
-    if (start.y > wall.collisionY && start.y < wall.collisionY + wall.height) {
+    if (start.y > wall.collisionY && start.y < wall.collisionY + wall.collisionHeight) {
       if (start.x < wall.collisionX - this.wallCollisionBuffer && end.x > wall.collisionX - this.wallCollisionBuffer) {
         collision.x = true;
         collision.validX = wall.collisionX - this.wallCollisionBuffer - 1;
       }
-      if (start.x > wall.collisionX + wall.width + this.wallCollisionBuffer && end.x < wall.collisionX + wall.width + this.wallCollisionBuffer) {
+      if (start.x > wall.collisionX + wall.collisionWidth + this.wallCollisionBuffer && end.x < wall.collisionX + wall.collisionWidth + this.wallCollisionBuffer) {
         collision.x = true;
-        collision.validX = wall.collisionX + wall.width + this.wallCollisionBuffer + 1;
+        collision.validX = wall.collisionX + wall.collisionWidth + this.wallCollisionBuffer + 1;
       }
     }
 
-    if (start.x > wall.collisionX && start.x < wall.collisionX + wall.width) {
+    if (start.x > wall.collisionX && start.x < wall.collisionX + wall.collisionWidth) {
       if (start.y < wall.collisionY - this.wallCollisionBuffer && end.y > wall.collisionY - this.wallCollisionBuffer) {
         collision.y = true;
         collision.validY = wall.collisionY - this.wallCollisionBuffer - 1;
       } 
-      if (start.y > wall.collisionY + wall.height + this.wallCollisionBuffer && end.y < wall.collisionY + wall.height + this.wallCollisionBuffer) {
+      if (start.y > wall.collisionY + wall.collisionHeight + this.wallCollisionBuffer && end.y < wall.collisionY + wall.collisionHeight + this.wallCollisionBuffer) {
         collision.y = true;
-        collision.validY = wall.collisionY + wall.height + this.wallCollisionBuffer + 1;
+        collision.validY = wall.collisionY + wall.collisionHeight + this.wallCollisionBuffer + 1;
       }
     }
   },
