@@ -79,7 +79,6 @@ Graveyard = {
 
     if (this.fence) {
       backgroundContainer.removeChild(this.fence);
-      this.fence.destroy();
     }
 
     this.fenceRadius = GameModel.fenceRadius;
@@ -204,6 +203,8 @@ BoneCollectors = {
     for (var i = 0; i < this.sprites.length; i++) {
       this.sprites[i].boneList = false;
       this.sprites[i].target = false;
+      this.sprites[i].position = {x:Graveyard.sprite.x,y:Graveyard.sprite.y};
+      this.sprites[i].state = this.states.collecting;
     }
   },
 
@@ -215,7 +216,6 @@ BoneCollectors = {
       }
       GameModel.addBones(boneCollector.bones);
       characterContainer.removeChild(boneCollector);
-      boneCollector.destroy();
     }
     if (this.sprites.length < GameModel.persistentData.boneCollectors) {
       var sprite = new PIXI.AnimatedSprite(this.texture);
@@ -309,6 +309,9 @@ BoneCollectors = {
         break;
 
       case this.states.returning:
+        if (!boneCollector.target) {
+          boneCollector.target = Graveyard.sprite;
+        }
         if (this.fastDistance(boneCollector.position.x, boneCollector.position.y, boneCollector.target.x, boneCollector.target.y) < this.collectDistance) {
           boneCollector.target = false;
           GameModel.addBones(boneCollector.bones);
