@@ -11,6 +11,7 @@ Humans = {
   doctorTextures :[],
   doctorDeadTexture : {},
   humans : [],
+  discardedHumans : [],
   aliveHumans : [],
   humansPerLevel : 50, // 50
   maxHumans : 1000, // 1000
@@ -47,7 +48,7 @@ Humans = {
     human.health -= damage;
     Blood.newSplatter(human.x, human.y);
     human.timeToScan = 0;
-    if (human.health <= 0) {
+    if (human.health <= 0 && !human.dead) {
       Bones.newBones(human.x, human.y);
       human.dead = true;
       GameModel.addBrains(1);
@@ -120,8 +121,9 @@ Humans = {
       for (var i=0; i < this.humans.length; i++) {
         characterContainer.removeChild(this.humans[i]);
       }
-      this.humans = [];
-      this.aliveHumans = [];
+      this.discardedHumans = this.humans.slice();;
+      this.humans.length = 0;
+      this.aliveHumans.length = 0;
     }
 
     this.getAttackDamage();
@@ -131,7 +133,12 @@ Humans = {
     for (var i=0; i < maxHumans; i++) {
       var human;
       if (numDoctors > 0) {
-        human = new PIXI.AnimatedSprite(this.doctorTextures);
+        if (this.discardedHumans.length > 0) {
+          human = this.discardedHumans.pop();
+          human.textures = this.doctorTextures;
+        } else {
+          human = new PIXI.AnimatedSprite(this.doctorTextures);
+        }
         human.deadTexture = this.doctorDeadTexture;
         human.doctor = true;
         human.healTickTimer = Math.random() * this.healTickTimer;
@@ -139,10 +146,16 @@ Humans = {
       } else {
         var torchBearer = Math.random() < this.getTorchChance();
         var textureId = Math.floor(Math.random() * 3) + (torchBearer ? 3 : 0);
-        human = new PIXI.AnimatedSprite(this.textures[textureId].animated);
+        if (this.discardedHumans.length > 0) {
+          human = this.discardedHumans.pop();
+          human.textures = this.textures[textureId].animated;
+        } else {
+          human = new PIXI.AnimatedSprite(this.textures[textureId].animated);
+        }
         human.torchBearer = torchBearer;
         human.deadTexture = this.textures[textureId].dead;
       }
+      human.dead = false;
       human.animationSpeed = 0.15;
       human.anchor = {x:35/80,y:1};
       human.currentPoi = this.map.getRandomBuilding();
@@ -151,8 +164,11 @@ Humans = {
       human.xSpeed = 0;
       human.ySpeed = 0;
       human.plagueTickTimer = Math.random() * this.plagueTickTimer;
+      human.infected = false;
+      human.plagueDamage = 0;
       human.visionDistance = this.visionDistance;
       human.visible = true;
+      human.alpha = 1;
       human.maxHealth = human.health = this.getBaseHealth();
       human.timeToScan = Math.random() * this.scanTime;
       human.timeFleeing = 0;

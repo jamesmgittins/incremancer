@@ -570,65 +570,6 @@ Map = {
   },
 
   treeSprites : [],
-  trunkColors : ["#614c14", "#574619", "#4f411c", "#5e4f27"],
-  trunkColorsDead : ["#5c5544", "#524d43", "#615c51"],
-  leafColors : ["#2d8000", "#3e9111", "#468524", "#306315"],
-  leafColorsDead : ["#754b0f", "#825c26", "#8f6933"],
-  branchStartPositions : [{x:16, y:16}, {x:16, y:18}, {x:16, y:20}, {x:17, y:17}, {x:17, y:21}, {x:17, y:22}, {x:17, y:24}, {x:17, y:25}],
-  branchEndPositions : [{x:4, y:8}, {x:6, y:7}, {x:12, y:6}, {x:16, y:5}, {x:20, y:6}, {x:24, y:7}, {x:28, y:8}],
-
-  getTreeTexture(alivePercent) {
-		var texture = document.createElement('canvas');
-		texture.width = 32;
-		texture.height = 32;
-    var textureCtx = texture.getContext('2d');
-    textureCtx.imageSmoothingEnabled = false;
-
-    // draw trunk
-    textureCtx.beginPath();
-    textureCtx.strokeStyle = alivePercent < 0.5 ? getRandomElementFromArray(this.trunkColorsDead, Math.random()) : getRandomElementFromArray(this.trunkColors, Math.random());
-    textureCtx.lineWidth = 4;
-    textureCtx.moveTo(16, 32);
-    textureCtx.lineTo(16, 16);
-    textureCtx.stroke();
-
-    // draw branches
-    textureCtx.beginPath();
-    var branches = 3 + (Math.random() * 4);
-    textureCtx.lineWidth = 1;
-    for (var i = 0; i < branches; i++) {
-      var branchStart = getRandomElementFromArray(this.branchStartPositions, Math.random());
-      var branchEnd = getRandomElementFromArray(this.branchEndPositions, Math.random());
-      textureCtx.moveTo(branchStart.x, branchStart.y);
-      textureCtx.lineTo(branchEnd.x, branchEnd.y);
-      textureCtx.stroke();
-    }
-
-    // draw base
-    textureCtx.beginPath();
-    textureCtx.strokeStyle = "#134719";
-    textureCtx.lineWidth = 1;
-    textureCtx.moveTo(13, 31);
-    textureCtx.lineTo(19, 31);
-    textureCtx.stroke();
-
-    // draw leaves
-    var leaves = Math.round(alivePercent * 50);
-    for (var i = 0; i < leaves; i++) {
-      textureCtx.beginPath();
-      textureCtx.lineWidth = 1;
-      textureCtx.strokeStyle = alivePercent < 0.5 ? getRandomElementFromArray(this.leafColorsDead, Math.random()) : getRandomElementFromArray(this.leafColors, Math.random());
-      var position = {x:Math.random() * 32, y:Math.random() * 16};
-      textureCtx.moveTo(position.x, position.y);
-      textureCtx.lineTo(position.x, position.y + 1);
-      textureCtx.stroke();
-    }
-    
-
-
-		return PIXI.Texture.from(texture);
-  },
-
   treeTextures : [],
 
   isValidTreePosition(position) {

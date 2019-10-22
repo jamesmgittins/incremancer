@@ -280,6 +280,7 @@ div.spells > button.spell span.tooltip {
   width: 200%;
   padding: 10px;
   background: rgba(0,0,0,0.4);
+  z-index: 10;
 }
 
 div.spells > button.spell span.timer {
@@ -290,6 +291,7 @@ div.spells > button.spell span.timer {
   width: 35px;
   padding: 8px 10px;
   background: rgba(0,0,0,0.4);
+  z-index: 5;
 }
 
 div.spells > button.spell:hover span.tooltip {

@@ -1,6 +1,7 @@
 Zombies = {
   map : Map,
   zombies : [],
+  discardedZombies : [],
   aliveZombies : [],
   aliveHumans : [],
   zombiePartition : [],
@@ -11,7 +12,7 @@ Zombies = {
   targetDistance : 100,
   fadeSpeed : 0.1,
   currId : 1,
-  scanTime : 2,
+  scanTime : 3,
   textures : [],
   maxSpeed : 10,
   zombieCursor : false,
@@ -49,7 +50,8 @@ Zombies = {
       for (var i=0; i < this.zombies.length; i++) {
         characterContainer.removeChild(this.zombies[i]);
       }
-      this.zombies = [];
+      this.discardedZombies = this.zombies.slice();
+      this.zombies.length = 0;
     }
     if (!this.zombieCursor) {
       this.zombieCursor = new PIXI.Sprite(PIXI.Texture.from('zombie1_1.png'));
@@ -62,10 +64,17 @@ Zombies = {
 
   createZombie(x,y) {
     var textureId = Math.floor(Math.random() * this.textures.length);
-    var zombie = new PIXI.AnimatedSprite(this.textures[textureId].animated);
+    var zombie;
+    if (this.discardedZombies.length > 0) {
+      zombie = this.discardedZombies.pop();
+      zombie.textures = this.textures[textureId].animated;
+    } else {
+      zombie = new PIXI.AnimatedSprite(this.textures[textureId].animated);
+    }
     zombie.super = this.super;
     zombie.textureId = textureId;
     zombie.dead = false;
+    zombie.alpha = 1;
     zombie.animationSpeed = 0.15;
     zombie.anchor = {x:35/80,y:1};
     zombie.position = {x:x,y:y};
@@ -81,6 +90,7 @@ Zombies = {
     zombie.attackTimer = 0;
     zombie.xSpeed = 0;
     zombie.ySpeed = 0;
+    zombie.speedMultiplier = 1;
     zombie.scanTime = 0;
     zombie.burnTickTimer = this.burnTickTimer;
     zombie.smokeTimer = this.smokeTimer;
@@ -104,6 +114,7 @@ Zombies = {
       Exclamations.newShield(zombie);
     }
     zombie.health -= damage;
+    zombie.speedMultiplier = Math.max(Math.min(1, zombie.health / GameModel.zombieHealth), 0.4);
     Blood.newSplatter(zombie.x, zombie.y);
     if (zombie.health <= 0 && !zombie.dead) {
       Bones.newBones(zombie.x, zombie.y);
@@ -223,7 +234,7 @@ Zombies = {
     if (zombie.burning)
       this.updateBurns(zombie, timeDiff);
 
-    if (!zombie.target || zombie.target.dead) {
+    if ((!zombie.target || zombie.target.dead) && zombie.scanTime < 0) {
       zombie.state = this.states.lookingForTarget;
     }
 
@@ -236,7 +247,6 @@ Zombies = {
           this.assignRandomTarget(zombie);
         if (zombie.target) {
           zombie.state = this.states.movingToTarget;
-          zombie.scanTime = this.scanTime;
         }
         break;
 
@@ -303,11 +313,11 @@ Zombies = {
     if (zombie.scanTime > 0)
       return;
 
-    zombie.scanTime = this.scanTime;
+    zombie.scanTime = this.scanTime * Math.random();
     var distanceToTarget = 10000;
     for (var i = 0; i < this.aliveHumans.length; i++) {
-      if (Math.abs(this.aliveHumans[i].x - zombie.x) < this.targetDistance) {
-        if (Math.abs(this.aliveHumans[i].y - zombie.y) < this.targetDistance) {
+      if (Math.abs(this.aliveHumans[i].x - zombie.x) < distanceToTarget) {
+        if (Math.abs(this.aliveHumans[i].y - zombie.y) < distanceToTarget) {
           var distanceToHuman = this.fastDistance(zombie.x, zombie.y, this.aliveHumans[i].x, this.aliveHumans[i].y);
           if (distanceToHuman < distanceToTarget) {
             zombie.target = this.aliveHumans[i];
@@ -335,14 +345,15 @@ Zombies = {
 
     var vector = this.map.howDoIGetToMyTarget(zombie, zombie.target);
 
-    var factor = this.maxSpeed * 2 / (this.magnitude(vector.x, vector.y) || 1);
+    var factor = this.maxSpeed * 5 / (this.magnitude(vector.x, vector.y) || 1);
 
     zombie.xSpeed += vector.x * factor * timeDiff;
     zombie.ySpeed += vector.y * factor * timeDiff;
   
-    if (this.magnitude(zombie.xSpeed, zombie.ySpeed) > this.maxSpeed) {
-      zombie.xSpeed -= zombie.xSpeed * timeDiff * 8;
-      zombie.ySpeed -= zombie.ySpeed * timeDiff * 8;
+    var speedMagnitude = this.magnitude(zombie.xSpeed, zombie.ySpeed);
+    if (speedMagnitude > this.maxSpeed * zombie.speedMultiplier) {
+      zombie.xSpeed *= (this.maxSpeed * zombie.speedMultiplier) / speedMagnitude;
+      zombie.ySpeed *= (this.maxSpeed * zombie.speedMultiplier) / speedMagnitude;
     }
 
     var newPosition = {x:zombie.position.x + zombie.xSpeed * timeDiff, y:zombie.position.y + zombie.ySpeed * timeDiff};
@@ -377,7 +388,7 @@ Zombies = {
   isSpaceToMove(zombie, x, y) {
     var neighbours = this.partitionGetNeighbours(zombie);
     for (var i=0; i < neighbours.length; i++) {
-      if (neighbours[i].zombieId != zombie.zombieId && Math.abs(neighbours[i].x - x) < this.spaceNeeded) {
+      if (neighbours[i].health >= zombie.health && neighbours[i].zombieId != zombie.zombieId && Math.abs(neighbours[i].x - x) < this.spaceNeeded) {
         if (Math.abs(neighbours[i].y - y) < this.spaceNeeded && Math.abs(neighbours[i].x - x) < this.spaceNeeded) {
           return this.fastDistance(x, y, neighbours[i].x, neighbours[i].y) > this.fastDistance(zombie.x, zombie.y, neighbours[i].x, neighbours[i].y);
         }

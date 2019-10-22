@@ -31,15 +31,15 @@ Blood = {
     for (var i = 0; i < this.sprites.length; i++) {
       this.container.removeChild(this.sprites[i]);
     }
-    this.sprites = [];
 
-		for (var i = 0; i < this.maxParts; i++) {
-
-      var sprite = new PIXI.Sprite(this.texture);
-      this.container.addChild(sprite);
-      sprite.visible=false;
-      this.sprites.push(sprite);
+    if (this.sprites.length < this.maxParts) {
+      for (var i = 0; i < this.maxParts; i++) {
+        var sprite = new PIXI.Sprite(this.texture);
+        this.sprites.push(sprite);
+        sprite.visible = false;
+      }
     }
+		
     this.discardedSprites = this.sprites.slice();
 	},
 	update(timeDiff) {
@@ -55,6 +55,7 @@ Blood = {
       if (sprite.alpha <= 0) {
         sprite.visible = false;
         this.discardedSprites.push(sprite);
+        this.container.removeChild(sprite);
       }
     } else {
       sprite.ySpeed += this.gravity * timeDiff;
@@ -72,9 +73,9 @@ Blood = {
       sprite = this.discardedSprites.pop();
     } else {
       sprite = new PIXI.Sprite(this.texture);
-      this.container.addChild(sprite);
       this.sprites.push(sprite);
     }
+    this.container.addChild(sprite);
     if (plague) {
       sprite.texture = this.plagueTexture;
     } else {
@@ -105,7 +106,7 @@ Blood = {
     }
   },
   newPlagueSplatter(x,y) {
-    for (var i=0; i < this.partsPerSplatter * 2; i++) {
+    for (var i=0; i < this.partsPerSplatter; i++) {
       this.newPart(x, y, true);
     }
   }
@@ -147,13 +148,13 @@ Bones = {
       this.sprites[i].visible = false;
       this.container.removeChild(this.sprites[i]);
     }
-    this.sprites = [];
 
-		for (var i = 0; i < this.maxParts; i++) {
-      var sprite = new PIXI.Sprite(this.texture);
-      this.container.addChild(sprite);
-      sprite.visible=false;
-      this.sprites.push(sprite);
+    if (this.sprites.length < this.maxParts) {
+      for (var i = 0; i < this.maxParts; i++) {
+        var sprite = new PIXI.Sprite(this.texture);
+        sprite.visible=false;
+        this.sprites.push(sprite);
+      }
     }
     this.discardedSprites = this.sprites.slice();
 	},
@@ -172,6 +173,7 @@ Bones = {
     if (sprite.collected) {
       sprite.visible = false;
       this.discardedSprites.push(sprite);
+      this.container.removeChild(sprite);
       return;
     }
     if (sprite.hitFloor) {
@@ -184,6 +186,7 @@ Bones = {
         if (sprite.alpha <= 0) {
           sprite.visible = false;
           this.discardedSprites.push(sprite);
+          this.container.removeChild(sprite);
         }
       }
       
@@ -204,9 +207,9 @@ Bones = {
       var sprite = this.discardedSprites.pop();
     } else {
       sprite = new PIXI.Sprite(this.texture);
-      this.container.addChild(sprite);
       this.sprites.push(sprite);
     }
+    this.container.addChild(sprite);
     sprite.x = x;
     sprite.y = y - (8 + Math.random() * 10);
     sprite.fadeTime = Math.random() * this.fadeTime;
@@ -259,16 +262,16 @@ Exclamations = {
     for (var i = 0; i < this.sprites.length; i++) {
       this.container.removeChild(this.sprites[i]);
     }
-    this.sprites = [];
 
-		for (var i = 0; i < this.maxSprites; i++) {
-
-      var sprite = new PIXI.Sprite(this.exclamationTexture);
-      this.container.addChild(sprite);
-      sprite.visible=false;
-      sprite.anchor = {x:0.5,y:1};
-      this.sprites.push(sprite);
+    if (this.sprites.length < this.maxSprites) {
+      for (var i = 0; i < this.maxSprites; i++) {
+        var sprite = new PIXI.Sprite(this.exclamationTexture);
+        sprite.anchor = {x:0.5,y:1};
+        this.sprites.push(sprite);
+        sprite.visible = false;
+      }
     }
+		
     this.discardedSprites = this.sprites.slice();
   },
 
@@ -280,10 +283,10 @@ Exclamations = {
       sprite = this.discardedSprites.pop();
     } else {
       sprite = new PIXI.Sprite(this.exclamationTexture);
-      this.container.addChild(sprite);
       sprite.anchor = {x:0.5,y:1};
       this.sprites.push(sprite);
     }
+    this.container.addChild(sprite);
     sprite.texture = texture;
     sprite.target = target;
     sprite.target.hasIcon = true;
@@ -368,16 +371,16 @@ Bullets = {
     for (var i = 0; i < this.sprites.length; i++) {
       characterContainer.removeChild(this.sprites[i]);
     }
-    this.sprites = [];
 
-		for (var i = 0; i < this.maxParts; i++) {
-
-      var sprite = new PIXI.Sprite(this.texture);
-      characterContainer.addChild(sprite);
-      sprite.visible=false;
-      sprite.scale.x = sprite.scale.y = 2;
-      this.sprites.push(sprite);
+    if (this.sprites.length < this.maxParts) {
+      for (var i = 0; i < this.maxParts; i++) {
+        var sprite = new PIXI.Sprite(this.texture);
+        sprite.scale.x = sprite.scale.y = 2;
+        sprite.visible = false;
+        this.sprites.push(sprite);
+      }
     }
+		
     this.discardedSprites = this.sprites.slice();
 	},
 	update(timeDiff) {
@@ -392,6 +395,7 @@ Bullets = {
       Zombies.damageZombie(sprite.target, sprite.damage);
       sprite.visible = false;
       this.discardedSprites.push(sprite);
+      characterContainer.removeChild(sprite);
     } else {
       sprite.x += sprite.xSpeed * timeDiff;
       sprite.y += sprite.ySpeed * timeDiff;
@@ -401,6 +405,7 @@ Bullets = {
     if (sprite.alpha < 0) {
       sprite.visible = false;
       this.discardedSprites.push(sprite);
+      characterContainer.removeChild(sprite);
     }
   },
   newBullet(x,y,target,damage) {
@@ -409,10 +414,10 @@ Bullets = {
      sprite = this.discardedSprites.pop();
     } else {
       sprite = new PIXI.Sprite(this.texture);
-      characterContainer.addChild(sprite);
       sprite.scale.x = sprite.scale.y = 2;
       this.sprites.push(sprite);
     }
+    characterContainer.addChild(sprite);
     sprite.x = x;
     sprite.y = y - 8;
     sprite.target = target;
@@ -465,17 +470,17 @@ Blasts = {
     for (var i = 0; i < this.sprites.length; i++) {
       foregroundContainer.removeChild(this.sprites[i]);
     }
-    this.sprites = [];
 
-		for (var i = 0; i < this.maxParts; i++) {
-
-      var sprite = new PIXI.Sprite(this.texture);
-      foregroundContainer.addChild(sprite);
-      sprite.visible=false;
-      sprite.scale.x = sprite.scale.y = 2;
-      sprite.anchor = {x:0.5, y:0.5};
-      this.sprites.push(sprite);
+    if (this.sprites.length < this.maxParts) {
+      for (var i = 0; i < this.maxParts; i++) {
+        var sprite = new PIXI.Sprite(this.texture);
+        sprite.scale.x = sprite.scale.y = 2;
+        sprite.anchor = {x:0.5, y:0.5};
+        sprite.visible = false;
+        this.sprites.push(sprite);
+      }
     }
+		
     this.discardedSprites = this.sprites.slice();
 	},
 	update(timeDiff) {
@@ -501,10 +506,10 @@ Blasts = {
      sprite = this.discardedSprites.pop();
     } else {
       sprite = new PIXI.Sprite(this.texture);
-      foregroundContainer.addChild(sprite);
       this.sprites.push(sprite);
       sprite.anchor = {x:0.5, y:0.5};
     }
+    foregroundContainer.addChild(sprite);
     sprite.scale.x = sprite.scale.y = 2;
 		sprite.visible = true;
 		sprite.x = x;
@@ -541,16 +546,17 @@ Smoke = {
     for (var i = 0; i < this.sprites.length; i++) {
       foregroundContainer.removeChild(this.sprites[i]);
     }
-    this.sprites = [];
     
-		for (var i = 0; i < this.maxParts; i++) {
-      var sprite = new PIXI.Sprite(this.texture);
-      foregroundContainer.addChild(sprite);
-      sprite.visible=false;
-      sprite.scale.x = sprite.scale.y = 2;
-      sprite.anchor = {x:0.5, y:0.5};
-      this.sprites.push(sprite);
+    if (this.sprites.length < this.maxParts) {
+      for (var i = 0; i < this.maxParts; i++) {
+        var sprite = new PIXI.Sprite(this.texture);
+        sprite.scale.x = sprite.scale.y = 2;
+        sprite.anchor = {x:0.5, y:0.5};
+        sprite.visible = false;
+        this.sprites.push(sprite);
+      }
     }
+		
     this.discardedSprites = this.sprites.slice();
 	},
 	update(timeDiff) {
@@ -568,6 +574,7 @@ Smoke = {
       if (sprite.scale.x <= 0) {
         sprite.visible = false;
         this.discardedSprites.push(sprite);
+        foregroundContainer.removeChild(sprite);
       }
     }
   },
@@ -577,10 +584,10 @@ Smoke = {
      sprite = this.discardedSprites.pop();
     } else {
       sprite = new PIXI.Sprite(this.texture);
-      foregroundContainer.addChild(sprite);
       this.sprites.push(sprite);
       sprite.anchor = {x:0.5, y:0.5};
     }
+    foregroundContainer.addChild(sprite);
     var sizeVariance = 0.2;
     sprite.ySpeed = -0.5;
     sprite.scale.x = sprite.scale.y = 1.6 - sizeVariance + (Math.random() * sizeVariance * 2);

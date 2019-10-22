@@ -43,7 +43,12 @@ Graveyard = {
       textureName = "sprites/megagraveyard.png";
       fortTexture = "fort2.png";
     }
-    this.sprite = new PIXI.Sprite(PIXI.Texture.from(textureName));
+    if (this.sprite) {
+      this.sprite.texture = PIXI.Texture.from(textureName);
+    } else {
+      this.sprite = new PIXI.Sprite(PIXI.Texture.from(textureName));
+    }
+    
     this.sprite.width = 32;
     this.sprite.height = 32;
     this.sprite.anchor = {x:0.5, y:0.5};
@@ -55,7 +60,12 @@ Graveyard = {
     this.sprite.y = gameFieldSize.y / 2;
 
     if (fortTexture) {
-      this.fortSprite = new PIXI.Sprite(PIXI.Texture.from(fortTexture));
+      if (this.fortSprite) {
+        fortSprite.texture = PIXI.Texture.from(fortTexture);
+      } else {
+        this.fortSprite = new PIXI.Sprite(PIXI.Texture.from(fortTexture));
+      }
+      
       this.fortSprite.anchor = {x:0.5, y:1};
       this.fortSprite.scale = {x:2,y:2};
       this.fortSprite.x = gameFieldSize.x / 2;
@@ -69,6 +79,7 @@ Graveyard = {
 
     if (this.fence) {
       backgroundContainer.removeChild(this.fence);
+      this.fence.destroy();
     }
 
     this.fenceRadius = GameModel.fenceRadius;
@@ -192,6 +203,7 @@ BoneCollectors = {
     }
     for (var i = 0; i < this.sprites.length; i++) {
       this.sprites[i].boneList = false;
+      this.sprites[i].target = false;
     }
   },
 
@@ -203,6 +215,7 @@ BoneCollectors = {
       }
       GameModel.addBones(boneCollector.bones);
       characterContainer.removeChild(boneCollector);
+      boneCollector.destroy();
     }
     if (this.sprites.length < GameModel.persistentData.boneCollectors) {
       var sprite = new PIXI.AnimatedSprite(this.texture);
