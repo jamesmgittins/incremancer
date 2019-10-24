@@ -59,7 +59,18 @@ Graveyard = {
     this.sprite.x = gameFieldSize.x / 2;
     this.sprite.y = gameFieldSize.y / 2;
 
+    Map.graveyardCollision = false;
+
     if (fortTexture) {
+      // var graveyyardCollisionWidth = 64;
+      // var graveyardCollisionHeight = 16;
+      // Map.graveyardCollision = {
+      //   collisionX:gameFieldSize.x / 2 - graveyyardCollisionWidth / 2, 
+      //   collisionY:(gameFieldSize.y / 2) + 2 - graveyardCollisionHeight, 
+      //   collisionWidth:graveyyardCollisionWidth, 
+      //   collisionHeight:graveyardCollisionHeight
+      // };
+
       if (this.fortSprite) {
         fortSprite.texture = PIXI.Texture.from(fortTexture);
       } else {
@@ -127,7 +138,7 @@ Graveyard = {
 
     if (GameModel.energy >= GameModel.energyMax) {
       for (var i = 0; i < GameModel.persistentData.graveyardZombies; i ++)  {
-        Zombies.spawnZombie(this.sprite.x,this.sprite.y + (this.level > 2 ? 5 : 0));
+        Zombies.spawnZombie(this.sprite.x,this.sprite.y + (this.level > 2 ? 8 : 0));
       }
     }
 

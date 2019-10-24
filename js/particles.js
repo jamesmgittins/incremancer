@@ -1,10 +1,10 @@
 Blood = {
-  maxParts : 100,
-  partsPerSplatter : 8,
+  maxParts : 1000,
+  partCounter : 0,
+  partsPerSplatter : 6,
   ecoPartsPerSplatter : 3,
   container : null,
   sprites : [],
-  discardedSprites : [],
   gravity : 100,
   spraySpeed : 20,
   fadeSpeed : 0.7,
@@ -28,24 +28,23 @@ Blood = {
       this.plagueTexture = this.getTexture("#00ff00");
     }
 
-    for (var i = 0; i < this.sprites.length; i++) {
-      this.container.removeChild(this.sprites[i]);
-    }
-
     if (this.sprites.length < this.maxParts) {
       for (var i = 0; i < this.maxParts; i++) {
         var sprite = new PIXI.Sprite(this.texture);
         this.sprites.push(sprite);
         sprite.visible = false;
+        if (Math.random() > 0.5)
+          sprite.scale = {x:2,y:2};
+        this.container.addChild(sprite);
       }
     }
-		
-    this.discardedSprites = this.sprites.slice();
 	},
 	update(timeDiff) {
+    this.visibleParts = 0;
 		for (var i = 0; i < this.sprites.length; i++) {
       if (this.sprites[i].visible) {
         this.updatePart(this.sprites[i], timeDiff);
+        this.visibleParts++;
       }
 		}
   },
@@ -54,8 +53,6 @@ Blood = {
       sprite.alpha -= this.fadeSpeed * timeDiff;
       if (sprite.alpha <= 0) {
         sprite.visible = false;
-        this.discardedSprites.push(sprite);
-        this.container.removeChild(sprite);
       }
     } else {
       sprite.ySpeed += this.gravity * timeDiff;
@@ -68,14 +65,10 @@ Blood = {
     
   },
   newPart(x,y, plague) {
-    var sprite;
-    if (this.discardedSprites.length > 0) {
-      sprite = this.discardedSprites.pop();
-    } else {
-      sprite = new PIXI.Sprite(this.texture);
-      this.sprites.push(sprite);
+    var sprite = this.sprites[this.partCounter++];
+    if (this.partCounter >= this.maxParts) {
+      this.partCounter = 0;
     }
-    this.container.addChild(sprite);
     if (plague) {
       sprite.texture = this.plagueTexture;
     } else {
@@ -95,15 +88,16 @@ Blood = {
     sprite.ySpeed = -1 * (plague ? this.spraySpeed * 1.5 : this.spraySpeed);
   },
   newSplatter(x,y) {
-    if (this.discardedSprites.length < this.sprites.length / 2) {
-      for (var i=0; i<this.ecoPartsPerSplatter; i++) {
-        this.newPart(x, y, false);
-      }
-    } else {
+    if (this.visibleParts < 0.9 * this.maxParts) {
       for (var i=0; i<this.partsPerSplatter; i++) {
         this.newPart(x, y, false);
       }
+    } else {
+      for (var i=0; i<this.ecoPartsPerSplatter; i++) {
+        this.newPart(x, y, false);
+      }
     }
+    
   },
   newPlagueSplatter(x,y) {
     for (var i=0; i < this.partsPerSplatter; i++) {
@@ -121,7 +115,7 @@ Bones = {
   uncollected : [],
   gravity : 100,
   spraySpeed : 20,
-  fadeTime : 30,
+  fadeTime : 40,
   fadeSpeed : 0.2,
   fadeBones : false,
 	getTexture() {
@@ -167,7 +161,7 @@ Bones = {
       }
     }
     this.uncollected = uncollectedBones;
-    this.fadeBones = uncollectedBones.length > 500;
+    this.fadeBones = uncollectedBones.length > 250;
   },
   updatePart(sprite, timeDiff) {
     if (sprite.collected) {
@@ -307,7 +301,7 @@ Exclamations = {
   },
 
   newRadio(target) {
-    this.newIcon(target, this.radioTexture, 2);
+    this.newIcon(target, this.radioTexture, 3);
   },
 
   newFire(target) {
@@ -441,9 +435,9 @@ Bullets = {
 };
 
 Blasts = {
-  maxParts:10,
+  maxParts:50,
+  partCounter:0,
   sprites:[],
-  discardedSprites:[],
 	getTexture() {
 		var blast = document.createElement('canvas');
 		blast.width = 32;
@@ -465,12 +459,10 @@ Blasts = {
 
     if (!this.texture) {
       this.texture = this.getTexture();
+      this.container = new PIXI.Container();
+      foregroundContainer.addChild(this.container);
     }
     
-    for (var i = 0; i < this.sprites.length; i++) {
-      foregroundContainer.removeChild(this.sprites[i]);
-    }
-
     if (this.sprites.length < this.maxParts) {
       for (var i = 0; i < this.maxParts; i++) {
         var sprite = new PIXI.Sprite(this.texture);
@@ -478,10 +470,9 @@ Blasts = {
         sprite.anchor = {x:0.5, y:0.5};
         sprite.visible = false;
         this.sprites.push(sprite);
+        this.container.addChild(sprite);
       }
     }
-		
-    this.discardedSprites = this.sprites.slice();
 	},
 	update(timeDiff) {
 		for (var i = 0; i < this.sprites.length; i++) {
@@ -496,32 +487,38 @@ Blasts = {
       sprite.scale.x = sprite.scale.y;
       if (sprite.scale.x <= 0) {
         sprite.visible = false;
-        this.discardedSprites.push(sprite);
       }
     }
   },
 	newBlast: function(x, y) {
-    var sprite;
-    if (this.discardedSprites.length > 0) {
-     sprite = this.discardedSprites.pop();
-    } else {
-      sprite = new PIXI.Sprite(this.texture);
-      this.sprites.push(sprite);
-      sprite.anchor = {x:0.5, y:0.5};
-    }
-    foregroundContainer.addChild(sprite);
+    var sprite = this.sprites[this.partCounter++];
+    if (this.partCounter >= this.maxParts)
+      this.partCounter = 0;
+      
     sprite.scale.x = sprite.scale.y = 2;
 		sprite.visible = true;
 		sprite.x = x;
     sprite.y = y;
     Smoke.newCloud(x, y);
+  },
+  newDroneBlast: function(x, y) {
+    var sprite = this.sprites[this.partCounter++];
+    if (this.partCounter >= this.maxParts)
+      this.partCounter = 0;
+      
+    sprite.scale.x = sprite.scale.y = 2;
+		sprite.visible = true;
+		sprite.x = x;
+    sprite.y = y;
+    Smoke.newDroneCloud(x, y);
 	}
 };
 
 Smoke = {
-  maxParts:10,
+  maxParts:1000,
+  partCounter:0,
+  container:false,
   sprites:[],
-  discardedSprites:[],
   tint:0xFFFFFF,
 	getTexture() {
 		var size = 8;
@@ -545,23 +542,19 @@ Smoke = {
 
     if (!this.texture) {
       this.texture = this.getTexture();
-    }
+      this.container = new PIXI.Container();
 
-    for (var i = 0; i < this.sprites.length; i++) {
-      foregroundContainer.removeChild(this.sprites[i]);
-    }
-    
-    if (this.sprites.length < this.maxParts) {
       for (var i = 0; i < this.maxParts; i++) {
         var sprite = new PIXI.Sprite(this.texture);
         sprite.scale.x = sprite.scale.y = 2;
         sprite.anchor = {x:0.5, y:0.5};
         sprite.visible = false;
         this.sprites.push(sprite);
+        this.container.addChild(sprite);
       }
+      foregroundContainer.addChild(this.container);
     }
-		
-    this.discardedSprites = this.sprites.slice();
+
 	},
 	update(timeDiff) {
 		for (var i = 0; i < this.sprites.length; i++) {
@@ -571,36 +564,28 @@ Smoke = {
 		}
   },
   updatePart(sprite, timeDiff) {
-    if (sprite.visible) {
-      sprite.scale.y -= (1.5 * timeDiff);
-      sprite.scale.x = sprite.scale.y;
-      sprite.y += sprite.ySpeed;
-      if (sprite.scale.x <= 0) {
-        sprite.visible = false;
-        this.discardedSprites.push(sprite);
-        foregroundContainer.removeChild(sprite);
-      }
+    sprite.scale.y -= (1.5 * timeDiff);
+    sprite.scale.x = sprite.scale.y;
+    sprite.y += sprite.ySpeed;
+    if (sprite.scale.x <= 0) {
+      sprite.visible = false;
     }
   },
 	newSmoke(x, y, variance = 0) {
-    var sprite;
-    if (this.discardedSprites.length > 0) {
-     sprite = this.discardedSprites.pop();
-    } else {
-      sprite = new PIXI.Sprite(this.texture);
-      this.sprites.push(sprite);
-      sprite.anchor = {x:0.5, y:0.5};
-    }
+    var sprite = this.sprites[this.partCounter++];
+    if (this.partCounter >= this.maxParts)
+      this.partCounter = 0;
+    
     if (this.allowTint) {
       sprite.tint = this.tint;
     }
-    foregroundContainer.addChild(sprite);
+
     var sizeVariance = 0.2;
     sprite.ySpeed = -0.5;
     sprite.scale.x = sprite.scale.y = 1.6 - sizeVariance + (Math.random() * sizeVariance * 2);
 		sprite.visible = true;
 		sprite.x = x - variance + (Math.random() * variance * 2);
-		sprite.y = y - variance + (Math.random() * variance * 2);
+    sprite.y = y - variance + (Math.random() * variance * 2);
   },
   newFireSmoke(x, y) {
     this.tint = 0xFFFFFF;
@@ -610,6 +595,12 @@ Smoke = {
     this.tint = 0x00FF00;
     for (var i = 0; i < 10; i++) {
       this.newSmoke(x, y, 16);
+    }
+  },
+  newDroneCloud(x, y) {
+    this.tint = 0xFFFFFF;
+    for (var i = 0; i < 10; i++) {
+      this.newSmoke(x, y, 24);
     }
   },
   newZombieSpawnCloud(x,y) {

@@ -86,7 +86,7 @@ angular.module('zombieApp', [])
     }
 
     zm.addGraveyardZombie = function() {
-      if (zm.model.persistentData.graveyardZombies < zm.model.energyMax / 10)
+      if (zm.model.persistentData.graveyardZombies < Math.floor(zm.model.energyMax / 10))
         zm.model.persistentData.graveyardZombies++;
     }
 

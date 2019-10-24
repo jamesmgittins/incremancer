@@ -167,6 +167,8 @@ Humans = {
       human.xSpeed = 0;
       human.ySpeed = 0;
       human.plagueTickTimer = Math.random() * this.plagueTickTimer;
+      human.target = false;
+      human.zombieTarget = false;
       human.infected = false;
       human.lastKnownBuilding = false;
       human.plagueDamage = 0;
@@ -248,6 +250,7 @@ Humans = {
       if (Math.random() < GameModel.riseFromTheDeadChance) {
         Zombies.createZombie(human.x, human.y);
         human.visible = false;
+        characterContainer.removeChild(human);
         return;
       }
     }
@@ -255,6 +258,7 @@ Humans = {
 
     if (human.alpha < 0) {
       human.visible = false;
+      characterContainer.removeChild(human);
     }
     return;
   },
@@ -430,6 +434,7 @@ Police = {
   maxRunSpeed : 40,
   baseHealth : 130,
   police : [],
+  discardedPolice : [],
   walkTexture : [],
   deadTexture :[],
   policePerLevel : 1,
@@ -479,6 +484,7 @@ Police = {
       for (var i=0; i < this.police.length; i++) {
         characterContainer.removeChild(this.police[i]);
       }
+      this.discardedPolice = this.police.slice();
       this.police = [];
     }
 
@@ -486,7 +492,14 @@ Police = {
     this.getAttackDamage();
 
     for (var i=0; i < maxPolice; i++) {
-      var police = new PIXI.AnimatedSprite(this.walkTexture);
+      var police;
+      if (this.discardedPolice.length > 0) {
+        police = this.discardedPolice.pop();
+        police.alpha = 1;
+        police.textures = this.walkTexture;
+      } else {
+        police = new PIXI.AnimatedSprite(this.walkTexture);
+      }
       police.deadTexture = this.deadTexture;
       police.animationSpeed = 0.2;
       police.anchor = {x:35/80,y:1};
@@ -495,15 +508,20 @@ Police = {
       police.zIndex = police.position.y;
       police.xSpeed = 0;
       police.ySpeed = 0;
-      police.police = true;
       police.radioTime = 5;
-      police.plagueTickTimer = Humans.plagueTickTimer;
+      police.dead = false;
+      police.infected = false;
+      police.lastKnownBuilding = false;
+      police.plagueDamage = 0;
+      police.plagueTickTimer = Math.random() * Humans.plagueTickTimer;
       police.maxSpeed = this.maxWalkSpeed;
       police.visionDistance = this.visionDistance;
       police.visible = true;
       police.maxHealth = police.health = this.getBaseHealth();
       police.timeToScan = Math.random() * Humans.scanTime;
       police.timeStanding = Math.random() * Humans.randomSecondsToStand();
+      police.target = false;
+      police.zombieTarget = false;
       police.state = this.states.standing;
       police.attackTimer = this.attackSpeed;
       police.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
@@ -674,6 +692,7 @@ Army = {
   maxRunSpeed : 50,
   baseHealth : 200,
   armymen : [],
+  discardedArmymen : [],
   walkTexture : [],
   deadTexture :[],
   armyPerLevel : 0.5,
@@ -685,6 +704,8 @@ Army = {
   visionDistance : 200,
   scaling :2,
   shotsPerBurst : 3,
+  droneStrikeTimer : 0,
+  droneStrikeTime : 30,
 
   states : {
     shooting : "shooting",
@@ -723,14 +744,26 @@ Army = {
       for (var i=0; i < this.armymen.length; i++) {
         characterContainer.removeChild(this.armymen[i]);
       }
+      this.discardedArmymen = this.armymen.slice();
       this.armymen = [];
     }
 
     var maxArmy = this.getMaxArmy();
     this.getAttackDamage();
+
+    this.droneStrike = false;
+    this.droneStrikeTimer = Math.random() * this.droneStrikeTime;
+    this.droneActive = GameModel.level >= 25;
   
     for (var i=0; i < maxArmy; i++) {
-      var armyman = new PIXI.AnimatedSprite(this.walkTexture);
+      var armyman;
+      if (this.discardedArmymen.length > 0) {
+        armyman = this.discardedArmymen.pop();
+        armyman.alpha = 1;
+        armyman.textures = this.walkTexture;
+      } else {
+        armyman = new PIXI.AnimatedSprite(this.walkTexture);
+      }
       armyman.deadTexture = this.deadTexture;
       armyman.animationSpeed = 0.2;
       armyman.anchor = {x:35/80,y:1};
@@ -739,14 +772,19 @@ Army = {
       armyman.zIndex = armyman.position.y;
       armyman.xSpeed = 0;
       armyman.ySpeed = 0;
-      armyman.army = true;
-      armyman.plagueTickTimer = Humans.plagueTickTimer;
+      armyman.dead = false;
+      armyman.infected = false;
+      armyman.lastKnownBuilding = false;
+      armyman.plagueDamage = 0;
+      armyman.plagueTickTimer = Math.random() * Humans.plagueTickTimer;
       armyman.maxSpeed = this.maxWalkSpeed;
       armyman.visionDistance = this.visionDistance;
       armyman.visible = true;
       armyman.maxHealth = armyman.health = this.getBaseHealth();
       armyman.timeToScan = Math.random() * Humans.scanTime;
       armyman.timeStanding = Math.random() * Humans.randomSecondsToStand();
+      armyman.target = false;
+      armyman.zombieTarget = false;
       armyman.state = this.states.standing;
       armyman.attackTimer = this.attackSpeed;
       armyman.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
@@ -756,11 +794,15 @@ Army = {
   },
 
   update(timeDiff, aliveZombies) {
+    if (this.droneActive) {
+      this.droneStrikeTimer -= timeDiff;
+    }
     for (var i=0; i < this.armymen.length; i++) {
       this.updateArmy(this.armymen[i], timeDiff, aliveZombies);
       if (!this.armymen[i].dead)
         Humans.aliveHumans.push(this.armymen[i]);
     }
+    this.updateDroneStrike(timeDiff, aliveZombies);
   },
 
   decideStateOnZombieDistance(armyman) {
@@ -816,7 +858,10 @@ Army = {
       Humans.updatePlague(armyman, timeDiff);
 
     if ((!armyman.zombieTarget || armyman.zombieTarget.dead) && armyman.timeToScan < 0) {
-      Humans.scanForZombies(armyman, aliveZombies);
+      var zombies = Humans.scanForZombies(armyman, aliveZombies);
+      if (zombies > 3 && this.droneActive && this.droneStrikeTimer < 0) {
+        this.callDroneStrike(armyman, aliveZombies);
+      }
     }
 
     this.decideStateOnZombieDistance(armyman);
@@ -883,6 +928,116 @@ Army = {
         }
 
         break;
+    }
+  },
+
+  droneBlastRadius : 35,
+
+  callDroneStrike(armyman, aliveZombies) {
+
+    var zombiesInArea = 0;
+    for (var i = 0; i < aliveZombies.length; i++) {
+      if (aliveZombies[i].x > armyman.zombieTarget.x - this.droneBlastRadius && aliveZombies[i].x < armyman.zombieTarget.x + this.droneBlastRadius) {
+        if (aliveZombies[i].y > armyman.zombieTarget.y - this.droneBlastRadius && aliveZombies[i].y < armyman.zombieTarget.y + this.droneBlastRadius) {
+          zombiesInArea++;
+        }
+      }
+    }
+    var humansInArea = 0;
+    var aliveHumans = Humans.aliveHumans;
+    for (var i = 0; i < aliveHumans.length; i++) {
+      if (aliveHumans[i].x > armyman.zombieTarget.x - this.droneBlastRadius && aliveHumans[i].x < armyman.zombieTarget.x + this.droneBlastRadius) {
+        if (aliveHumans[i].y > armyman.zombieTarget.y - this.droneBlastRadius && aliveHumans[i].y < armyman.zombieTarget.y + this.droneBlastRadius) {
+          humansInArea++;
+        }
+      }
+    }
+
+    if (zombiesInArea > 1 && humansInArea == 0) {
+      Exclamations.newRadio(armyman);
+      this.droneStrikeTimer = this.droneStrikeTime;
+      this.droneStrike = {
+        caller:armyman,
+        target:armyman.zombieTarget,
+        timer:3,
+        bombsLeft:3
+      }
+    }
+  },
+
+  droneBomb(aliveZombies) {
+    var variance = 16;
+    var bombHit = {
+      x:this.droneStrike.target.x - variance + (Math.random() *  variance * 2),
+      y:this.droneStrike.target.y - variance + (Math.random() *  variance * 2)
+    };
+    Blasts.newDroneBlast(bombHit.x, bombHit.y);
+    for (var i = 0; i < aliveZombies.length; i++) {
+      if (aliveZombies[i].x > bombHit.x - this.droneBlastRadius && aliveZombies[i].x < bombHit.x + this.droneBlastRadius) {
+        if (aliveZombies[i].y > bombHit.y - this.droneBlastRadius && aliveZombies[i].y < bombHit.y + this.droneBlastRadius) {
+          Zombies.damageZombie(aliveZombies[i], this.attackDamage * 5);
+        }
+      }
+    }
+    this.droneStrike.timer = 0.3;
+    this.droneStrike.bombsLeft--;
+  },
+
+  updateDroneStrike(timeDiff, aliveZombies) {
+    if (this.droneStrike) {
+      
+      this.droneStrike.timer -= timeDiff;
+
+      if (!this.droneStrike.startedBombing) {
+        if (!this.droneStrike.text) {
+          this.droneStrike.text = new PIXI.Text("3", {
+            fontFamily: 'sans-serif',
+            fontSize : 40,
+            fill: "#F00",
+            stroke: "#000",
+            strokeThickness: 0,
+            align: 'center'
+          });
+          this.droneStrike.text.anchor = {x:0.5, y:1};
+          this.droneStrike.text.scale.x = 0.5;
+          this.droneStrike.text.scale.y = 0.5;
+          foregroundContainer.addChild(this.droneStrike.text)
+
+          this.droneStrike.laser = new PIXI.Graphics();
+          foregroundContainer.addChild(this.droneStrike.laser);
+        }
+        this.droneStrike.text.text = Math.ceil(this.droneStrike.timer);
+        this.droneStrike.text.x = this.droneStrike.target.x;
+        this.droneStrike.text.y = this.droneStrike.target.y - 30;
+
+        this.droneStrike.laser.clear();
+        this.droneStrike.laser.lineStyle(1, 0xFF0000);
+        this.droneStrike.laser.moveTo(this.droneStrike.caller.x, this.droneStrike.caller.y - 10);
+        this.droneStrike.laser.lineTo(this.droneStrike.target.x, this.droneStrike.target.y - 10);
+      }
+
+      if ((this.droneStrike.caller.dead || this.droneStrike.target.dead) && !this.droneStrike.startedBombing) {
+        foregroundContainer.removeChild(this.droneStrike.text)
+        foregroundContainer.removeChild(this.droneStrike.laser);
+        this.droneStrike = false;
+        this.droneStrikeTimer = 0;
+        return;
+      }
+      
+      if (this.droneStrike.timer < 0) {
+
+        if (!this.droneStrike.startedBombing) {
+          foregroundContainer.removeChild(this.droneStrike.text)
+          foregroundContainer.removeChild(this.droneStrike.laser);
+          this.droneStrike.startedBombing = true;
+        }
+
+        this.droneBomb(aliveZombies);
+
+        if (this.droneStrike.bombsLeft <= 0) {
+          this.droneStrike = false;
+        }
+      }
     }
   }
 

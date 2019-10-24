@@ -11,6 +11,8 @@ function onDragStart(event) {
   this.dragOffset = this.data.getLocalPosition(this);
   this.dragOffset.x *= this.scale.x;
   this.dragOffset.y *= this.scale.y;
+  this.dragStartX = this.x;
+  this.dragStartY = this.y;
   lastDiff = false;
 }
 
@@ -48,10 +50,10 @@ function onDragMove(event) {
     pinchZoom(event);
   } else if (this.dragging) {
       const newPosition = this.data.getLocalPosition(this.parent);
-      if (distanceBetweenPoints(this.x, this.y, newPosition.x - this.dragOffset.x, newPosition.y - this.dragOffset.y) >= 1) {
-        this.x = newPosition.x - this.dragOffset.x;
-        this.y = newPosition.y - this.dragOffset.y;
-        preventGameContainerLeavingBounds(this);
+      this.x = newPosition.x - this.dragOffset.x;
+      this.y = newPosition.y - this.dragOffset.y;
+      preventGameContainerLeavingBounds(this);
+      if (distanceBetweenPoints(this.dragStartX, this.dragStartY, this.x, this.y) > 2) {
         this.hasMoved = true;
       }
   }
@@ -276,7 +278,7 @@ function startGame() {
     setGameFieldSizeForLevel();
 
     centerGameContainer();
-    
+
     // Listen for animate update
     app.ticker.add((delta) => {
       update(app.ticker.deltaMS / 1000);

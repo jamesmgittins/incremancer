@@ -8,6 +8,7 @@ Map = {
   cornerDistance : 14,
   minBuildings: 3,
   wallWidth : 4,
+  graveyardCollision : false,
 
   getRandomBuilding() {
     return getRandomElementFromArray(this.buildingsByPopularity, Math.random());
@@ -344,11 +345,26 @@ Map = {
     }
   },
 
+  checkGraveyard(start, end) {
+    var collision = {
+      x:false, 
+      y:false
+    };
+    if (this.graveyardCollision) {
+      this.checkWall(this.graveyardCollision, start, end, collision);
+    }
+    if (collision.x || collision.y)
+      return collision;
+
+    return false;
+  },
+
   checkCollisions(start, end) {
     var closeBuilding = this.findBuilding(start);
 
-    if (!closeBuilding)
-      return false;
+    if (!closeBuilding) {
+      return this.checkGraveyard(start, end);
+    }
 
     var collision = {
       x:false, 
@@ -358,6 +374,7 @@ Map = {
     for (var i = 0; i < closeBuilding.walls.length; i++) {
       this.checkWall(closeBuilding.walls[i], start, end, collision);
     }
+    
 
     return collision;
   },
@@ -411,8 +428,10 @@ Map = {
 
   modifyVectorForCollision(vector, building, position) {
     // no building = no collision
-    if (!building)
+    if (!building && !this.graveyardCollision) {
       return vector;
+    }
+      
 
     // check 5 distance from position
     var collision = {x:false, y:false};
@@ -424,8 +443,14 @@ Map = {
     };
 
     // check all the walls
-    for (var i = 0; i < building.walls.length; i++) {
-      this.checkWall(building.walls[i], position, end, collision);
+    if (building) {
+      for (var i = 0; i < building.walls.length; i++) {
+        this.checkWall(building.walls[i], position, end, collision);
+      }
+    }
+
+    if (this.graveyardCollision) {
+      this.checkWall(this.graveyardCollision, position, end, collision);
     }
 
     if (collision.x) {
