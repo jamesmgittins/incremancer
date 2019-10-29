@@ -24,6 +24,7 @@ Upgrades = {
     zombieDmgPC : "zombieDmgPC",
     zombieHealthPC : "zombieHealthPC",
     startingPC : "startingPC",
+    energyCost : "energyCost"
   },
 
   costs : {
@@ -144,6 +145,9 @@ Upgrades = {
         GameModel.startingResources += upgrade.effect * upgrade.rank;
         // GameModel.startingPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
+      case this.types.energyCost:
+        GameModel.zombieCost -= upgrade.effect * upgrade.rank;
+        return;
     }
   },
 
@@ -154,24 +158,31 @@ Upgrades = {
         return;
       case this.constructionTypes.crypt:
         GameModel.constructions.crypt = 1;
-        // GameModel.brainsStorePCMod += 0.5;
-        // GameModel.bloodStorePCMod += 0.5;
-        GameModel.brainsStorePCMod *= 1.5;
-        GameModel.bloodStorePCMod *= 1.5;
+        GameModel.brainsStorePCMod += 0.5;
+        GameModel.bloodStorePCMod += 0.5;
+        // GameModel.brainsStorePCMod *= 1.5;
+        // GameModel.bloodStorePCMod *= 1.5;
         return;
       case this.constructionTypes.fort:
         GameModel.constructions.fort = 1;
-        // GameModel.brainsStorePCMod += 0.5;
-        // GameModel.bloodStorePCMod += 0.5;
-        GameModel.brainsStorePCMod *= 1.5;
-        GameModel.bloodStorePCMod *= 1.5;
+        GameModel.brainsStorePCMod += 0.6;
+        GameModel.bloodStorePCMod += 0.6;
+        // GameModel.brainsStorePCMod *= 1.5;
+        // GameModel.bloodStorePCMod *= 1.5;
         return;
       case this.constructionTypes.fortress:
         GameModel.constructions.fortress = 1;
-        // GameModel.brainsStorePCMod += 0.5;
-        // GameModel.bloodStorePCMod += 0.5;
-        GameModel.brainsStorePCMod *= 1.5;
-        GameModel.bloodStorePCMod *= 1.5;
+        GameModel.brainsStorePCMod += 0.7;
+        GameModel.bloodStorePCMod += 0.7;
+        // GameModel.brainsStorePCMod *= 1.5;
+        // GameModel.bloodStorePCMod *= 1.5;
+        return;
+      case this.constructionTypes.citadel:
+        GameModel.constructions.citadel = 1;
+        GameModel.brainsStorePCMod += 0.8;
+        GameModel.bloodStorePCMod += 0.8;
+        // GameModel.brainsStorePCMod *= 1.5;
+        // GameModel.bloodStorePCMod *= 1.5;
         return;
       case this.constructionTypes.plagueSpikes:
         GameModel.constructions.plagueSpikes = 1;
@@ -181,6 +192,29 @@ Upgrades = {
         return;
       case this.constructionTypes.fenceSize:
         GameModel.fenceRadius += upgrade.effect * upgrade.rank;
+        return;
+      case this.constructionTypes.runesmith:
+        GameModel.constructions.runesmith = 1;
+        if (!GameModel.persistentData.runes) {
+          GameModel.persistentData.runes = {
+            life : {
+              blood:0,
+              brains:0,
+              bones:0
+            },
+            death : {
+              blood:0,
+              brains:0,
+              bones:0
+            }
+          }
+        }
+        return;
+      case this.constructionTypes.aviary:
+        GameModel.constructions.aviary = 1;
+        return;
+      case this.constructionTypes.zombieCage:
+        GameModel.zombieCages += upgrade.effect * upgrade.rank;
         return;
     }
   },
@@ -231,6 +265,8 @@ Upgrades = {
         return Math.round(GameModel.startingResources * 500) + " blood, " + Math.round(GameModel.startingResources * 50) + " brains, " + Math.round(GameModel.startingResources * 200) + " bones";
       case this.types.unlockSpell:
         return this.currentRank(upgrade) > 0 ? "You have learned this spell" : "You have yet to learn this spell";
+      case this.types.energyCost:
+        return "Zombie Cost: " + GameModel.zombieCost + " energy";
     }
   },
 
@@ -276,7 +312,9 @@ Upgrades = {
   },
 
   constructionLeadsTo(construction) {
-    return this.constructionUpgrades.filter(upgrade => upgrade.requires == construction.id).map(upgrade => upgrade.name).join(", ");
+    return this.constructionUpgrades.filter(upgrade => upgrade.requires == construction.id)
+      .concat(this.upgrades.filter(upgrade => upgrade.requires == construction.id))
+      .map(upgrade => upgrade.name).join(", ");
   },
 
   purchaseUpgrade(upgrade) {
@@ -503,16 +541,129 @@ Upgrades = {
     });
   },
 
+  runeCalculations : [
+    {
+      rune: "death",
+      effect : "attackSpeed",
+      cost: "blood",
+      logBase : 1.6,
+      adjustment : -13,
+      subtract : true,
+      cap : 0.8
+    },
+    {
+      rune: "death",
+      effect : "critChance",
+      cost: "brains",
+      logBase : 1.3,
+      adjustment : -20,
+      cap : 0.8
+    },
+    {
+      rune: "death",
+      effect : "critDamage",
+      cost: "bones",
+      logBase : 1.03,
+      adjustment : -200,
+      cap : false
+    },
+    {
+      rune: "life",
+      effect : "damageReduction",
+      cost: "blood",
+      logBase : 1.5,
+      adjustment : -15,
+      subtract : true,
+      cap : 0.8
+    },
+    {
+      rune: "life",
+      effect : "healthRegen",
+      cost: "brains",
+      logBase : 2.9,
+      adjustment : -5.5,
+      cap : 0.5
+    },
+    {
+      rune: "life",
+      effect : "damageReflection",
+      cost: "bones",
+      logBase : 1.24,
+      adjustment : -30,
+      cap : 1
+    }
+  ],
+
+  infuseRune(runeType, costType, amount) {
+    var rune = runeType == "life" ? GameModel.persistentData.runes.life : GameModel.persistentData.runes.death;
+    switch(costType) {
+      case "blood":
+        if (GameModel.persistentData.blood > amount) {
+          rune.blood += amount;
+          GameModel.persistentData.blood -= amount;
+        }
+        break;
+      case "brains":
+        if (GameModel.persistentData.brains > amount) {
+          rune.brains += amount;
+          GameModel.persistentData.brains -= amount;
+        }
+        break;
+      case "bones":
+        if (GameModel.persistentData.bones > amount) {
+          rune.bones += amount;
+          GameModel.persistentData.bones -= amount;
+        }
+        break;
+    }
+    GameModel.saveData();
+    this.updateRuneEffects();
+  },
+
+  updateRuneEffects() {
+    if (!GameModel.persistentData.runes)
+      return;
+
+    var runeEffects = {
+      attackSpeed : 1,
+      critChance : 0,
+      critDamage : 0,
+      damageReduction : 1,
+      healthRegen : 0,
+      damageReflection : 0
+    };
+
+    for (var i = 0; i < this.runeCalculations.length; i++) {
+      var calculation = this.runeCalculations[i];
+      var infusionAmount = GameModel.persistentData.runes[calculation.rune][calculation.cost];
+      if (infusionAmount > 0) {
+        var result = (Math.log(infusionAmount) / Math.log(calculation.logBase) + calculation.adjustment) / 100;
+        if (!calculation.cap || result < calculation.cap) {
+          if (calculation.subtract) {
+            runeEffects[calculation.effect] -= result;
+          } else {
+            runeEffects[calculation.effect] += result;
+          }
+        }
+      }
+    }
+    GameModel.runeEffects = runeEffects;
+  },
+
   constructionTypes : {
     graveyard : "graveyard",
     crypt : "crypt",
     fort : "fort",
     fortress : "fortress",
+    citadel : "citadel",
     fence : "fence",
     fenceSize : "fenceSize",
     plagueWorkshop : "plagueWorkshop",
     plagueSpikes : "plagueSpikes",
-    spellTower : "spellTower"
+    spellTower : "spellTower",
+    runesmith : "runesmith",
+    aviary : "aviary",
+    zombieCage : "zombieCage"
   },
 
   Upgrade : function(id, name, type, costType, basePrice, multiplier, effect, cap, description, purchaseMessage, requires) {
@@ -547,19 +698,28 @@ Upgrades = {
 
 Upgrades.constructionUpgrades = [
   new Upgrades.Construction(201, "Cursed Graveyard", Upgrades.constructionTypes.graveyard, {blood:1800, energy:30}, 30, 1, 1, 1, false, "Construct a Cursed Graveyard in the town that will automatically spawn zombies when your energy is at its maximum!", "Graveyard menu now available!"),
+  new Upgrades.Construction(205, "Crypt", Upgrades.constructionTypes.crypt, {blood:21000, bones:2220}, 60, 1, 1, 1, 201, "Construct a Crypt in your graveyard. This will give you a nice dark and quiet place to think. The additional space will also allow you to store 50% more blood and brains!"),
+  new Upgrades.Construction(206, "Bone Fort", Upgrades.constructionTypes.fort, {blood:60000, bones:6000, energy:60}, 60, 1, 1, 1, 205, "Turn your crypt into a fort. The additional space will also allow you to store 60% more blood and brains.", "New upgrades are available in the shop!"),
+  new Upgrades.Construction(207, "Bone Fortress", Upgrades.constructionTypes.fortress, {blood:100000, bones:9000, energy:90}, 60, 1, 1, 1, 206, "Turn your fort into a fortress. The additional space will also allow you to store 70% more blood and brains."),
+  new Upgrades.Construction(211, "Bone Citadel", Upgrades.constructionTypes.citadel, {blood:200000, bones:12000, energy:120}, 60, 1, 1, 1, 207, "Turn your fortress into a towering citadel that looms over the town. The additional space will also allow you to store 80% more blood and brains.","New upgrades are available in the shop!"),
   new Upgrades.Construction(202, "Perimeter Fence", Upgrades.constructionTypes.fence, {bones:880, energy:22}, 44, 1, 1, 1, 201, "Build a protective fence around the graveyard that will reduce damage taken by zombies inside by 50%."),
-  new Upgrades.Construction(203, "Bigger Fence", Upgrades.constructionTypes.fenceSize, {bones:880, energy:22}, 44, 1, 10, 4, 202, "Enlarge the fence so more area is protected."),
-  new Upgrades.Construction(204, "Plague Workshop", Upgrades.constructionTypes.plagueWorkshop, {blood:10200, brains:600}, 60, 1, 1, 1, 205, "Build a workshop to study the effects of plague. This will unlock new upgrades in the shop.", "Plague upgrades now available!"),
-  new Upgrades.Construction(205, "Crypt", Upgrades.constructionTypes.crypt, {blood:21000, bones:4500}, 60, 1, 1, 1, 201, "Construct a Crypt in your graveyard. This will give you a nice dark and quiet place to think. The additional space will also allow you to store 50% more blood and brains!"),
-  new Upgrades.Construction(206, "Bone Fort", Upgrades.constructionTypes.fort, {blood:42000, bones:6000}, 60, 1, 1, 1, 205, "Turn your crypt into a fort. The additional space will also allow you to store 50% more blood and brains."),
-  new Upgrades.Construction(207, "Bone Fortress", Upgrades.constructionTypes.fortress, {blood:60000, bones:9000}, 60, 1, 1, 1, 206, "Turn your fort into a fortress. The additional space will also allow you to store 50% more blood and brains."),
-  new Upgrades.Construction(208, "Plague Spikes", Upgrades.constructionTypes.plagueSpikes, {brains:3000, bones:6000}, 30, 1, 1, 1, 204, "Booby trap the area around your graveyard with cruel spikes that infect tresspassing humans with the plague."),
+  new Upgrades.Construction(203, "Bigger Fence", Upgrades.constructionTypes.fenceSize, {bones:880, energy:22}, 44, 1, 10, 4, 202, "Enlarge the fence so a greater area is protected."),
+  new Upgrades.Construction(204, "Plague Workshop", Upgrades.constructionTypes.plagueWorkshop, {blood:10200, brains:600}, 60, 1, 1, 1, 205, "Build a laboratory to study the effects of plague. This will unlock new upgrades in the shop.", "Plague upgrades now available!"),
+  new Upgrades.Construction(208, "Plague Spikes", Upgrades.constructionTypes.plagueSpikes, {brains:3000, bones:1000}, 30, 1, 1, 1, 204, "Booby trap the area around your graveyard with cruel spikes that infect tresspassing humans with the plague."),
   new Upgrades.Construction(209, "Spell Tower", Upgrades.constructionTypes.spellTower, {brains:3000, blood:30000}, 30, 1, 1, 1, 206, "Dedicate one tower of your fort to the study of spellcraft. Perhaps you can learn some new spells?", "Spells now available in the shop!"),
+  new Upgrades.Construction(210, "Runesmith", Upgrades.constructionTypes.runesmith, {bones:3000, blood:120000, brains:1000}, 30, 1, 1, 1, 207, "Build a runesmith's workshop in order to fortify your zombies with powerful runes."),
+  new Upgrades.Construction(212, "Acursed Aviary", Upgrades.constructionTypes.aviary, {bones:6000, blood:220000, brains:2000}, 60, 1, 1, 1, 211, "Construct an aviary on top of your citadel so you can release wicked harpies to bomb the townspeople.", "Harpies available for hire in the graveyard menu"),
+  new Upgrades.Construction(213, "Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:600, blood:900}, 30, 1, 5, 1, 201, "Build a cage to contain surplus zombies once a town is defeated."),
+  new Upgrades.Construction(214, "Second Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:1200, blood:1800}, 30, 1, 10, 1, 205, "Build an additional cage to contain surplus zombies once a town is defeated."),
+  new Upgrades.Construction(215, "Third Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:1800, blood:2700}, 30, 1, 10, 1, 206, "Build an additional cage to contain surplus zombies once a town is defeated."),
+  new Upgrades.Construction(216, "Fourth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:2400, blood:3600}, 30, 1, 10, 1, 207, "Build an additional cage to contain surplus zombies once a town is defeated."),
+  new Upgrades.Construction(217, "Fifth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:3000, blood:4500}, 30, 1, 15, 1, 211, "Build an additional cage to contain surplus zombies once a town is defeated."),
 ];
 
 Upgrades.prestigeUpgrades = [
   new Upgrades.Upgrade(108, "A Small Investment", Upgrades.types.startingPC, Upgrades.costs.prestigePoints, 10, 1.25, 1, 0, "Each rank gives you an additional 500 blood, 50 brains, and 200 bones when starting a new level."),
   new Upgrades.Upgrade(109, "Time Warp", Upgrades.types.unlockSpell, Upgrades.costs.prestigePoints, 50, 1, 1, 1, "Unlock the Time Warp spell in order to speed up the flow of time."),
+  new Upgrades.Upgrade(110, "Master of Death", Upgrades.types.energyCost, Upgrades.costs.prestigePoints, 1000, 1, 1, 5, "Each rank reduces the energy cost of summoning a zombie by 1"),
   new Upgrades.Upgrade(101, "Blood Storage", Upgrades.types.bloodStoragePC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% blood storage for each rank."),
   new Upgrades.Upgrade(102, "Blood Rate", Upgrades.types.bloodGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% blood income rate for each rank."),
   new Upgrades.Upgrade(103, "Brain Storage", Upgrades.types.brainsStoragePC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% brain storage for each rank."),
@@ -571,9 +731,13 @@ Upgrades.prestigeUpgrades = [
 
 Upgrades.upgrades = [
   // blood upgrades
-  new Upgrades.Upgrade(1, "Bloodthirst", Upgrades.types.damage, Upgrades.costs.blood, 50, 1.4, 1, 0, "Your zombies thirst for blood and do +1 damage for each rank of Bloodthirst."),
-  new Upgrades.Upgrade(2, "Leatherface", Upgrades.types.health, Upgrades.costs.blood, 100, 1.4, 10, 0, "Your zombies gain thicker skin and +10 health with each rank."),
-  new Upgrades.Upgrade(3, "Cold Storage", Upgrades.types.brainsCap, Upgrades.costs.blood, 150, 1.2, 50, 0, "Turns out you can use all of your spare blood to store brains and keep them fresh. Each rank increases your maximum brain capacity by 50."),
+  new Upgrades.Upgrade(1, "Bloodthirst", Upgrades.types.damage, Upgrades.costs.blood, 50, 1.2, 1, 0, "Your zombies thirst for blood and do +1 damage for each rank of Bloodthirst."),
+  new Upgrades.Upgrade(9, "Sharpened Teeth", Upgrades.types.damage, Upgrades.costs.blood, 3000, 1.23, 3, 0, "Your zombies bites do +3 damage with each rank of Sharpened Teeth.", false, 206),
+  new Upgrades.Upgrade(11, "Razor Claws", Upgrades.types.damage, Upgrades.costs.blood, 28000, 1.25, 5, 0, "Your zombies bites do +5 damage with each rank of Razor Claws.", false, 211),
+  new Upgrades.Upgrade(2, "Like Leather", Upgrades.types.health, Upgrades.costs.blood, 100, 1.2, 10, 0, "Your zombies gain tougher skin and +10 health with each rank."),
+  new Upgrades.Upgrade(10, "Thick Skull", Upgrades.types.health, Upgrades.costs.blood, 5000, 1.23, 25, 0, "Your zombies gain +25 health with each rank.", false, 206),
+  new Upgrades.Upgrade(12, "Battle Hardened", Upgrades.types.health, Upgrades.costs.blood, 32000, 1.25, 40, 0, "Your zombies gain +40 health with each rank.", false, 211),
+  new Upgrades.Upgrade(3, "Cold Storage", Upgrades.types.brainsCap, Upgrades.costs.blood, 150, 1.2, 50, 15, "Turns out you can use all of your spare blood to store brains and keep them fresh. Each rank increases your maximum brain capacity by 50."),
   new Upgrades.Upgrade(4, "Recycling is Cool", Upgrades.types.brainRecoverChance, Upgrades.costs.blood, 1000, 1.2, 0.1, 10, "Why are we wasting so many good brains on this project? Each rank increases your chance to get a brain back from a dead zombie by 10%"),
   new Upgrades.Upgrade(5, "Your Soul is Mine!", Upgrades.types.riseFromTheDeadChance, Upgrades.costs.blood, 1500, 1.4, 0.1, 10, "Using your most powerful blood magic you command the bodies of the dead to rise as your servants! Each rank grants 10% chance that dead humans will turn into zombies."),
   new Upgrades.Upgrade(6, "Infected Bite", Upgrades.types.infectedBite, Upgrades.costs.blood, 3500, 1.4, 0.1, 10, "Your zombies are now infected with plague and could infect their victims too. Each rank adds 10% chance to inflict damage over time when a zombie attacks a target.", false, 204),
@@ -584,10 +748,10 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 15, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),
   new Upgrades.Upgrade(21, "Master Summoner", Upgrades.types.energyCap, Upgrades.costs.brains, 10, 1.5, 5, 20, "All the brains you harvested have proved fruitful in your experiments. Each rank raises your maximum energy by 5."),
   new Upgrades.Upgrade(22, "Primal Reflexes", Upgrades.types.speed, Upgrades.costs.brains, 5, 1.6, 1, 20, "The zombies retain more of their human agility increasing run speed by 1 for each rank."),
-  new Upgrades.Upgrade(23, "Blood Harvest", Upgrades.types.bloodCap, Upgrades.costs.brains, 50, 1.1, 500, 0, "All this brain power has enabled you to devise some superior blood storage vats. Each rank increases your maximum blood by 500."),
-  new Upgrades.Upgrade(24, "Unholy Construction", Upgrades.types.construction, Upgrades.costs.brains, 75, 1, 1, 1, "Learn the art of Unholy Construction in order to build structures that will solidify your foothold on the town.", "Construction menu now available!"),
-  new Upgrades.Upgrade(25, "Infected Corpse", Upgrades.types.infectedBlast, Upgrades.costs.brains, 1000, 1.4, 0.1, 10, "Fill your zombies with so much plague they are ready to explode! Each rank adds 10% chance for a zombie to explode into a cloud of plague upon death.", false, 204),
-  new Upgrades.Upgrade(26, "Energy Charge", Upgrades.types.unlockSpell, Upgrades.costs.brains, 5000, 1, 2, 1, "Learn the Energy Charge spell which can drastically increase your energy rate for 30 seconds.", "New spell learned, Energy Charge!", 209),
+  new Upgrades.Upgrade(23, "Blood Harvest", Upgrades.types.bloodStoragePC, Upgrades.costs.brains, 50, 1.12, 0.1, 0, "All this brain power has enabled you to devise some superior blood storage methods. Each rank increases your maximum blood by 10%."),
+  new Upgrades.Upgrade(24, "Unholy Construction", Upgrades.types.construction, Upgrades.costs.brains, 50, 1, 1, 1, "Learn the art of Unholy Construction in order to build structures that will solidify your foothold on the town.", "Construction menu now available!"),
+  new Upgrades.Upgrade(25, "Infected Corpse", Upgrades.types.infectedBlast, Upgrades.costs.brains, 500, 1.4, 0.1, 10, "Fill your zombies with so much plague they are ready to explode! Each rank adds 10% chance for a zombie to explode into a cloud of plague upon death.", false, 204),
+  new Upgrades.Upgrade(26, "Energy Charge", Upgrades.types.unlockSpell, Upgrades.costs.brains, 2000, 1, 2, 1, "Learn the Energy Charge spell which can drastically increase your energy rate for 30 seconds.", "New spell learned, Energy Charge!", 209),
   
   // bone upgrades
   new Upgrades.Upgrade(40, "Bone Throne", Upgrades.types.energyCap, Upgrades.costs.bones, 50, 1.5, 10, 10, "Sitting atop your throne of bones you can finally think clearly. Each rank increases maximum energy by 10."),

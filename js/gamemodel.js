@@ -7,7 +7,7 @@ GameModel = {
   energySpellMultiplier:1,
   zombieCost:10,
   bonesPCMod : 1,
-  bloodMax:500,
+  bloodMax:1000,
   bloodPCMod : 1,
   bloodStorePCMod : 1,
   brainsMax:50,
@@ -18,6 +18,8 @@ GameModel = {
   zombieDamage : 10,
   zombieDamagePCMod : 1,
   zombieSpeed : 10,
+  zombieCages : 0,
+  zombiesInCages : 0,
   startingResources : 0,
   brainRecoverChance:0,
   riseFromTheDeadChance:0,
@@ -32,6 +34,14 @@ GameModel = {
   endLevelTimer : 3,
   endLevelDelay : 3,
   messageQueue : [],
+  runeEffects : {
+    attackSpeed : 1,
+    critChance : 0,
+    critDamage : 0,
+    damageReduction : 1,
+    healthRegen : 0,
+    damageReflection : 0
+  },
 
   gameSpeed : 1,
   
@@ -49,8 +59,9 @@ GameModel = {
   baseStats : {
     energyRate : 1,
     energyMax : 10,
-    bloodMax : 500,
+    bloodMax : 1000,
     brainsMax : 50,
+    zombieCost : 10,
     zombieHealth : 100,
     zombieDamage : 10,
     zombieSpeed : 10,
@@ -71,6 +82,8 @@ GameModel = {
     this.zombieHealth = this.baseStats.zombieHealth;
     this.zombieDamage = this.baseStats.zombieDamage;
     this.zombieSpeed = this.baseStats.zombieSpeed;
+    this.zombieCost = this.baseStats.zombieCost;
+    this.zombieCages = 0;
     this.brainRecoverChance = 0;
     this.riseFromTheDeadChance = 0;
     this.infectedBiteChance = 0;
@@ -117,7 +130,7 @@ GameModel = {
   },
 
   getEnergyRate() {
-    return (this.energySpellMultiplier * this.energyRate) - this.persistentData.boneCollectors;
+    return (this.energySpellMultiplier * this.energyRate) - (this.persistentData.boneCollectors + this.persistentData.harpies);
   },
 
   update(timeDiff, updateTime) {
@@ -138,6 +151,7 @@ GameModel = {
         if (this.endLevelTimer < 0) {
           this.currentState = this.states.levelCompleted;
           this.calculateEndLevelBones();
+          this.calculateEndLevelZombieCages();
           if (this.level == this.persistentData.levelUnlocked) {
             this.persistentData.levelUnlocked = this.level + 1;
             this.addPrestigePoints(this.level);
@@ -162,6 +176,38 @@ GameModel = {
     if (this.persistentData.boneCollectors > 0 && Bones.uncollected) {
       this.endLevelBones = Bones.uncollected.length;
       this.addBones(this.endLevelBones);
+    }
+  },
+
+  calculateEndLevelZombieCages() {
+    if (this.zombieCages > 0) {
+      this.zombiesInCages += this.zombieCount;
+      if (this.zombiesInCages > this.zombieCages)
+        this.zombiesInCages = this.zombieCages;
+    }
+  },
+
+  releaseCagedZombies() {
+    if (this.currentState = this.states.playingLevel) {
+      for (var i=0; i < this.zombiesInCages; i++) {
+        Zombies.createZombie(Graveyard.sprite.x, Graveyard.sprite.y);
+      }
+      this.zombiesInCages = 0;
+    }
+  },
+
+  sacrificeCagedZombies() {
+    this.addBlood(this.cagedZombieSacrificeValue().blood);
+    this.addBrains(this.cagedZombieSacrificeValue().brains);
+    this.addBones(this.cagedZombieSacrificeValue().bones);
+    this.zombiesInCages = 0;
+  },
+
+  cagedZombieSacrificeValue() {
+    return {
+      blood:this.zombiesInCages * this.zombieHealth * 0.5,
+      brains:this.zombiesInCages,
+      bones:this.zombiesInCages * 3
     }
   },
 
@@ -191,6 +237,7 @@ GameModel = {
     Graveyard.initialize();
     centerGameContainer();
     Upgrades.applyUpgrades();
+    Upgrades.updateRuneEffects();
     this.addStartLevelResources();
   },
 
@@ -203,9 +250,16 @@ GameModel = {
     this.energy = this.energyMax;
 
     if (this.currentState == this.states.playingLevel && this.persistentData.levelStarted != this.level && this.startingResources > 0) {
-      this.addBlood(this.startingResources * 500);
-      this.addBrains(this.startingResources * 50);
-      this.addBones(this.startingResources * 200);
+      this.persistentData.blood += this.startingResources * 500;
+      if (this.persistentData.blood > this.bloodMax)
+        this.persistentData.blood = this.bloodMax;
+
+      this.persistentData.brains += this.startingResources * 50;
+      if (this.persistentData.brains > this.brainsMax)
+        this.persistentData.brains = this.brainsMax;
+
+      this.persistentData.bones += this.startingResources * 200;
+      this.persistentData.bonesTotal += this.startingResources * 200;
     }
   },
 
@@ -232,6 +286,7 @@ GameModel = {
     prestigePointsToSpend : 0,
     boneCollectors : 0,
     graveyardZombies : 1,
+    harpies : 0,
     resolution : 1,
     zoomButtons : false
   },
@@ -255,9 +310,11 @@ GameModel = {
       this.persistentData.upgrades = this.persistentData.upgrades.filter(upgrade => upgrade.costType == Upgrades.costs.prestigePoints);
       this.persistentData.constructions = [];
       this.persistentData.boneCollectors = 0;
+      this.persistentData.harpies = 0;
       this.persistentData.graveyardZombies = 1;
       this.persistentData.prestigePointsToSpend += this.persistentData.prestigePointsEarned;
       this.persistentData.prestigePointsEarned = 0;
+      this.persistentData.runes = false;
       BoneCollectors.update(0.1);
       this.level = 1;
       this.currentState = this.states.prestiged;

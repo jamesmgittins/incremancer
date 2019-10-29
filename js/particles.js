@@ -20,6 +20,7 @@ Blood = {
 		return PIXI.Texture.from(blast);
 	},
 	initialize() {
+    this.viewableArea = viewableArea;
     if (!this.container) {
       this.container = new PIXI.Container();
       backgroundSpriteContainer.addChild(this.container);
@@ -65,6 +66,10 @@ Blood = {
     
   },
   newPart(x,y, plague) {
+
+    if (this.viewableArea.hideParticle(x,y)) {
+      return;
+    }
     var sprite = this.sprites[this.partCounter++];
     if (this.partCounter >= this.maxParts) {
       this.partCounter = 0;
@@ -456,7 +461,7 @@ Blasts = {
 		return PIXI.Texture.from(blast);
 	},
 	initialize() {
-
+    this.viewableArea = viewableArea;
     if (!this.texture) {
       this.texture = this.getTexture();
       this.container = new PIXI.Container();
@@ -491,6 +496,9 @@ Blasts = {
     }
   },
 	newBlast: function(x, y) {
+    if (this.viewableArea.hideParticle(x,y)) {
+      return;
+    }
     var sprite = this.sprites[this.partCounter++];
     if (this.partCounter >= this.maxParts)
       this.partCounter = 0;
@@ -537,7 +545,7 @@ Smoke = {
     return PIXI.Texture.from(blast);
 	},
 	initialize() {
-
+    this.viewableArea = viewableArea;
     this.allowTint = GameModel.app.renderer.type == 1;
 
     if (!this.texture) {
@@ -572,6 +580,9 @@ Smoke = {
     }
   },
 	newSmoke(x, y, variance = 0) {
+    if (this.viewableArea.hideParticle(x,y)) {
+      return;
+    }
     var sprite = this.sprites[this.partCounter++];
     if (this.partCounter >= this.maxParts)
       this.partCounter = 0;

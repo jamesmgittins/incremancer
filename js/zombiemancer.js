@@ -196,12 +196,39 @@ function scrollGameContainer(timeDiff) {
     preventGameContainerLeavingBounds(gc);
 }
 
+var viewableArea = {
+  x:0,
+  y:0,
+  width:1000,
+  height:1000,
+  hideParticle(x, y) {
+    if (x < this.x) {
+      return true;
+    }
+    if (y < this.y) {
+      return true;
+    }
+    if (x > this.x + this.width) {
+      return true;
+    }
+    if (y > this.y + this.height) {
+      return true;
+    }
+    return false;
+  },
+  update() {
+    this.x = (-gameContainer.x) / gameContainer.scale.x;
+    this.y = (-gameContainer.y) / gameContainer.scale.y;
+    this.width = canvasSize.x / gameContainer.scale.x;
+    this.height = canvasSize.y / gameContainer.scale.y;
+  }
+}
+
 var debug = false;
 var frames = 0;
 var timeSinceLastFrameCount = 1;
 
 function update(timeDiff) {
-  // gameContainer.cacheAsBitmap = false;
 
   if (GameModel.persistentData.showfps) {
     frames++;
@@ -213,6 +240,7 @@ function update(timeDiff) {
     }
   }
   scrollGameContainer(timeDiff);
+  viewableArea.update();
   
   timeDiff *= GameModel.gameSpeed;
 
@@ -224,7 +252,6 @@ function update(timeDiff) {
   Exclamations.update(timeDiff);
   Blasts.update(timeDiff);
   Smoke.update(timeDiff);
-  // gameContainer.cacheAsBitmap = true;
 }
 
 function setGameFieldSizeForLevel() {
@@ -260,6 +287,7 @@ function startGame() {
     .add('sprites/doctor.json')
     .add('sprites/zombie.json')
     .add('sprites/bonecollector.json')
+    .add('sprites/harpy.json')
     .add('sprites/objects.json')
     .add('sprites/fenceposts.json')
     .add('sprites/trees.json')

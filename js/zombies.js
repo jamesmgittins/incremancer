@@ -1,5 +1,6 @@
 Zombies = {
   map : Map,
+  model : GameModel,
   zombies : [],
   discardedZombies : [],
   aliveZombies : [],
@@ -32,7 +33,7 @@ Zombies = {
 
   populate() {
     this.graveyard = Graveyard;
-    GameModel.zombieCount = 0;
+    this.model.zombieCount = 0;
     if (this.textures.length == 0) {
       for (var i=0; i < 3; i++) {
         var animated = [];
@@ -85,7 +86,8 @@ Zombies = {
     zombie.position = {x:x,y:y};
     zombie.zIndex = zombie.position.y;
     zombie.visible = true;
-    zombie.health = zombie.super ? GameModel.zombieHealth * 10 : GameModel.zombieHealth;
+    zombie.health = zombie.super ? this.model.zombieHealth * 10 : this.model.zombieHealth;
+    zombie.regenTimer = 5;
     zombie.state = this.states.lookingForTarget;
     zombie.scaling = zombie.super ? 1.5 * this.scaling : this.scaling;
     zombie.scale = {
@@ -107,46 +109,51 @@ Zombies = {
   },
 
   spawnZombie(x,y) {
-    if (GameModel.energy < GameModel.zombieCost)
+    if (this.model.energy < this.model.zombieCost)
       return;
 
-    GameModel.energy -= GameModel.zombieCost;
+    this.model.energy -= this.model.zombieCost;
     this.createZombie(x,y);
   },
 
-  damageZombie(zombie, damage) {
+  damageZombie(zombie, damage, human) {
     if (this.graveyard.isWithinFence(zombie)) {
       damage *= 0.5;
       Exclamations.newShield(zombie);
     }
-    zombie.health -= damage;
-    zombie.speedMultiplier = Math.max(Math.min(1, zombie.health / GameModel.zombieHealth), 0.4);
+    zombie.health -= damage * this.model.runeEffects.damageReduction;
+    zombie.speedMultiplier = Math.max(Math.min(1, zombie.health / this.model.zombieHealth), 0.4);
     Blood.newSplatter(zombie.x, zombie.y);
     if (zombie.health <= 0 && !zombie.dead) {
       Bones.newBones(zombie.x, zombie.y);
       zombie.dead = true;
-      if (Math.random() < GameModel.infectedBlastChance) {
+      if (Math.random() < this.model.infectedBlastChance) {
         this.causePlagueExplosion(zombie);
       }
       zombie.textures = this.textures[zombie.textureId].dead;
-      if (Math.random() < GameModel.brainRecoverChance) {
-        GameModel.addBrains(1);
+      if (Math.random() < this.model.brainRecoverChance) {
+        this.model.addBrains(1);
       }
+    }
+    if (human && this.model.runeEffects.damageReflection > 0) {
+      Humans.damageHuman(human, damage * this.model.runeEffects.damageReflection);
     }
   },
 
-  causePlagueExplosion(zombie) {
+  causePlagueExplosion(zombie, killZombie = true) {
     var explosionRadius = 50;
     Blood.newPlagueSplatter(zombie.x, zombie.y);
     Blasts.newBlast(zombie.x, zombie.y - 4);
-    zombie.visible = false;
-    characterContainer.removeChild(zombie);
+    if (killZombie) {
+      zombie.visible = false;
+      characterContainer.removeChild(zombie);
+    }
     for (var i = 0; i < this.aliveHumans.length; i++) {
       if (Math.abs(this.aliveHumans[i].x - zombie.x) < explosionRadius) {
         if (Math.abs(this.aliveHumans[i].y - zombie.y) < explosionRadius) {
           if (this.fastDistance(zombie.x, zombie.y, this.aliveHumans[i].x, this.aliveHumans[i].y) < explosionRadius) {
             this.inflictPlague(this.aliveHumans[i]);
-            Humans.damageHuman(this.aliveHumans[i], zombie.super ? GameModel.zombieDamage * 10 : GameModel.zombieDamage);
+            Humans.damageHuman(this.aliveHumans[i], zombie.super ? this.model.zombieDamage * 10 : this.model.zombieDamage);
           }
         }
       }
@@ -180,7 +187,7 @@ Zombies = {
   },
 
   update(timeDiff) {
-    this.maxSpeed = GameModel.zombieSpeed;
+    this.maxSpeed = this.model.zombieSpeed;
     this.reactionTime = Math.max(0.2, this.aliveZombies.length / 2000);
     var aliveZombies = [];
     var zombiePartition = [];
@@ -194,10 +201,10 @@ Zombies = {
         }
       }
     }
-    GameModel.zombieCount = aliveZombies.length;
+    this.model.zombieCount = aliveZombies.length;
     this.aliveZombies = aliveZombies;
     this.zombiePartition = zombiePartition;
-    if (GameModel.energy >= GameModel.zombieCost && GameModel.currentState == GameModel.states.playingLevel) {
+    if (this.model.energy >= this.model.zombieCost && this.model.currentState == this.model.states.playingLevel) {
       this.zombieCursor.visible = true;
     } else {
       this.zombieCursor.visible = false;
@@ -213,8 +220,8 @@ Zombies = {
       Bones.newBones(zombie.x, zombie.y);
       zombie.dead = true;
       this.causePlagueExplosion(zombie);
-      if (Math.random() < GameModel.brainRecoverChance) {
-        GameModel.addBrains(1);
+      if (Math.random() < this.model.brainRecoverChance) {
+        this.model.addBrains(1);
       }
     }
   },
@@ -235,6 +242,10 @@ Zombies = {
     
     zombie.attackTimer -= timeDiff;
     zombie.scanTime -= timeDiff;
+    
+    if (this.model.runeEffects.healthRegen > 0) {
+      this.updateZombieRegen(zombie, timeDiff);
+    }
 
     if (this.detonate) {
       this.detonateZombie(zombie, timeDiff);
@@ -263,7 +274,7 @@ Zombies = {
 
         var distanceToHumanTarget = this.fastDistance(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y);
 
-        if (distanceToHumanTarget < this.attackDistance) {
+        if (distanceToHumanTarget < this.attackDistance && zombie.attackTimer < 0) {
           zombie.state = this.states.attackingTarget;
           break;
         }
@@ -277,11 +288,11 @@ Zombies = {
         if (this.fastDistance(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y) < this.attackDistance) {
           zombie.scale.x = zombie.target.x > zombie.x ? zombie.scaling : -zombie.scaling;
           if (zombie.attackTimer < 0) {
-            Humans.damageHuman(zombie.target, zombie.super ? GameModel.zombieDamage * 10 : GameModel.zombieDamage);
-            if (Math.random() < GameModel.infectedBiteChance) {
+            Humans.damageHuman(zombie.target, this.calculateDamage(zombie));
+            if (Math.random() < this.model.infectedBiteChance) {
               this.inflictPlague(zombie.target);
             }
-            zombie.attackTimer = this.attackSpeed;
+            zombie.attackTimer = this.attackSpeed * this.model.runeEffects.attackSpeed;
           }
         } else {
           zombie.state = this.states.movingToTarget;
@@ -290,13 +301,35 @@ Zombies = {
     }
   },
 
+  updateZombieRegen(zombie, timeDiff) {
+    zombie.regenTimer -= timeDiff;
+
+    if (zombie.regenTimer < 0) {
+      zombie.regenTimer = 5;
+      if (zombie.health < this.model.zombieHealth) {
+        zombie.health += this.model.zombieHealth * this.model.runeEffects.healthRegen;
+        if (zombie.health > this.model.zombieHealth) {
+          zombie.health = this.model.zombieHealth;
+        }
+      }
+    }
+  },
+
+  calculateDamage(zombie) {
+    var damage = zombie.super ? this.model.zombieDamage * 10 : this.model.zombieDamage;
+    if (this.model.runeEffects.critChance > 0 && Math.random() < this.model.runeEffects.critChance) {
+      damage *= this.model.runeEffects.critDamage;
+    }
+    return damage;
+  },
+
   inflictPlague(human) {
     if (!human.infected) {
       Exclamations.newPoison(human);
-      human.plagueDamage = GameModel.zombieDamage / 2;
+      human.plagueDamage = this.model.zombieDamage / 2;
       human.plagueTicks = 5;
     } else {
-      human.plagueDamage += GameModel.zombieDamage / 2;
+      human.plagueDamage += this.model.zombieDamage / 2;
       human.plagueTicks += 5;
     }
     human.infected = true;
@@ -361,7 +394,7 @@ Zombies = {
       zombie.targetTimer = this.reactionTime;
     }
     
-    if (GameModel.gameSpeed > 1) {
+    if (this.model.gameSpeed > 1) {
       var ax = Math.abs(zombie.targetVector.x);
       var ay = Math.abs(zombie.targetVector.y);
       if (Math.max(ax, ay) == 0)

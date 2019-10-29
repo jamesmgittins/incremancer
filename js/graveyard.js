@@ -2,6 +2,7 @@ Graveyard = {
 
   sprite : false,
   fortSprite : false,
+  spikeSprites : [],
   level : 1,
   spikeTimer : 5,
   fenceRadius : 50,
@@ -16,9 +17,13 @@ Graveyard = {
     this.drawFence();
     Bones.initialize();
     BoneCollectors.populate();
+    Harpies.populate();
   },
 
   drawGraveyard() {
+    if (!this.spikeTexture) {
+      this.spikeTexture = PIXI.Texture.from("spikes.png");
+    }
     if (this.sprite) {
       backgroundContainer.removeChild(this.sprite);
     }
@@ -42,6 +47,11 @@ Graveyard = {
       this.level = 4;
       textureName = "sprites/megagraveyard.png";
       fortTexture = "fort2.png";
+    }
+    if (GameModel.constructions.citadel) {
+      this.level = 5;
+      textureName = "sprites/megagraveyard.png";
+      fortTexture = "fort3.png";
     }
     if (this.sprite) {
       this.sprite.texture = PIXI.Texture.from(textureName);
@@ -122,13 +132,14 @@ Graveyard = {
 
   update(timeDiff) {
     BoneCollectors.addAndRemoveBoneCollectors();
+    Harpies.addAndRemoveHarpies();
     
     if (!GameModel.constructions.graveyard || GameModel.currentState != GameModel.states.playingLevel) {
       this.sprite.visible = false;
       return;
     }
 
-    if (this.level < 2 && GameModel.constructions.crypt || this.level < 3 && GameModel.constructions.fort || this.level < 4 && GameModel.constructions.fortress)
+    if (this.level < 2 && GameModel.constructions.crypt || this.level < 3 && GameModel.constructions.fort || this.level < 4 && GameModel.constructions.fortress || this.level < 5 && GameModel.constructions.citadel)
       this.drawGraveyard();
 
     this.sprite.visible = true;
@@ -136,14 +147,26 @@ Graveyard = {
       this.fortSprite.visible = true;
     }
 
+    if (this.level == 5) {
+      if (Math.random() > 0.9) {
+        if (Math.random() > 0.5) {
+          Smoke.newFireSmoke(this.sprite.x - 20, this.sprite.y - 113);
+        } else {
+          Smoke.newFireSmoke(this.sprite.x + 20, this.sprite.y - 113);
+        }
+        
+      }
+    }
+
     if (GameModel.energy >= GameModel.energyMax) {
       for (var i = 0; i < GameModel.persistentData.graveyardZombies; i ++)  {
-        Zombies.spawnZombie(this.sprite.x,this.sprite.y + (this.level > 2 ? 8 : 0));
+        Zombies.spawnZombie(this.sprite.x, this.sprite.y + (this.level > 2 ? 8 : 0));
       }
     }
 
     Bones.update(timeDiff);
     BoneCollectors.update(timeDiff);
+    Harpies.update(timeDiff);
 
     if(!GameModel.constructions.fence || GameModel.currentState != GameModel.states.playingLevel) {
       this.fence.visible = false;
@@ -155,6 +178,7 @@ Graveyard = {
     }
 
     this.updatePlagueSpikes(timeDiff);
+    this.updateSpikeSprites(timeDiff)
   },
 
   updatePlagueSpikes(timeDiff) {
@@ -170,9 +194,44 @@ Graveyard = {
                 Zombies.inflictPlague(aliveHumans[i]);
                 Humans.damageHuman(aliveHumans[i], GameModel.zombieDamage);
                 Blood.newPlagueSplatter(aliveHumans[i].x, aliveHumans[i].y);
+                this.addSpikeSprite(aliveHumans[i]);
               }
             }
           }
+        }
+      }
+    }
+  },
+
+  addSpikeSprite(human) {
+    var sprite = false;
+    for (var i=0; i < this.spikeSprites.length;i++) { 
+      if (!this.spikeSprites[i].visible) {
+        sprite = this.spikeSprites[i];
+        break;
+      }
+    }
+    if (!sprite) {
+      sprite = new PIXI.Sprite(this.spikeTexture);
+      this.spikeSprites.push(sprite);
+      characterContainer.addChild(sprite);
+      sprite.anchor = {x:0.5, y:1};
+    }
+    sprite.visible = true;
+    sprite.alpha = 1;
+    sprite.x = human.x;
+    sprite.y = human.y + 2;
+    sprite.zIndex = sprite.y;
+    sprite.scale.y = 2;
+    sprite.scale.x = Math.random() > 0.5 ? 1.5 : -1.5;
+  },
+
+  updateSpikeSprites(timeDiff) {
+    for (var i=0; i < this.spikeSprites.length;i++) {
+      if (this.spikeSprites[i].visible) {
+        this.spikeSprites[i].alpha -= timeDiff * 0.4;
+        if (this.spikeSprites[i].alpha <= 0) {
+          this.spikeSprites[i].visible = false;
         }
       }
     }
@@ -206,10 +265,11 @@ BoneCollectors = {
   },
 
   populate() {
+    this.bones = Bones;
     if (!this.texture) {
       this.texture = [];
       for (var i=0; i < 2; i++) {
-        this.texture.push(PIXI.Texture.from('bonecollector' + (i + 1) + '.png'))
+        this.texture.push(PIXI.Texture.from('bonecollector' + (i + 1) + '.png'));
       }
     }
     for (var i = 0; i < this.sprites.length; i++) {
@@ -266,12 +326,12 @@ BoneCollectors = {
       for (var j = 0; j < 3; j++) {
         var nearestBone = false;
         var distanceToNearest = 2000;
-        for (var i=0; i < Bones.uncollected.length; i++) {
-          if (!Bones.uncollected[i].collected && !Bones.uncollected[i].collector) {
-            var distance = this.fastDistance(x, y, Bones.uncollected[i].x, Bones.uncollected[i].y);
+        for (var i=0; i < this.bones.uncollected.length; i++) {
+          if (!this.bones.uncollected[i].collected && !this.bones.uncollected[i].collector) {
+            var distance = this.fastDistance(x, y, this.bones.uncollected[i].x, this.bones.uncollected[i].y);
             if (distance < distanceToNearest) {
               distanceToNearest = distance;
-              nearestBone = Bones.uncollected[i];
+              nearestBone = this.bones.uncollected[i];
             }
           }
         }
@@ -354,5 +414,183 @@ BoneCollectors = {
     boneCollector.position.x += boneCollector.xSpeed * timeDiff;
     boneCollector.position.y += boneCollector.ySpeed * timeDiff;
     boneCollector.zIndex = boneCollector.position.y;
+  }
+};
+
+Harpies = {
+  sprites:[],
+  bombSprites : [],
+  discardedBombSprites : [],
+  maxSpeed:75,
+  bombHeight:100,
+  textures:false,
+  scaling:2.5,
+  fastDistance : fastDistance,
+
+  states : {
+    bombing : "bombing",
+    returning : "returning"
+  },
+
+  populate() {
+    if (!this.textures) {
+      this.textures = [];
+      for (var i = 0; i < 2; i++) {
+        this.textures.push(PIXI.Texture.from("harpy" + (i + 1) + ".png"));
+      }
+      this.bombTexture = PIXI.Texture.from("harpybomb.png")
+    }
+    if (typeof GameModel.persistentData.harpies === 'undefined') {
+      GameModel.persistentData.harpies = 0;
+    }
+
+    for (var i = 0; i < this.sprites.length; i++) {
+      this.sprites[i].target = false;
+      this.sprites[i].position = {x:Graveyard.sprite.x,y:Graveyard.sprite.y - this.bombHeight};
+      this.sprites[i].state = this.states.returning;
+    }
+
+    for (var i = 0; i < this.bombSprites.length; i++) {
+      this.bombSprites[i].visible = false;
+    }
+  },
+
+  addAndRemoveHarpies() {
+    if (this.sprites.length > GameModel.persistentData.harpies) {
+      var harpy = this.sprites.pop();
+      harpy.target = false;
+      if (harpy.bomb) {
+        harpy.bomb.dropped = true;
+        harpy.bomb.floor = harpy.bomb.y + this.bombHeight;
+      }
+      foregroundContainer.removeChild(harpy);
+    }
+    if (this.sprites.length < GameModel.persistentData.harpies) {
+      var sprite = new PIXI.AnimatedSprite(this.textures);
+      sprite.animationSpeed = 0.2;
+      sprite.anchor = {x:0.5,y:1};
+      sprite.position = {x:Graveyard.sprite.x,y:Graveyard.sprite.y - this.bombHeight};
+      sprite.zIndex = sprite.position.y;
+      sprite.visible = true;
+      sprite.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
+      sprite.xSpeed = 0;
+      sprite.ySpeed = 0;
+      sprite.speedFactor = 0;
+      sprite.state = this.states.returning;
+      sprite.play();
+      this.sprites.push(sprite);
+      foregroundContainer.addChild(sprite);
+    }
+  },
+
+  update(timeDiff) {
+    for (var i=0; i < this.sprites.length; i++) {
+      this.updateHarpy(this.sprites[i], timeDiff);
+    }
+    for (var i=0; i < this.bombSprites.length; i++) {
+      if (this.bombSprites[i].visible)
+        this.updateBomb(this.bombSprites[i], timeDiff);
+    }
+  },
+
+  updateBomb(bomb, timeDiff) {
+    if (bomb.dropped) {
+      bomb.rotation += timeDiff * bomb.rotSpeed;
+      bomb.ySpeed += timeDiff * 50;
+      bomb.scale.x = bomb.scale.y -= timeDiff * 0.2;
+      bomb.y += bomb.ySpeed * timeDiff;
+      if (bomb.y >= bomb.floor - 2) {
+        bomb.visible = false;
+        this.discardedBombSprites.push(bomb);
+        Zombies.causePlagueExplosion(bomb, false);
+      }
+    } else {
+      bomb.x = bomb.harpy.x;
+      bomb.y = bomb.harpy.y;
+    }
+  },
+
+  updateHarpy(harpy, timeDiff) {
+    switch (harpy.state) {
+      case this.states.bombing:
+
+        if (!harpy.target || harpy.target.graveyard || harpy.target.dead) {
+          harpy.target = getRandomElementFromArray(Humans.aliveHumans, Math.random());
+        }
+
+        if (!harpy.target) {
+          harpy.state = this.states.returning;
+          return;
+        }
+          
+
+        if (this.fastDistance(harpy.x, harpy.y, harpy.target.x, harpy.target.y - this.bombHeight) < 10) {
+          harpy.bomb.dropped = true;
+          harpy.bomb.floor = harpy.target.y;
+          harpy.bomb = false;
+          harpy.state = this.states.returning;
+          harpy.target = false;
+          harpy.speedFactor = 0;
+        } else {
+          this.updateHarpySpeed(harpy, timeDiff);
+        }
+
+        break;
+      case this.states.returning:
+      
+        if (!harpy.target) {
+          harpy.target = Graveyard.sprite;
+        }
+
+        if (this.fastDistance(harpy.x, harpy.y, harpy.target.x, harpy.target.y - this.bombHeight) < 10) {
+          this.getBomb(harpy);
+          harpy.state = this.states.bombing;
+          harpy.speedFactor = 0;
+        } else {
+          this.updateHarpySpeed(harpy, timeDiff);
+        }
+
+        break;
+    }
+  },
+
+  getBomb(harpy) {
+    var bomb;
+    if (this.discardedBombSprites.length > 0) {
+      bomb = this.discardedBombSprites.pop();
+    } else {
+      bomb = new PIXI.Sprite(this.bombTexture);
+      this.bombSprites.push(bomb);
+      foregroundContainer.addChild(bomb);
+      bomb.anchor = {x:0.5,y:0.5};
+    }
+    bomb.scale.x = bomb.scale.y = 2;
+    bomb.rotation = 0;
+    bomb.rotSpeed = Math.random() > 0.5 ? 4 : -4;
+    bomb.ySpeed = 0;
+    bomb.visible = true;
+    bomb.dropped = false;
+    bomb.harpy = harpy;
+    harpy.bomb = bomb;
+  },
+
+  updateHarpySpeed(harpy, timeDiff) {
+    harpy.speedFactor = Math.min(1, harpy.speedFactor += timeDiff * 2);
+
+    var xVector = harpy.target.x - harpy.x;
+    var yVector = (harpy.target.y - this.bombHeight) - harpy.y;
+    var ax = Math.abs(xVector);
+    var ay = Math.abs(yVector);
+    if (Math.max(ax, ay) == 0)
+      return;
+    var ratio = 1 / Math.max(ax, ay);
+    ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
+    
+    harpy.xSpeed = xVector * ratio * this.maxSpeed * harpy.speedFactor;
+    harpy.ySpeed = yVector * ratio * this.maxSpeed * harpy.speedFactor;
+
+    harpy.position.x += harpy.xSpeed * timeDiff;
+    harpy.position.y += harpy.ySpeed * timeDiff;
+    harpy.scale.x = harpy.xSpeed > 0 ? this.scaling : -1 * this.scaling;
   }
 };

@@ -47,12 +47,28 @@
       "trimmed":false,
       "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
       "sourceSize":{"w":8,"h":8}
+    },
+    "harpybomb.png":
+    {
+      "frame":{"x":0,"y":48,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
+    },
+    "spikes.png":
+    {
+      "frame":{"x":0,"y":56,"w":8,"h":8},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":8,"h":8},
+      "sourceSize":{"w":8,"h":8}
     }
   },
   "meta": {
     "image":"objects.png",
     "format":"RGBA8888",
-    "size":{"w":8,"h":48},
+    "size":{"w":8,"h":64},
     "scale":1
   }
 }

@@ -3,7 +3,6 @@ Humans = {
   map : Map,
   maxWalkSpeed : 15,
   maxRunSpeed : 35,
-  baseHealth: 60,
   minSecondsTostand : 1,
   maxSecondsToStand : 60, // 60
   chanceToStayInCurrentBuilding : 0.95, // 0.95
@@ -48,6 +47,7 @@ Humans = {
     human.health -= damage;
     Blood.newSplatter(human.x, human.y);
     human.timeToScan = 0;
+    human.speedMod = Math.max(Math.min(1, human.health / human.maxHealth), 0.25);
     if (human.health <= 0 && !human.dead) {
       Bones.newBones(human.x, human.y);
       human.dead = true;
@@ -86,12 +86,47 @@ Humans = {
     return Math.min(GameModel.level - 10, 10) * 0.05;
   },
 
-  getBaseHealth() {
-    return this.baseHealth + (GameModel.level * 5);
+  getMaxHealth(level) {
+    if (level < 7) {
+      return (level + 4) * 10;
+    }
+    if (level < 12) {
+      return (level -1) * 20;
+    }
+    if (level < 16) {
+      return (level - 3) * 25;
+    }
+    if (level < 29) {
+      return (level - 9) * 50;
+    }
+    if (level < 49) {
+      return (level - 19) * 100;
+    }
+    if (level < 64) {
+      return (level - 29) * 150;
+    }
+    if (level < 78) {
+      return (level - 37) * 200;
+    }
+    if (level < 85) {
+      return (level - 45) * 250;
+    }
+    if (level < 92) {
+      return (level - 52) * 300;
+    }
+    return (level - 68) * 500;
   },
 
   getAttackDamage() {
-    this.attackDamage = Math.round(5 + (GameModel.level / 5));
+    if (GameModel.level == 1) {
+      this.attackDamage = 4;
+      return;
+    }
+    if (GameModel.level == 2) {
+      this.attackDamage = 5;
+      return;
+    }
+    this.attackDamage = Math.round(this.getMaxHealth(GameModel.level) / 10);
   },
 
   populate() {
@@ -130,6 +165,7 @@ Humans = {
     this.getAttackDamage();
     var maxHumans = this.getMaxHumans();
     var numDoctors = this.getMaxDoctors();
+    var maxHealth = this.getMaxHealth(GameModel.level);
   
     for (var i=0; i < maxHumans; i++) {
       var human;
@@ -168,6 +204,7 @@ Humans = {
       human.ySpeed = 0;
       human.plagueTickTimer = Math.random() * this.plagueTickTimer;
       human.target = false;
+      human.speedMod = 1;
       human.zombieTarget = false;
       human.infected = false;
       human.lastKnownBuilding = false;
@@ -175,7 +212,7 @@ Humans = {
       human.visionDistance = this.visionDistance;
       human.visible = true;
       human.alpha = 1;
-      human.maxHealth = human.health = this.getBaseHealth();
+      human.maxHealth = human.health = maxHealth;
       human.timeToScan = Math.random() * this.scanTime;
       human.timeFleeing = 0;
       this.changeState(human, this.states.standing);
@@ -215,9 +252,11 @@ Humans = {
       return;
     var ratio = 1 / Math.max(ax, ay);
     ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
+
+    var humanSpeedMod = human.speedMod * ratio * human.maxSpeed;
     
-    human.xSpeed = human.targetVector.x * ratio * human.maxSpeed;
-    human.ySpeed = human.targetVector.y * ratio * human.maxSpeed;
+    human.xSpeed = human.targetVector.x * humanSpeedMod;
+    human.ySpeed = human.targetVector.y * humanSpeedMod;
 
     human.position.x += human.xSpeed * timeDiff;
     human.position.y += human.ySpeed * timeDiff;
@@ -324,6 +363,7 @@ Humans = {
       human.health += this.attackDamage * 2;
       if (human.health > human.maxHealth) {
         human.health = human.maxHealth;
+        human.speedMod = Math.max(Math.min(1, human.health / human.maxHealth), 0.25);
       }
       Exclamations.newHealing(human);
     }
@@ -397,7 +437,7 @@ Humans = {
           var distanceToTarget = this.fastDistance(human.position.x, human.position.y, human.target.x, human.target.y);
           if (distanceToTarget < this.attackDistance) {
             if (human.attackTimer < 0) {
-              Zombies.damageZombie(human.zombieTarget, this.attackDamage);
+              Zombies.damageZombie(human.zombieTarget, this.attackDamage, human);
               this.inflictBurn(human, human.zombieTarget);
               human.attackTimer = this.attackSpeed;
             }
@@ -432,7 +472,6 @@ Police = {
   map:Map,
   maxWalkSpeed : 15,
   maxRunSpeed : 40,
-  baseHealth : 130,
   police : [],
   discardedPolice : [],
   walkTexture : [],
@@ -464,12 +503,12 @@ Police = {
     return maxPolice;
   },
 
-  getBaseHealth() {
-    return this.baseHealth + (5 * GameModel.level);
+  getMaxHealth() {
+    return Math.round(Humans.getMaxHealth(GameModel.level) * 1.5);
   },
 
   getAttackDamage() {
-    this.attackDamage = Math.round(13 + (GameModel.level / 5));
+    this.attackDamage = Math.round(this.getMaxHealth() / 10);
   },
 
   populate() {
@@ -489,6 +528,7 @@ Police = {
     }
 
     var maxPolice = this.getMaxPolice();
+    var maxHealth = this.getMaxHealth();
     this.getAttackDamage();
 
     for (var i=0; i < maxPolice; i++) {
@@ -509,6 +549,7 @@ Police = {
       police.xSpeed = 0;
       police.ySpeed = 0;
       police.radioTime = 5;
+      police.speedMod = 1;
       police.dead = false;
       police.infected = false;
       police.lastKnownBuilding = false;
@@ -517,7 +558,7 @@ Police = {
       police.maxSpeed = this.maxWalkSpeed;
       police.visionDistance = this.visionDistance;
       police.visible = true;
-      police.maxHealth = police.health = this.getBaseHealth();
+      police.maxHealth = police.health = maxHealth;
       police.timeToScan = Math.random() * Humans.scanTime;
       police.timeStanding = Math.random() * Humans.randomSecondsToStand();
       police.target = false;
@@ -661,7 +702,7 @@ Police = {
         if (police.zombieTarget && !police.zombieTarget.dead) {
           police.scale.x = police.zombieTarget.x > police.x ? this.scaling : -this.scaling;
           if (police.attackTimer < 0) {
-            Zombies.damageZombie(police.zombieTarget, this.attackDamage);
+            Zombies.damageZombie(police.zombieTarget, this.attackDamage, police);
             police.attackTimer = this.attackSpeed;
           }
         } else {
@@ -683,14 +724,12 @@ Police = {
         break;
     }
   }
-
 }
 
 Army = {
   map:Map,
   maxWalkSpeed : 20,
   maxRunSpeed : 50,
-  baseHealth : 200,
   armymen : [],
   discardedArmymen : [],
   walkTexture : [],
@@ -724,12 +763,12 @@ Army = {
     return maxArmy;
   },
 
-  getBaseHealth() {
-    return this.baseHealth + (GameModel.level * 5);
+  getMaxHealth() {
+    return Math.round(Humans.getMaxHealth(GameModel.level) * 1);
   },
 
   getAttackDamage() {
-    this.attackDamage = Math.round(20 + GameModel.level / 5);
+    this.attackDamage = Math.round(this.getMaxHealth() / 10);
   },
 
   populate() {
@@ -749,6 +788,7 @@ Army = {
     }
 
     var maxArmy = this.getMaxArmy();
+    var maxHealth = this.getMaxHealth();
     this.getAttackDamage();
 
     this.droneStrike = false;
@@ -772,6 +812,7 @@ Army = {
       armyman.zIndex = armyman.position.y;
       armyman.xSpeed = 0;
       armyman.ySpeed = 0;
+      armyman.speedMod = 1;
       armyman.dead = false;
       armyman.infected = false;
       armyman.lastKnownBuilding = false;
@@ -780,7 +821,7 @@ Army = {
       armyman.maxSpeed = this.maxWalkSpeed;
       armyman.visionDistance = this.visionDistance;
       armyman.visible = true;
-      armyman.maxHealth = armyman.health = this.getBaseHealth();
+      armyman.maxHealth = armyman.health = maxHealth;
       armyman.timeToScan = Math.random() * Humans.scanTime;
       armyman.timeStanding = Math.random() * Humans.randomSecondsToStand();
       armyman.target = false;
@@ -899,7 +940,7 @@ Army = {
         if (armyman.zombieTarget && !armyman.zombieTarget.dead) {
           armyman.scale.x = armyman.zombieTarget.x > armyman.x ? this.scaling : -this.scaling;
           if (armyman.attackTimer < 0) {
-            Zombies.damageZombie(armyman.zombieTarget, this.attackDamage);
+            Zombies.damageZombie(armyman.zombieTarget, this.attackDamage, armyman);
             armyman.attackTimer = this.attackSpeed;
           }
         } else {

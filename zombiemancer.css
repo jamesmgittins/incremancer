@@ -164,8 +164,11 @@ div.shop div.upgrade, div.shop div.bone-collectors {
 }
 
 div.shop div.bone-collectors button {
-  margin: 10px;
+  margin: 10px 0;
   padding : 8px 15px;
+}
+div.shop div.bone-collectors label {
+  margin:10px;
 }
 div.shop h3 {
   margin: 0 0 5px 0;
@@ -385,7 +388,7 @@ ul {
     font-size: 16px;
   }
 }
-@media screen and (max-width: 1276px) {
+@media screen and (max-width: 1509px) {
   div.buttons.open {
     right: 325px;
   }
@@ -480,4 +483,21 @@ ul {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #ccc;
+}
+
+div.upgrade .row {
+  clear: both;
+  display: table;
+  width:100%;
+  margin:5px 0;
+}
+div.upgrade .col {
+  float:left;
+  width: 65%;
+}
+div.upgrade .col button {
+  width:100%;
+}
+div.upgrade .col:nth-of-type(2) {
+  width: 35%;
 }

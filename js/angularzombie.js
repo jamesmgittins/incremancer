@@ -21,6 +21,7 @@ angular.module('zombieApp', [])
     zm.closeSidePanels = function() {
       zm.sidePanels.options = false;
       zm.sidePanels.graveyard = false;
+      zm.sidePanels.runesmith = false;
       zm.sidePanels.prestige = false;
       zm.sidePanels.construction = false;
       zm.sidePanels.shop = false;
@@ -41,8 +42,12 @@ angular.module('zombieApp', [])
         case "graveyard":
           zm.sidePanels.graveyard = true;
           break;
+        case "runesmith":
+          zm.sidePanels.runesmith = true;
+          break;
         case "prestige":
-          zm.upgrades = Upgrades.prestigeUpgrades;
+          zm.upgrades = Upgrades.prestigeUpgrades.filter(upgrade => upgrade.cap == 0 || zm.currentRank(upgrade) < upgrade.cap);
+          zm.upgrades.push.apply(zm.upgrades, Upgrades.prestigeUpgrades.filter(upgrade => upgrade.cap !== 0 && zm.currentRank(upgrade) >= upgrade.cap));
           zm.sidePanels.prestige = true;
           break;
         case "options":
@@ -85,15 +90,19 @@ angular.module('zombieApp', [])
         zm.model.persistentData.boneCollectors--;
     }
 
-    zm.addGraveyardZombie = function() {
-      if (zm.model.persistentData.graveyardZombies < Math.floor(zm.model.energyMax / 10))
-        zm.model.persistentData.graveyardZombies++;
+    zm.setHarpies = function(number) {
+      if ((number >= 0 && number < zm.model.persistentData.harpies) || (zm.model.getEnergyRate() >= 1 && number > 0)) {
+        zm.model.persistentData.harpies = number;
+      }
     }
 
-    zm.subtractGraveyardZombie = function() {
-      if(zm.model.persistentData.graveyardZombies > 0) {
-        zm.model.persistentData.graveyardZombies--;
-      }
+    zm.setGraveyardZombies = function(number) {
+      if (number <= zm.maxGraveyardZombies() && number >= 0)
+        zm.model.persistentData.graveyardZombies = number;
+    }
+
+    zm.maxGraveyardZombies = function() {
+      return Math.floor(zm.model.energyMax / zm.model.zombieCost);
     }
 
     zm.upgradePrice = function(upgrade) {
@@ -141,6 +150,8 @@ angular.module('zombieApp', [])
           return "+" + upgrade.effect + " max energy";
         case Upgrades.types.bloodCap:
           return "+" + upgrade.effect + " max blood";
+        case Upgrades.types.bloodStoragePC:
+          return "+" + Math.round(upgrade.effect * 100) + "% max blood";
         case Upgrades.types.brainsCap:
           return "+" + upgrade.effect + " max brains";
         case Upgrades.types.damage:
@@ -285,6 +296,12 @@ angular.module('zombieApp', [])
       }
     }
 
+    zm.infusionAmount = 1000;
+
+    zm.infuseRune = function(rune, cost) {
+      Upgrades.infuseRune(rune, cost, zm.infusionAmount);
+    }
+
     zm.energyPercent = function() {
       return Math.min(Math.round(zm.model.energy / zm.model.energyMax * 100),100);
     }
@@ -354,7 +371,7 @@ angular.module('zombieApp', [])
     }
 
     $document.ready(function(){
-      $scope.updatePromise = $interval(update, 100);
+      $scope.updatePromise = $interval(update, 200);
       Upgrades.angularModel = zm;
     });
 
