@@ -156,6 +156,12 @@ GameModel = {
             this.persistentData.levelUnlocked = this.level + 1;
             this.addPrestigePoints(this.level);
           }
+          if (this.level > this.persistentData.allTimeHighestLevel) {
+            this.persistentData.allTimeHighestLevel = this.level;
+            if (kongregate) {
+              kongregate.stats.submit("level", this.persistentData.allTimeHighestLevel);
+            }
+          }
           this.startTimer = 3;
         } else {
           this.endLevelTimer -= timeDiff;
@@ -276,6 +282,7 @@ GameModel = {
     autoStart : false,
     levelUnlocked : 1,
     levelStarted : 0,
+    allTimeHighestLevel : 0,
     blood : 0,
     brains : 0,
     bones: 0,
@@ -363,5 +370,33 @@ GameModel = {
 
     this.app.renderer.plugins.interaction.resolution = resolution;
     this.app.renderer.resize(document.body.clientWidth, document.body.clientHeight);
+  },
+
+  downloadSaveGame() {
+    this.blob = new Blob([LZString.compressToEncodedURIComponent(JSON.stringify(this.persistentData))], {type: "octet/stream"});
+    this.encodedContent = window.URL.createObjectURL(this.blob);
+    var datestamp = new Date().toISOString().replace(/:|T|Z|\./g,"");
+    this.savefilename = "incremancer-" + datestamp + ".sav";
+  },
+
+  importFile() {
+    var files = document.getElementById("import-file").files;
+
+    if (files && files.length == 1) {
+      var file = files[0];
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        var savegame = JSON.parse(LZString.decompressFromEncodedURIComponent(event.target.result));
+        if (savegame.dateOfSave) {
+          GameModel.persistentData = savegame;
+          GameModel.level = GameModel.persistentData.levelUnlocked;
+          GameModel.setupLevel();
+        } else {
+          alert("Error loading save game");
+        }
+      };
+      reader.readAsText(file);
+    }
   }
+
 };

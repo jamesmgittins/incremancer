@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#104510" />
     <link rel="manifest" href="manifest.json">
+    <script src='https://www.kongregate.com/javascripts/kongregate_api.js'></script>
+    <script src="js/lz-string.min.js"></script>
     <script src="js/pixi-legacy.min.js"></script>
     <script src="js/utilsfunctions.js"></script>
     <script src="js/zombiemancer.js"></script>
@@ -319,6 +321,16 @@
           <p>Used for performance testing</p>
           <button ng-click="zm.toggleShowFps();">{{zm.model.persistentData.showfps ? "On" : "Off"}}</button>
         </div>
+        <div class="upgrade">
+            <h4>Manage Save</h4>
+            <p>Import or export a saved game</p>
+            <label class="blood">Warning: Importing a save game will overwrite your current progress</label>
+            <a ng-if="zm.model.encodedContent" href="{{zm.model.encodedContent}}" download="{{zm.model.savefilename}}" class="button">
+              <button>Download Save File</button>
+            </a>
+            <button onclick="document.getElementById('import-file').click();">Import Save</button>
+            <input type="file" id="import-file" name="import-file" enctype="multipart/form-data" hidden onchange="GameModel.importFile();"/>
+          </div>
         <div class="upgrade">
           <h4>Reset Game</h4>
           <p>This will reset all save data if you want to start from the very beginning again.</p>

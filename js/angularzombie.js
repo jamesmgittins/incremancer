@@ -5,6 +5,9 @@ angular.module('zombieApp', [])
   .filter('whole', function(){
     return formatWhole;
   })
+  .config(['$compileProvider', function ($compileProvider) {
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|javascript|data|blob):/);
+  }])
   .controller('ZombieController', ['$scope','$interval','$document',function($scope, $interval, $document) {
     var zm = this;
     zm.model = GameModel;
@@ -52,6 +55,7 @@ angular.module('zombieApp', [])
           break;
         case "options":
           zm.sidePanels.options = true;
+          zm.model.downloadSaveGame();
           break;
       }
       zm.sidePanels.open = true;

@@ -81,6 +81,10 @@ function onClickTap(event) {
 
 function zoom(change, coords) {
 
+  if (lastPinchZoom + 50 > Date.now()) {
+    return;
+  }
+  lastPinchZoom = Date.now();
   var gc = gameContainer;
 
   if (!coords) {
@@ -331,6 +335,21 @@ window.onload = function() {
   GameModel.onReady();
   setSizes()
   startGame();
+
+  if(window.self !== window.top) {
+    if (document.referrer != "" &&
+    document.referrer.indexOf("kongregate.com") == -1 &&
+    document.referrer.indexOf("konggames.com") == -1 &&
+    document.referrer.indexOf("gti.nz") == -1) {
+      window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+    } else {
+      if (document.referrer.indexOf("kongregate.com") !== -1 || document.referrer.indexOf("konggames.com") !== -1) {
+        kongregateAPI.loadAPI(function(){
+          window.kongregate = kongregateAPI.getAPI();
+        });
+      }
+    }
+  }
 };
 
 window.onresize = function() {
