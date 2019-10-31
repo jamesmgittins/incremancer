@@ -317,6 +317,7 @@ GameModel = {
       this.persistentData.upgrades = this.persistentData.upgrades.filter(upgrade => upgrade.costType == Upgrades.costs.prestigePoints);
       this.persistentData.constructions = [];
       this.persistentData.boneCollectors = 0;
+      this.persistentData.currentConstruction = false;
       this.persistentData.harpies = 0;
       this.persistentData.graveyardZombies = 1;
       this.persistentData.prestigePointsToSpend += this.persistentData.prestigePointsEarned;
