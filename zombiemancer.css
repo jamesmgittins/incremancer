@@ -75,6 +75,7 @@ div.shop div.upgrades {
   overflow-y: auto;
   flex:1;
   margin-top:5px;
+  overscroll-behavior: contain;
 }
 
 div.shop div.upgrade div.progress {
