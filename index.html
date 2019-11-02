@@ -6,10 +6,12 @@
     <meta name="keywords" content="zombie,game,idle,javascript">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#104510" />
+    <meta charset="utf-8"/>
     <link rel="manifest" href="manifest.json">
     <script src='https://www.kongregate.com/javascripts/kongregate_api.js'></script>
     <script src="js/lz-string.min.js"></script>
     <script src="js/pixi-legacy.min.js"></script>
+    <script src="js/angular.min.js"></script>
     <script src="js/utilsfunctions.js"></script>
     <script src="js/zombiemancer.js"></script>
     <script src="js/spells.js"></script>
@@ -20,8 +22,8 @@
     <script src="js/zombies.js"></script>
     <script src="js/graveyard.js"></script>
     <script src="js/bloodparts.js"></script>
-    <script src="js/angular.min.js"></script>
     <script src="js/angularzombie.js"></script>
+    <!-- <script src="js/zombie.min.js"></script> -->
     <link rel="stylesheet" type="text/css" href="zombiemancer.css">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
   </head>
@@ -188,7 +190,8 @@
           <h4>Caged Zombies</h4>
           <h4>You currently have {{zm.model.zombiesInCages}} / {{zm.model.zombieCages}} zombies caged</h4>
           <p>You can release them to fight again, or sacrifice them to gain {{zm.model.cagedZombieSacrificeValue().blood}} blood, {{zm.model.cagedZombieSacrificeValue().brains}} brains, and {{zm.model.cagedZombieSacrificeValue().bones}} bones</p>
-          <button ng-click="zm.model.releaseCagedZombies()" ng-disabled="zm.model.zombiesInCages == 0">Release</button>
+          <button ng-click="zm.model.releaseCagedZombies()" ng-disabled="zm.model.zombiesInCages == 0 || zm.model.currentState != zm.model.states.playingLevel">Release</button>
+          <button ng-click="zm.model.persistentData.autoRelease = !zm.model.persistentData.autoRelease" class="{{zm.model.persistentData.autoRelease ? 'active' : ''}}">Auto Release</button>
           <button ng-click="zm.model.sacrificeCagedZombies()" ng-disabled="zm.model.zombiesInCages == 0">Sacrifice</button>
         </div>
         <div class="bone-collectors bones" ng-if="zm.model.constructions.aviary">

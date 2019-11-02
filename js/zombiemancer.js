@@ -165,6 +165,9 @@ function setupContainers(app) {
   gameContainer.on('click', onClickTap);
   gameContainer.on('tap', onClickTap);
   document.getElementsByTagName('canvas')[0].onwheel = onWheel;
+  document.getElementsByTagName('canvas')[0].oncontextmenu = function(event){
+    event.preventDefault();
+  };
 }
 
 function centerGameContainer() {

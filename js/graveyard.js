@@ -273,7 +273,7 @@ BoneCollectors = {
       }
     }
     for (var i = 0; i < this.sprites.length; i++) {
-      this.sprites[i].boneList = false;
+      this.sprites[i].boneList = [];
       this.sprites[i].target = false;
       this.sprites[i].position = {x:Graveyard.sprite.x,y:Graveyard.sprite.y};
       this.sprites[i].state = this.states.collecting;
@@ -283,8 +283,10 @@ BoneCollectors = {
   addAndRemoveBoneCollectors() {
     if (this.sprites.length > GameModel.persistentData.boneCollectors) {
       var boneCollector = this.sprites.pop();
-      for (var i = 0; i < boneCollector.boneList.length; i++){
-        boneCollector.boneList[i].collector = false;
+      if (boneCollector.boneList) {
+        for (var i = 0; i < boneCollector.boneList.length; i++){
+          boneCollector.boneList[i].collector = false;
+        }
       }
       GameModel.addBones(boneCollector.bones);
       characterContainer.removeChild(boneCollector);
@@ -303,6 +305,7 @@ BoneCollectors = {
       sprite.speedFactor = 0;
       sprite.state = this.states.collecting;
       sprite.play();
+      sprite.boneList = [];
       this.sprites.push(sprite);
       characterContainer.addChild(sprite);
     }

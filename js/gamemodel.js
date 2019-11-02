@@ -137,7 +137,7 @@ GameModel = {
     Spells.updateSpells(timeDiff);
 
     timeDiff *= this.gameSpeed;
-
+    this.autoRemoveCollectorsHarpies();
     this.addEnergy(this.getEnergyRate() * timeDiff);
     if (this.currentState == this.states.playingLevel) {
 
@@ -193,8 +193,19 @@ GameModel = {
     }
   },
 
+  autoRemoveCollectorsHarpies() {
+    if (this.getEnergyRate() < 0) {
+      if (this.persistentData.harpies > 1) {
+        this.persistentData.harpies--;
+      }
+      if (this.persistentData.boneCollectors > 1) {
+        this.persistentData.boneCollectors--;
+      }
+    }
+  },
+
   releaseCagedZombies() {
-    if (this.currentState = this.states.playingLevel) {
+    if (this.currentState == this.states.playingLevel) {
       for (var i=0; i < this.zombiesInCages; i++) {
         Zombies.createZombie(Graveyard.sprite.x, Graveyard.sprite.y);
       }
@@ -228,6 +239,9 @@ GameModel = {
     this.currentState = this.states.playingLevel;
     this.setupLevel();
     this.updatePlayingLevel();
+    if(this.persistentData.autoRelease) {
+      this.releaseCagedZombies();
+    }
   },
 
   setupLevel() {
