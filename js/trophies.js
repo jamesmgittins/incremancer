@@ -81,7 +81,7 @@ Trophies = {
       GameModel.saveData();
       Upgrades.applyUpgrades();
       if (window.kongregate) {
-        window.kongregate.stats.submit("trophies", this.persistentData.trophies.length);
+        window.kongregate.stats.submit("trophies", GameModel.persistentData.trophies.length);
       }
       GameModel.messageQueue.push("The VIP has been killed! - New Trophy Aquired");
     } else {
@@ -97,6 +97,7 @@ Trophies = {
     }
     var trophies = [];
     var maxTrophyToCreate = GameModel.persistentData.allTimeHighestLevel + 5;
+    maxTrophyToCreate += 500;
     for (var i=5; i <= maxTrophyToCreate; i += 5) {
       trophies.push(this.createTrophy(i, GameModel.persistentData.trophies.includes(i), GameModel.persistentData.vipEscaped.includes(i)));
     }
