@@ -97,7 +97,7 @@ Trophies = {
     }
     var trophies = [];
     var maxTrophyToCreate = GameModel.persistentData.allTimeHighestLevel + 5;
-    maxTrophyToCreate += 500;
+    // maxTrophyToCreate += 500;
     for (var i=5; i <= maxTrophyToCreate; i += 5) {
       trophies.push(this.createTrophy(i, GameModel.persistentData.trophies.includes(i), GameModel.persistentData.vipEscaped.includes(i)));
     }
