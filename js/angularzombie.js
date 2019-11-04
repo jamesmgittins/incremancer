@@ -20,6 +20,7 @@ angular.module('zombieApp', [])
     zm.upgrades = [];
     zm.currentShopFilter = "blood";
     zm.currentConstructionFilter = "available";
+    zm.graveyardTab = "minions";
 
     zm.closeSidePanels = function() {
       zm.sidePanels.options = false;
@@ -44,6 +45,7 @@ angular.module('zombieApp', [])
           break;
         case "graveyard":
           zm.sidePanels.graveyard = true;
+          zm.graveyardTab = "minions";
           break;
         case "runesmith":
           zm.sidePanels.runesmith = true;
@@ -59,6 +61,13 @@ angular.module('zombieApp', [])
           break;
       }
       zm.sidePanels.open = true;
+    }
+
+    zm.graveyardTabSelect = function(tab) {
+      zm.graveyardTab = tab;
+      if (tab == 'trophies') {
+        zm.trophies = Trophies.getTrophyList();
+      }
     }
 
     zm.filterShop = function(type) {
@@ -174,6 +183,16 @@ angular.module('zombieApp', [])
           return "+" + Math.round(upgrade.effect * 100) + "% chance for zombies to explode on death";
         case Upgrades.types.boneCollectorCapacity:
           return "+" + upgrade.effect + " bone collector capacity";
+        case Upgrades.types.zombieDmgPC:
+          return "+" + Math.round(upgrade.effect * 100) + "% zombie damage";
+        case Upgrades.types.zombieHealthPC:
+          return "+" + Math.round(upgrade.effect * 100) + "% zombie health";
+        case Upgrades.types.bonesRate:
+          return "+" + upgrade.effect + " bones per second";
+        case Upgrades.types.brainsRate:
+          return "+" + upgrade.effect + " brains per second";
+        case Upgrades.types.plagueDamagePC:
+          return "+" + Math.round(upgrade.effect * 100) + "% plague damage";
       }
       return "";
     }

@@ -6,6 +6,9 @@ Upgrades = {
     damage:"damage",
     health:"health",
     speed:"speed",
+    brainsRate:"brainsRate",
+    bonesRate:"bonesRate",
+    energyRate:"energyRate",
     bloodCap:"bloodCap",
     brainsCap:"brainsCap",
     brainRecoverChance:"brainRecoverChance",
@@ -14,6 +17,8 @@ Upgrades = {
     construction:"construction",
     infectedBite:"infectedBite",
     infectedBlast:"infectedBlast",
+    plagueDamagePC:"plagueDamagePC",
+    burningSpeedPC:"burningSpeedPC",
     unlockSpell:"unlockSpell",
     // prestige items
     bloodGainPC : "bloodGainPC",
@@ -62,6 +67,10 @@ Upgrades = {
     for (var i = 0; i < GameModel.persistentData.constructions.length; i++) {
       this.applyConstructionUpgrade(GameModel.persistentData.constructions[i]);
     }
+    var trophies = Trophies.getAquiredTrophyList();
+    for (var i = 0; i < trophies.length; i++) {
+      this.applyUpgrade(trophies[i]);
+    }
     GameModel.bloodMax *= GameModel.bloodStorePCMod;
     GameModel.brainsMax *= GameModel.brainsStorePCMod;
     GameModel.zombieDamage *= GameModel.zombieDamagePCMod;
@@ -72,6 +81,12 @@ Upgrades = {
     switch (upgrade.type) {
       case this.types.energyRate:
         GameModel.energyRate += upgrade.effect * upgrade.rank;
+        return;
+      case this.types.brainsRate:
+        GameModel.brainsRate += upgrade.effect * upgrade.rank;
+        return;
+      case this.types.bonesRate:
+        GameModel.bonesRate += upgrade.effect * upgrade.rank;
         return;
       case this.types.energyCap:
         GameModel.energyMax += upgrade.effect * upgrade.rank;
@@ -102,6 +117,12 @@ Upgrades = {
         return;
       case this.types.infectedBlast:
         GameModel.infectedBlastChance += upgrade.effect * upgrade.rank;
+        return;
+      case this.types.plagueDamagePC:
+        GameModel.plagueDamagePCMod += upgrade.effect * upgrade.rank;
+        return;
+      case this.types.burningSpeedPC:
+        GameModel.burningSpeedMod += upgrade.effect * upgrade.rank;
         return;
       case this.types.construction:
         GameModel.construction = 1;
@@ -267,6 +288,8 @@ Upgrades = {
         return this.currentRank(upgrade) > 0 ? "You have learned this spell" : "You have yet to learn this spell";
       case this.types.energyCost:
         return "Zombie Cost: " + GameModel.zombieCost + " energy";
+      case this.types.burningSpeedPC:
+        return "Burning zombie speed: " + Math.round(GameModel.burningSpeedMod * 100) + "%";
     }
   },
 
@@ -731,10 +754,10 @@ Upgrades.prestigeUpgrades = [
 
 Upgrades.upgrades = [
   // blood upgrades
-  new Upgrades.Upgrade(1, "Bloodthirst", Upgrades.types.damage, Upgrades.costs.blood, 50, 1.2, 1, 0, "Your zombies thirst for blood and do +1 damage for each rank of Bloodthirst."),
+  new Upgrades.Upgrade(1, "Bloodthirst", Upgrades.types.damage, Upgrades.costs.blood, 50, 1.2, 1, 40, "Your zombies thirst for blood and do +1 damage for each rank of Bloodthirst."),
   new Upgrades.Upgrade(9, "Sharpened Teeth", Upgrades.types.damage, Upgrades.costs.blood, 3000, 1.23, 3, 0, "Your zombies bites do +3 damage with each rank of Sharpened Teeth.", false, 206),
   new Upgrades.Upgrade(11, "Razor Claws", Upgrades.types.damage, Upgrades.costs.blood, 28000, 1.25, 5, 0, "Your zombies bites do +5 damage with each rank of Razor Claws.", false, 211),
-  new Upgrades.Upgrade(2, "Like Leather", Upgrades.types.health, Upgrades.costs.blood, 100, 1.2, 10, 0, "Your zombies gain tougher skin and +10 health with each rank."),
+  new Upgrades.Upgrade(2, "Like Leather", Upgrades.types.health, Upgrades.costs.blood, 100, 1.2, 10, 40, "Your zombies gain tougher skin and +10 health with each rank."),
   new Upgrades.Upgrade(10, "Thick Skull", Upgrades.types.health, Upgrades.costs.blood, 5000, 1.23, 25, 0, "Your zombies gain +25 health with each rank.", false, 206),
   new Upgrades.Upgrade(12, "Battle Hardened", Upgrades.types.health, Upgrades.costs.blood, 32000, 1.25, 40, 0, "Your zombies gain +40 health with each rank.", false, 211),
   new Upgrades.Upgrade(3, "Cold Storage", Upgrades.types.brainsCap, Upgrades.costs.blood, 150, 1.2, 50, 15, "Turns out you can use all of your spare blood to store brains and keep them fresh. Each rank increases your maximum brain capacity by 50."),
@@ -743,6 +766,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(6, "Infected Bite", Upgrades.types.infectedBite, Upgrades.costs.blood, 3500, 1.4, 0.1, 10, "Your zombies are now infected with plague and could infect their victims too. Each rank adds 10% chance to inflict damage over time when a zombie attacks a target.", false, 204),
   new Upgrades.Upgrade(7, "Detonate", Upgrades.types.unlockSpell, Upgrades.costs.blood, 25000, 1, 3, 1, "Learn the Detonate spell which can explode all of your zombies into a cloud of plague. Not exactly sure how useful that will be.", "New spell learned, Detonate!", 209),
   new Upgrades.Upgrade(8, "Gigazombies?", Upgrades.types.unlockSpell, Upgrades.costs.blood, 50000, 1, 5, 1, "Learn the Gigazombies spell which will turn some of your zombies into hulking monstrosities with increased health and damage.", "New spell learned, Gigazombies!", 209),
+  new Upgrades.Upgrade(13, "Blazing Speed", Upgrades.types.burningSpeedPC, Upgrades.costs.blood, 30000, 1.25, 0.05, 10, "The humans are using torches to set your zombies on fire. Perhaps we can turn the tables on them? Each rank increases the movement and attack speed of burning zombies by 5%", false, 207),
 
   // brain upgrades
   new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 15, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),

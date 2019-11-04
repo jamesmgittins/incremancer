@@ -267,8 +267,10 @@ function setGameFieldSizeForLevel() {
     x:size,
     y:size
   };
-  grass.width = gameFieldSize.x;
-  grass.height = gameFieldSize.y;
+  if (grass) {
+    grass.width = gameFieldSize.x;
+    grass.height = gameFieldSize.y;
+  }
   gameContainer.hitArea = new PIXI.Rectangle(0,0,gameFieldSize.x,gameFieldSize.y);
 }
 

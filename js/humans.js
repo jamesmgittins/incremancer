@@ -35,7 +35,8 @@ Humans = {
     standing:"standing",
     walking:"walking",
     attacking:"attacking",
-    fleeing:"fleeing"
+    fleeing:"fleeing",
+    escaping:"escaping"
   },
 
   randomSecondsToStand() {
@@ -53,6 +54,11 @@ Humans = {
       human.dead = true;
       GameModel.addBrains(1);
       human.textures = human.deadTexture;
+
+      if (human.vip) {
+        this.vipText.visible = false;
+        Trophies.trophyAquired(GameModel.level);
+      }
     }
   },
 
@@ -129,6 +135,28 @@ Humans = {
     this.attackDamage = Math.round(this.getMaxHealth(GameModel.level) / 10);
   },
 
+  setupVipText(human) {
+    if (!this.vipText) {
+      this.vipText = new PIXI.Text("VIP", {
+        fontFamily: 'sans-serif',
+        fontSize : 64,
+        fill: "#FC0",
+        stroke: "#000",
+        strokeThickness: 3,
+        align: 'center'
+      });
+      this.vipText.anchor = {x:0.5, y:1};
+      this.vipText.scale.x = 0.25;
+      this.vipText.scale.y = 0.25;
+      foregroundContainer.addChild(this.vipText);
+    }
+    this.vipText.visible = true;
+    this.vipText.human = human;
+    this.vipText.yOffset = -20;
+    this.vipText.x = human.x;
+    this.vipText.y = human.y + this.vipText.yOffset;
+  },
+
   populate() {
     
     this.map.populatePois();
@@ -166,6 +194,11 @@ Humans = {
     var maxHumans = this.getMaxHumans();
     var numDoctors = this.getMaxDoctors();
     var maxHealth = this.getMaxHealth(GameModel.level);
+    var vipNeeded = Trophies.doesLevelHaveTrophy(GameModel.level);
+
+    if (vipNeeded) {
+      this.escapeTarget = {x:gameFieldSize.x / 2, y:gameFieldSize.y + 50};
+    }
   
     for (var i=0; i < maxHumans; i++) {
       var human;
@@ -194,6 +227,7 @@ Humans = {
         human.deadTexture = this.textures[textureId].dead;
         human.doctor = false;
       }
+      human.vip = false;
       human.dead = false;
       human.animationSpeed = 0.15;
       human.anchor = {x:35/80,y:1};
@@ -213,6 +247,12 @@ Humans = {
       human.visible = true;
       human.alpha = 1;
       human.maxHealth = human.health = maxHealth;
+      if (vipNeeded && !human.doctor) {
+        human.vip = true;
+        vipNeeded = false;
+        human.maxHealth = human.health = maxHealth * 2;
+        this.setupVipText(human);
+      }
       human.timeToScan = Math.random() * this.scanTime;
       human.timeFleeing = 0;
       this.changeState(human, this.states.standing);
@@ -278,6 +318,12 @@ Humans = {
     this.aliveHumans = aliveHumans;
     Police.update(timeDiff, aliveZombies);
     Army.update(timeDiff, aliveZombies);
+
+    if (this.vipText && this.vipText.visible) {
+      this.vipText.x = this.vipText.human.x;
+      this.vipText.y = this.vipText.human.y + this.vipText.yOffset;
+    }
+
     GameModel.humanCount = this.aliveHumans.length;
   },
 
@@ -320,6 +366,13 @@ Humans = {
         this.assignRandomTarget(human);
         Exclamations.newExclamation(human);
         break;
+      case this.states.escaping:
+        human.play();
+        human.maxSpeed = this.maxRunSpeed;
+        human.target = this.escapeTarget;
+        Exclamations.newExclamation(human);
+        GameModel.messageQueue.push("The VIP is escaping!");
+        break;
       case this.states.attacking:
         human.play();
         human.maxSpeed = this.maxRunSpeed;
@@ -358,8 +411,9 @@ Humans = {
 
   healHuman(human) {
     if (human.health < human.maxHealth) {
-      human.infected = false;
-      human.plagueDamage = 0;
+      if (human.infected && human.plagueTicks > 0) {
+        human.plagueTicks--;
+      }
       human.health += this.attackDamage * 2;
       if (human.health > human.maxHealth) {
         human.health = human.maxHealth;
@@ -404,7 +458,9 @@ Humans = {
       var count = Humans.scanForZombies(human, aliveZombies);
 
       if (count > 0) {
-        if (Math.random() < count * this.fleeChancePerZombie) {
+        if (human.vip && human.state !== this.states.escaping) {
+          this.changeState(human, this.states.escaping);
+        } else if (Math.random() < count * this.fleeChancePerZombie) {
           this.changeState(human, this.states.fleeing);
         } else {
           human.target = human.zombieTarget;
@@ -427,6 +483,19 @@ Humans = {
           human.target = false;
           human.zombieTarget = false;
           this.changeState(human, this.states.standing);
+        } else {
+          Humans.updateHumanSpeed(human, timeDiff);
+        }
+        break;
+      case this.states.escaping:
+        if (this.fastDistance(human.position.x, human.position.y, human.target.x, human.target.y) < this.moveTargetDistance) {
+          Smoke.newDroneCloud(human.x, human.y);
+          human.dead = true;
+          human.zombieTarget = false;
+          human.visible = false;
+          this.vipText.visible = false;
+          GameModel.messageQueue.push("The VIP has escaped!");
+          GameModel.vipEscaped();
         } else {
           Humans.updateHumanSpeed(human, timeDiff);
         }

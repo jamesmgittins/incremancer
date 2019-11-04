@@ -4,6 +4,8 @@ GameModel = {
   energy:0,
   energyMax:10,
   energyRate:1,
+  brainsRate:0,
+  bonesRate:0,
   energySpellMultiplier:1,
   zombieCost:10,
   bonesPCMod : 1,
@@ -20,6 +22,8 @@ GameModel = {
   zombieSpeed : 10,
   zombieCages : 0,
   zombiesInCages : 0,
+  plagueDamagePCMod : 1,
+  burningSpeedMod : 1,
   startingResources : 0,
   brainRecoverChance:0,
   riseFromTheDeadChance:0,
@@ -58,6 +62,8 @@ GameModel = {
 
   baseStats : {
     energyRate : 1,
+    brainsRate : 0,
+    bonesRate : 0,
     energyMax : 10,
     bloodMax : 1000,
     brainsMax : 50,
@@ -76,6 +82,8 @@ GameModel = {
 
   resetToBaseStats() {
     this.energyRate = this.baseStats.energyRate;
+    this.brainsRate = this.baseStats.brainsRate;
+    this.bonesRate = this.baseStats.bonesRate;
     this.energyMax = this.baseStats.energyMax;
     this.bloodMax = this.baseStats.bloodMax;
     this.brainsMax = this.baseStats.brainsMax;
@@ -98,6 +106,8 @@ GameModel = {
     this.brainsStorePCMod = 1;
     this.zombieHealthPCMod = 1;
     this.zombieDamagePCMod = 1;
+    this.plagueDamagePCMod = 1;
+    this.burningSpeedMod = 1;
     this.startingResources = 0;
     this.fenceRadius = 50;
   },
@@ -140,6 +150,8 @@ GameModel = {
     this.autoRemoveCollectorsHarpies();
     this.addEnergy(this.getEnergyRate() * timeDiff);
     if (this.currentState == this.states.playingLevel) {
+      this.addBones(this.bonesRate * timeDiff);
+      this.addBrains(this.brainsRate * timeDiff);
 
       if (this.lastSave + 30000 < updateTime) {
         this.saveData();
@@ -156,10 +168,10 @@ GameModel = {
             this.persistentData.levelUnlocked = this.level + 1;
             this.addPrestigePoints(this.level);
           }
-          if (this.level > this.persistentData.allTimeHighestLevel) {
+          if (!this.persistentData.allTimeHighestLevel || this.level > this.persistentData.allTimeHighestLevel) {
             this.persistentData.allTimeHighestLevel = this.level;
-            if (kongregate) {
-              kongregate.stats.submit("level", this.persistentData.allTimeHighestLevel);
+            if (window.kongregate) {
+              window.kongregate.stats.submit("level", this.persistentData.allTimeHighestLevel);
             }
           }
           this.startTimer = 3;
@@ -261,6 +273,14 @@ GameModel = {
     this.addStartLevelResources();
   },
 
+  vipEscaped() {
+    if (!this.persistentData.vipEscaped) {
+      this.persistentData.vipEscaped = [];
+    }
+    this.persistentData.vipEscaped.push(this.level);
+    this.saveData();
+  },
+
   updatePlayingLevel() {
     this.persistentData.levelStarted = this.level;
     this.saveData();
@@ -337,6 +357,7 @@ GameModel = {
       this.persistentData.prestigePointsToSpend += this.persistentData.prestigePointsEarned;
       this.persistentData.prestigePointsEarned = 0;
       this.persistentData.runes = false;
+      this.persistentData.vipEscaped = [];
       BoneCollectors.update(0.1);
       this.level = 1;
       this.currentState = this.states.prestiged;

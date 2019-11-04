@@ -123,6 +123,9 @@ Zombies = {
     }
     zombie.health -= damage * this.model.runeEffects.damageReduction;
     zombie.speedMultiplier = Math.max(Math.min(1, zombie.health / this.model.zombieHealth), 0.4);
+    if (zombie.burning) {
+      zombie.speedMultiplier = this.model.burningSpeedMod;
+    }
     Blood.newSplatter(zombie.x, zombie.y);
     if (zombie.health <= 0 && !zombie.dead) {
       Bones.newBones(zombie.x, zombie.y);
@@ -285,7 +288,8 @@ Zombies = {
         break;
 
       case this.states.attackingTarget:
-        if (this.fastDistance(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y) < this.attackDistance) {
+        var distanceToTarget = this.fastDistance(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y);
+        if (distanceToTarget < this.attackDistance) {
           zombie.scale.x = zombie.target.x > zombie.x ? zombie.scaling : -zombie.scaling;
           if (zombie.attackTimer < 0) {
             Humans.damageHuman(zombie.target, this.calculateDamage(zombie));
@@ -293,6 +297,12 @@ Zombies = {
               this.inflictPlague(zombie.target);
             }
             zombie.attackTimer = this.attackSpeed * this.model.runeEffects.attackSpeed;
+            if (zombie.burning) {
+              zombie.attackTimer *= (1 / this.model.burningSpeedMod);
+            }
+          }
+          if (distanceToTarget > this.attackDistance / 2) {
+            this.updateZombieSpeed(zombie, timeDiff);
           }
         } else {
           zombie.state = this.states.movingToTarget;
@@ -326,10 +336,10 @@ Zombies = {
   inflictPlague(human) {
     if (!human.infected) {
       Exclamations.newPoison(human);
-      human.plagueDamage = this.model.zombieDamage / 2;
+      human.plagueDamage = (this.model.zombieDamage / 2) * this.model.plagueDamagePCMod;
       human.plagueTicks = 5;
     } else {
-      human.plagueDamage += this.model.zombieDamage / 2;
+      human.plagueDamage += (this.model.zombieDamage / 2) * this.model.plagueDamagePCMod;
       human.plagueTicks += 5;
     }
     human.infected = true;

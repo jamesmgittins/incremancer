@@ -12,7 +12,11 @@ html,body {
   -ms-user-select: none;
   user-select: none;
   touch-action: manipulation;
+  overscroll-behavior: contain;
 }
+
+.clear {clear:both;}
+
 canvas {
   height: 100%;
   width: 100%;
@@ -76,6 +80,17 @@ div.shop div.upgrades {
   flex:1;
   margin-top:5px;
   overscroll-behavior: contain;
+}
+
+div.shop div.upgrade.uncollected {
+  opacity: 0.5;
+}
+div.shop div.upgrade.owned {
+  color:#ffee10;
+}
+div.shop div.upgrade span.escaped {
+  color:#f33;
+  float: right;
 }
 
 div.shop div.upgrade div.progress {
@@ -154,7 +169,7 @@ div.shop div.shop-title h2 {
   margin: 8px 0;
 }
 div.shop div.shop-title button {
-  float:right;
+  float: right;
 }
 
 button.info {
@@ -168,9 +183,17 @@ div.shop div.upgrade, div.shop div.bone-collectors {
   position: relative;
 }
 
+div.shop h4 > button {
+  float:right;
+  margin: -5px 0 5px 0 !important;
+}
+
 div.shop div.bone-collectors button {
-  margin: 10px 0;
+  margin: 5px 0 0 0;
   padding : 8px 15px;
+}
+div.shop div.bone-collectors .cages button {
+  padding : 8px 8px;
 }
 div.shop div.bone-collectors label {
   margin:10px;
@@ -186,6 +209,7 @@ div.shop div.upgrade h4, div.shop div.bone-collectors h4 {
   font-size: 18px;
   line-height: 18px;
   margin: 0 0 5px 0;
+  clear: both;
 }
 
 div.shop div.upgrade:not(.current-construction) p, div.shop div.bone-collectors p{
@@ -259,7 +283,7 @@ div.buttons {
 
 div.spells {
   position:absolute;
-  top:90px;
+  top:95px;
   left:0;
   padding:10px;
 }
@@ -270,6 +294,7 @@ div.spells > button.spell {
   display: block;
   width: 100%;
   margin-bottom: 5px;
+  font-size: 18px;
 }
 
 div.spells > button.spell.active {
@@ -391,6 +416,17 @@ ul {
   div.start-game button, div.end-level button, div.shop button {
     padding: 8px 10px;
     font-size: 16px;
+  }
+}
+@media screen and (max-width: 1530px) and (min-width: 820px) {
+  div.top-bar.open {
+    left: 0;
+    transform: none;
+    width: calc(100% - 340px);
+  }
+
+  div.top-bar.open div.resources {
+    white-space: normal;
   }
 }
 @media screen and (max-width: 1509px) {
