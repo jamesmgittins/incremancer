@@ -111,7 +111,7 @@ Spells = {
     spell.active = true;
     spell.timer = spell.duration;
     spell.start();
-    GameModel.messageQueue.push(spell.name);
+    GameModel.sendMessage(spell.name);
   },
   updateSpells(timeDiff) {
     for (var i = 0; i < this.spells.length; i++) {

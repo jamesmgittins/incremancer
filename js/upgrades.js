@@ -135,24 +135,24 @@ Upgrades = {
         return;
         // prestige items
       case this.types.bonesGainPC:
-        GameModel.bonesPCMod += upgrade.effect * upgrade.rank;
-        // GameModel.bonesPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        // GameModel.bonesPCMod += upgrade.effect * upgrade.rank;
+        GameModel.bonesPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.bloodGainPC:
-        GameModel.bloodPCMod += upgrade.effect * upgrade.rank;
-        // GameModel.bloodPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        // GameModel.bloodPCMod += upgrade.effect * upgrade.rank;
+        GameModel.bloodPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.bloodStoragePC:
-        GameModel.bloodStorePCMod += upgrade.effect * upgrade.rank;
-        // GameModel.bloodStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        // GameModel.bloodStorePCMod += upgrade.effect * upgrade.rank;
+        GameModel.bloodStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.brainsGainPC:
-        GameModel.brainsPCMod += upgrade.effect * upgrade.rank;
-        // GameModel.brainsPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        // GameModel.brainsPCMod += upgrade.effect * upgrade.rank;
+        GameModel.brainsPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.brainsStoragePC:
-        GameModel.brainsStorePCMod += upgrade.effect * upgrade.rank;
-        // GameModel.brainsStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        // GameModel.brainsStorePCMod += upgrade.effect * upgrade.rank;
+        GameModel.brainsStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.zombieDmgPC:
         GameModel.zombieDamagePCMod += upgrade.effect * upgrade.rank;
@@ -164,7 +164,6 @@ Upgrades = {
         return;
       case this.types.startingPC:
         GameModel.startingResources += upgrade.effect * upgrade.rank;
-        // GameModel.startingPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.energyCost:
         GameModel.zombieCost -= upgrade.effect * upgrade.rank;
@@ -179,31 +178,31 @@ Upgrades = {
         return;
       case this.constructionTypes.crypt:
         GameModel.constructions.crypt = 1;
-        GameModel.brainsStorePCMod += 0.5;
-        GameModel.bloodStorePCMod += 0.5;
-        // GameModel.brainsStorePCMod *= 1.5;
-        // GameModel.bloodStorePCMod *= 1.5;
+        // GameModel.brainsStorePCMod += 0.5;
+        // GameModel.bloodStorePCMod += 0.5;
+        GameModel.brainsStorePCMod *= 1.5;
+        GameModel.bloodStorePCMod *= 1.5;
         return;
       case this.constructionTypes.fort:
         GameModel.constructions.fort = 1;
-        GameModel.brainsStorePCMod += 0.6;
-        GameModel.bloodStorePCMod += 0.6;
-        // GameModel.brainsStorePCMod *= 1.5;
-        // GameModel.bloodStorePCMod *= 1.5;
+        // GameModel.brainsStorePCMod += 0.6;
+        // GameModel.bloodStorePCMod += 0.6;
+        GameModel.brainsStorePCMod *= 1.6;
+        GameModel.bloodStorePCMod *= 1.6;
         return;
       case this.constructionTypes.fortress:
         GameModel.constructions.fortress = 1;
-        GameModel.brainsStorePCMod += 0.7;
-        GameModel.bloodStorePCMod += 0.7;
-        // GameModel.brainsStorePCMod *= 1.5;
-        // GameModel.bloodStorePCMod *= 1.5;
+        // GameModel.brainsStorePCMod += 0.7;
+        // GameModel.bloodStorePCMod += 0.7;
+        GameModel.brainsStorePCMod *= 1.7;
+        GameModel.bloodStorePCMod *= 1.7;
         return;
       case this.constructionTypes.citadel:
         GameModel.constructions.citadel = 1;
-        GameModel.brainsStorePCMod += 0.8;
-        GameModel.bloodStorePCMod += 0.8;
-        // GameModel.brainsStorePCMod *= 1.5;
-        // GameModel.bloodStorePCMod *= 1.5;
+        // GameModel.brainsStorePCMod += 0.8;
+        // GameModel.bloodStorePCMod += 0.8;
+        // GameModel.brainsStorePCMod *= 1.8;
+        // GameModel.bloodStorePCMod *= 1.8;
         return;
       case this.constructionTypes.plagueSpikes:
         GameModel.constructions.plagueSpikes = 1;
@@ -273,11 +272,11 @@ Upgrades = {
       case this.types.bloodGainPC:
         return "Blood: " + Math.round(GameModel.bloodPCMod * 100) + "%";
       case this.types.bloodStoragePC:
-        return "Blood Storage: " + Math.round(GameModel.bloodStorePCMod * 100) + "%";
+        return "Blood Storage: " + formatWhole(GameModel.bloodStorePCMod * 100) + "%";
       case this.types.brainsGainPC:
         return "Brains: " + Math.round(GameModel.brainsPCMod * 100) + "%";
       case this.types.brainsStoragePC:
-        return "Brains Storage: " +  Math.round(GameModel.brainsStorePCMod * 100) + "%";
+        return "Brains Storage: " +  formatWhole(GameModel.brainsStorePCMod * 100) + "%";
       case this.types.zombieDmgPC:
         return "Zombie Damage: " + Math.round(GameModel.zombieDamagePCMod * 100) + "%";
       case this.types.zombieHealthPC:
@@ -382,7 +381,7 @@ Upgrades = {
       GameModel.saveData();
       this.applyUpgrades();
       if (upgrade.purchaseMessage) {
-        GameModel.messageQueue.push(upgrade.purchaseMessage);
+        GameModel.sendMessage(upgrade.purchaseMessage);
       }
     }
   },
@@ -453,9 +452,9 @@ Upgrades = {
     GameModel.saveData();
     this.applyUpgrades();
     this.angularModel.updateConstructionUpgrades();
-    GameModel.messageQueue.push("Construction of " + upgrade.name + " complete!");
+    GameModel.sendMessage("Construction of " + upgrade.name + " complete!");
     if (upgrade.completeMessage) {
-      GameModel.messageQueue.push(upgrade.completeMessage);
+      GameModel.sendMessage(upgrade.completeMessage);
     }
   },
 
@@ -756,7 +755,7 @@ Upgrades.upgrades = [
   // blood upgrades
   new Upgrades.Upgrade(1, "Bloodthirst", Upgrades.types.damage, Upgrades.costs.blood, 50, 1.2, 1, 40, "Your zombies thirst for blood and do +1 damage for each rank of Bloodthirst."),
   new Upgrades.Upgrade(9, "Sharpened Teeth", Upgrades.types.damage, Upgrades.costs.blood, 3000, 1.23, 3, 0, "Your zombies bites do +3 damage with each rank of Sharpened Teeth.", false, 206),
-  new Upgrades.Upgrade(11, "Razor Claws", Upgrades.types.damage, Upgrades.costs.blood, 28000, 1.25, 5, 0, "Your zombies bites do +5 damage with each rank of Razor Claws.", false, 211),
+  new Upgrades.Upgrade(11, "Razor Claws", Upgrades.types.damage, Upgrades.costs.blood, 28000, 1.25, 5, 0, "Your zombies attacks do +5 damage with each rank of Razor Claws.", false, 211),
   new Upgrades.Upgrade(2, "Like Leather", Upgrades.types.health, Upgrades.costs.blood, 100, 1.2, 10, 40, "Your zombies gain tougher skin and +10 health with each rank."),
   new Upgrades.Upgrade(10, "Thick Skull", Upgrades.types.health, Upgrades.costs.blood, 5000, 1.23, 25, 0, "Your zombies gain +25 health with each rank.", false, 206),
   new Upgrades.Upgrade(12, "Battle Hardened", Upgrades.types.health, Upgrades.costs.blood, 32000, 1.25, 40, 0, "Your zombies gain +40 health with each rank.", false, 211),
@@ -769,7 +768,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(13, "Blazing Speed", Upgrades.types.burningSpeedPC, Upgrades.costs.blood, 30000, 1.25, 0.05, 10, "The humans are using torches to set your zombies on fire. Perhaps we can turn the tables on them? Each rank increases the movement and attack speed of burning zombies by 5%", false, 207),
 
   // brain upgrades
-  new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 15, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),
+  new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 20, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),
   new Upgrades.Upgrade(21, "Master Summoner", Upgrades.types.energyCap, Upgrades.costs.brains, 10, 1.5, 5, 20, "All the brains you harvested have proved fruitful in your experiments. Each rank raises your maximum energy by 5."),
   new Upgrades.Upgrade(22, "Primal Reflexes", Upgrades.types.speed, Upgrades.costs.brains, 5, 1.6, 1, 20, "The zombies retain more of their human agility increasing run speed by 1 for each rank."),
   new Upgrades.Upgrade(23, "Blood Harvest", Upgrades.types.bloodStoragePC, Upgrades.costs.brains, 50, 1.12, 0.1, 0, "All this brain power has enabled you to devise some superior blood storage methods. Each rank increases your maximum blood by 10%."),
@@ -778,7 +777,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(26, "Energy Charge", Upgrades.types.unlockSpell, Upgrades.costs.brains, 2000, 1, 2, 1, "Learn the Energy Charge spell which can drastically increase your energy rate for 30 seconds.", "New spell learned, Energy Charge!", 209),
   
   // bone upgrades
-  new Upgrades.Upgrade(40, "Bone Throne", Upgrades.types.energyCap, Upgrades.costs.bones, 50, 1.5, 10, 10, "Sitting atop your throne of bones you can finally think clearly. Each rank increases maximum energy by 10."),
+  new Upgrades.Upgrade(40, "Bone Throne", Upgrades.types.energyCap, Upgrades.costs.bones, 50, 1.55, 10, 15, "Sitting atop your throne of bones you can finally think clearly. Each rank increases maximum energy by 10."),
   new Upgrades.Upgrade(41, "Crown of Bones", Upgrades.types.energyRate, Upgrades.costs.bones, 200, 1.5, 0.2, 25, "Not just dapper, these spikes help channel your energy. Each rank increases energy rate by 0.2 per second."),
   new Upgrades.Upgrade(42, "Bonebarrows", Upgrades.types.boneCollectorCapacity, Upgrades.costs.bones, 300, 1.2, 5, 20, "Your bone collectors are struggling to carry all these bones. Maybe it's time we gave them an upgrade? Each rank increases their carrying capacity by 5."),
   new Upgrades.Upgrade(43, "Bone Reinforced Tanks", Upgrades.types.bloodCap, Upgrades.costs.bones, 500, 1.07, 2000, 0, "Finally! Now that we have a solid construction material we can get to work building better storage for our other resources. Each rank increases blood storage by 2000."),

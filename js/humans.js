@@ -72,14 +72,18 @@ Humans = {
     human.ySpeed = 0;
   },
 
+  getMaxNpcs() {
+    return Math.min(this.humansPerLevel * GameModel.level, this.maxHumans);
+  },
+
   getMaxHumans() {
-    return Math.min(this.humansPerLevel * GameModel.level, this.maxHumans) - (Police.getMaxPolice() + Army.getMaxArmy());
+    return this.getMaxNpcs() - (Police.police.length + Army.armymen.length);
   },
 
   getMaxDoctors() {
     var maxDoctors = Math.min(Math.round(0.7 * GameModel.level), 75);
 
-    if (GameModel.level < 14)
+    if (GameModel.level < 18)
       return 0;
 
     return maxDoctors;
@@ -142,7 +146,7 @@ Humans = {
         fontSize : 64,
         fill: "#FC0",
         stroke: "#000",
-        strokeThickness: 3,
+        strokeThickness: 5,
         align: 'center'
       });
       this.vipText.anchor = {x:0.5, y:1};
@@ -190,12 +194,15 @@ Humans = {
       this.aliveHumans.length = 0;
     }
 
+    Police.populate();
+    Army.populate();
+
     this.getAttackDamage();
     var maxHumans = this.getMaxHumans();
     var numDoctors = this.getMaxDoctors();
     var maxHealth = this.getMaxHealth(GameModel.level);
     var vipNeeded = Trophies.doesLevelHaveTrophy(GameModel.level);
-
+    
     if (vipNeeded) {
       this.escapeTarget = {x:gameFieldSize.x / 2, y:gameFieldSize.y + 50};
     }
@@ -263,8 +270,7 @@ Humans = {
       characterContainer.addChild(human);
     }
 
-    Police.populate();
-    Army.populate();
+    
   },
 
   updateHumanSpeed(human, timeDiff) {
@@ -333,7 +339,7 @@ Humans = {
   
     if (human.alpha > 0.5 && human.alpha - this.fadeSpeed * timeDiff <= 0.5) {
       if (Math.random() < GameModel.riseFromTheDeadChance) {
-        Zombies.createZombie(human.x, human.y);
+        Zombies.createZombie(human.x, human.y, human.isDog);
         human.visible = false;
         characterContainer.removeChild(human);
         return;
@@ -371,7 +377,7 @@ Humans = {
         human.maxSpeed = this.maxRunSpeed;
         human.target = this.escapeTarget;
         Exclamations.newExclamation(human);
-        GameModel.messageQueue.push("The VIP is escaping!");
+        GameModel.sendMessage("The VIP is escaping!");
         break;
       case this.states.attacking:
         human.play();
@@ -458,8 +464,9 @@ Humans = {
       var count = Humans.scanForZombies(human, aliveZombies);
 
       if (count > 0) {
-        if (human.vip && human.state !== this.states.escaping) {
-          this.changeState(human, this.states.escaping);
+        if (human.vip) {
+          if (human.state !== this.states.escaping)
+            this.changeState(human, this.states.escaping);
         } else if (Math.random() < count * this.fleeChancePerZombie) {
           this.changeState(human, this.states.fleeing);
         } else {
@@ -494,7 +501,7 @@ Humans = {
           human.zombieTarget = false;
           human.visible = false;
           this.vipText.visible = false;
-          GameModel.messageQueue.push("The VIP has escaped!");
+          GameModel.sendMessage("The VIP has escaped!");
           GameModel.vipEscaped();
         } else {
           Humans.updateHumanSpeed(human, timeDiff);
@@ -545,6 +552,9 @@ Police = {
   discardedPolice : [],
   walkTexture : [],
   deadTexture :[],
+  dogTexture : [],
+  deadDogTexture : [],
+  policeDogLevel : 20,
   policePerLevel : 1,
   attackSpeed : 2,
   attackDamage : 16,
@@ -553,6 +563,7 @@ Police = {
   shootDistance : 100,
   visionDistance : 150,
   scaling :2,
+  dogScaling: 1.3,
   radioTime : 30,
 
   states : {
@@ -563,11 +574,25 @@ Police = {
     standing : "standing"
   },
 
+  dogStates : {
+    following : "following",
+    attacking : "attacking",
+    hunting : "hunting"
+  },
+
+  isExtraPolice() {
+    return (GameModel.level + 10) % 20 == 0;
+  },
+
   getMaxPolice() {
     var maxPolice = Math.min(Math.round(this.policePerLevel * GameModel.level), 100);
 
     if (GameModel.level < 3)
       return 0;
+
+    if (this.isExtraPolice()) {
+      return Math.max(maxPolice * 2, 100);
+    }
 
     return maxPolice;
   },
@@ -583,9 +608,13 @@ Police = {
   populate() {
     if (this.walkTexture.length == 0) {
       for (var i=0; i < 3; i++) {
-        this.walkTexture.push(PIXI.Texture.from('cop' + (i + 1) + '.png'))
+        this.walkTexture.push(PIXI.Texture.from('cop' + (i + 1) + '.png'));
       }
       this.deadTexture = [PIXI.Texture.from('cop4.png')];
+      for (var i=0; i < 2; i++) {
+        this.dogTexture.push(PIXI.Texture.from("dog" + (i + 1) + ".png"));
+      }
+      this.deadDogTexture = [PIXI.Texture.from("dogdead.png")];
     }
 
     if (this.police.length > 0) {
@@ -598,6 +627,7 @@ Police = {
 
     var maxPolice = this.getMaxPolice();
     var maxHealth = this.getMaxHealth();
+    var maxDogHealth = maxHealth * 0.6;
     this.getAttackDamage();
 
     for (var i=0; i < maxPolice; i++) {
@@ -609,6 +639,7 @@ Police = {
       } else {
         police = new PIXI.AnimatedSprite(this.walkTexture);
       }
+      police.isDog = false;
       police.deadTexture = this.deadTexture;
       police.animationSpeed = 0.2;
       police.anchor = {x:35/80,y:1};
@@ -637,12 +668,63 @@ Police = {
       police.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
       this.police.push(police);
       characterContainer.addChild(police);
+
+      if (GameModel.level >= this.policeDogLevel && Math.random() > 0.5) {
+        this.createPoliceDog(police, maxDogHealth);
+      }
     }
+
+    if (this.isExtraPolice()) {
+      GameModel.sendMessage("Warning: High Police Activity!");
+    }
+  },
+
+  createPoliceDog(police, maxDogHealth) {
+    var dog;
+    if (this.discardedPolice.length > 0) {
+      dog = this.discardedPolice.pop();
+      dog.alpha = 1;
+      dog.textures = this.dogTexture;
+    } else {
+      dog = new PIXI.AnimatedSprite(this.dogTexture);
+    }
+    dog.owner = police;
+    dog.isDog = true;
+    dog.deadTexture = this.deadDogTexture;
+    dog.animationSpeed = 0.15;
+    dog.anchor = {x:0.5,y:1};
+    dog.position = {x:police.position.x + 3, y: police.position.y};
+    dog.zIndex = dog.position.y;
+    dog.xSpeed = 0;
+    dog.ySpeed = 0;
+    dog.speedMod = 1;
+    dog.dead = false;
+    dog.infected = false;
+    dog.lastKnownBuilding = false;
+    dog.plagueDamage = 0;
+    dog.plagueTickTimer = Math.random() * Humans.plagueTickTimer;
+    dog.maxSpeed = this.maxRunSpeed;
+    dog.visionDistance = this.visionDistance;
+    dog.visible = true;
+    dog.maxHealth = dog.health = maxDogHealth;
+    dog.timeToScan = Math.random() * Humans.scanTime;
+    dog.target = police;
+    dog.zombieTarget = false;
+    dog.state = this.dogStates.following;
+    dog.followTimer = 0;
+    dog.attackTimer = this.attackSpeed;
+    dog.scale = {x:Math.random() > 0.5 ? this.dogScaling : -1 * this.dogScaling, y: this.dogScaling};
+    this.police.push(dog);
+    characterContainer.addChild(dog);
   },
 
   update(timeDiff, aliveZombies) {
     for (var i=0; i < this.police.length; i++) {
-      this.updatePolice(this.police[i], timeDiff, aliveZombies);
+      if (this.police[i].isDog) {
+        this.updatePoliceDog(this.police[i], timeDiff, aliveZombies);
+      } else {
+        this.updatePolice(this.police[i], timeDiff, aliveZombies);
+      }
       if (!this.police[i].dead)
         Humans.aliveHumans.push(this.police[i]);
     }
@@ -792,6 +874,85 @@ Police = {
 
         break;
     }
+  },
+  updateDogSpeed(dog, timeDiff) {
+    // dog.speedMod = 1;
+    Humans.updateHumanSpeed(dog, timeDiff);
+    if (Math.abs(dog.xSpeed) > 1)
+      dog.scale.x = dog.xSpeed > 0 ? this.dogScaling : -this.dogScaling;
+  },
+  updatePoliceDog(dog, timeDiff, aliveZombies) {
+    
+    if (dog.dead)
+      return Humans.updateDeadHumanFading(dog, timeDiff);
+
+    dog.attackTimer -= timeDiff;
+    dog.timeToScan -= timeDiff;
+
+    if (dog.infected)
+      Humans.updatePlague(dog, timeDiff);
+
+    if ((!dog.zombieTarget || dog.zombieTarget.dead) && dog.timeToScan < 0) {
+      Humans.scanForZombies(dog, aliveZombies);
+      if (dog.zombieTarget) {
+        dog.state = this.dogStates.attacking;
+      }
+    }
+
+    switch (dog.state) {
+
+      case this.dogStates.following:
+
+        if (dog.owner.dead) {
+          dog.state = this.dogStates.hunting;
+          dog.play();
+          break;
+        }
+
+        if (dog.owner.zombieTarget && !dog.owner.zombieTarget.dead) {
+          dog.state = this.dogStates.attacking;
+          dog.play();
+          dog.target = dog.owner.zombieTarget;
+          break;
+        }
+        dog.target = dog.owner;
+        if (fastDistance(dog.position.x, dog.position.y, dog.target.x, dog.target.y) < this.moveTargetDistance) {
+          dog.followTimer = Math.random() * 3;
+          dog.gotoAndStop(0);
+        } else {
+          dog.followTimer -= timeDiff;
+          if (dog.followTimer < 0) {
+            dog.play();
+            this.updateDogSpeed(dog, timeDiff);
+          }
+        }
+        break;
+      case this.dogStates.attacking:
+
+        if (dog.zombieTarget && !dog.zombieTarget.dead) {
+          if (fastDistance(dog.position.x, dog.position.y, dog.zombieTarget.x, dog.zombieTarget.y) < this.moveTargetDistance) {
+            dog.scale.x = dog.target.x > dog.x ? this.dogScaling : -this.dogScaling;
+            if (dog.attackTimer < 0) {
+              Zombies.damageZombie(dog.target, this.attackDamage, dog);
+              dog.attackTimer = this.attackSpeed;
+            }
+          } else {
+            dog.target = dog.zombieTarget;
+            this.updateDogSpeed(dog, timeDiff);
+
+          }
+        } else {
+          dog.state = this.dogStates.following;
+        }
+      case this.dogStates.hunting:
+          if (fastDistance(dog.position.x, dog.position.y, dog.target.x, dog.target.y) < this.moveTargetDistance) {
+            dog.target = {x:Math.random() * gameFieldSize.x, y:Math.random() * gameFieldSize.y};
+            dog.maxSpeed = this.maxRunSpeed;
+          } else {
+            this.updateDogSpeed(dog, timeDiff);
+          }
+        break;
+    }
   }
 }
 
@@ -823,11 +984,19 @@ Army = {
     standing : "standing"
   },
 
+  isExtraArmy() {
+    return GameModel.level % 20 == 0;
+  },
+
   getMaxArmy() {
     var maxArmy = Math.min(Math.round(this.armyPerLevel * GameModel.level), 100);
 
-    if (GameModel.level < 8)
+    if (GameModel.level < 11)
       return 0;
+
+    if (this.isExtraArmy()) {
+      return Math.max(maxArmy * 2, 100);
+    }
 
     return maxArmy;
   },
@@ -900,6 +1069,10 @@ Army = {
       armyman.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
       this.armymen.push(armyman);
       characterContainer.addChild(armyman);
+    }
+
+    if (this.isExtraArmy()) {
+      GameModel.sendMessage("Warning: High Military Activity!");
     }
   },
 

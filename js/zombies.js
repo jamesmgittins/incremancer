@@ -15,6 +15,8 @@ Zombies = {
   currId : 1,
   scanTime : 3,
   textures : [],
+  dogTexture : [],
+  deadDogTexture : [],
   maxSpeed : 10,
   zombieCursor : false,
   zombieCursorScale : 3,
@@ -45,6 +47,10 @@ Zombies = {
           dead : [PIXI.Texture.from('zombie' + (i + 1) + '_dead.png')]
         })
       }
+      for (var i=0; i < 2; i++) {
+        this.dogTexture.push(PIXI.Texture.from("zombiedog" + (i + 1) + ".png"));
+      }
+      this.deadDogTexture = [PIXI.Texture.from("zombiedogdead.png")];
     }
 
     if (this.zombies.length > 0) {
@@ -65,15 +71,25 @@ Zombies = {
     }
   },
 
-  createZombie(x,y) {
+  createZombie(x, y, isDog = false) {
     var textureId = Math.floor(Math.random() * this.textures.length);
     var zombie;
     if (this.discardedZombies.length > 0) {
       zombie = this.discardedZombies.pop();
-      zombie.textures = this.textures[textureId].animated;
+      if (isDog) {
+        zombie.textures = this.dogTexture;
+      } else {
+        zombie.textures = this.textures[textureId].animated;
+      }
     } else {
-      zombie = new PIXI.AnimatedSprite(this.textures[textureId].animated);
+      if (isDog) {
+        zombie = new PIXI.AnimatedSprite(this.dogTexture);
+      } else {
+        zombie = new PIXI.AnimatedSprite(this.textures[textureId].animated);
+      }
+      
     }
+    zombie.isDog = isDog;
     zombie.super = this.super;
     zombie.textureId = textureId;
     zombie.dead = false;
@@ -89,7 +105,8 @@ Zombies = {
     zombie.health = zombie.super ? this.model.zombieHealth * 10 : this.model.zombieHealth;
     zombie.regenTimer = 5;
     zombie.state = this.states.lookingForTarget;
-    zombie.scaling = zombie.super ? 1.5 * this.scaling : this.scaling;
+    var dogScale = isDog ? 0.7 : 1;
+    zombie.scaling = zombie.super ? 1.5 * this.scaling * dogScale : this.scaling * dogScale;
     zombie.scale = {
       x: Math.random() > 0.5 ? zombie.scaling : -1 * zombie.scaling,
       y: zombie.scaling
@@ -133,7 +150,7 @@ Zombies = {
       if (Math.random() < this.model.infectedBlastChance) {
         this.causePlagueExplosion(zombie);
       }
-      zombie.textures = this.textures[zombie.textureId].dead;
+      zombie.textures = zombie.isDog ? this.deadDogTexture : this.textures[zombie.textureId].dead;
       if (Math.random() < this.model.brainRecoverChance) {
         this.model.addBrains(1);
       }
@@ -277,7 +294,7 @@ Zombies = {
 
         var distanceToHumanTarget = this.fastDistance(zombie.position.x, zombie.position.y, zombie.target.x, zombie.target.y);
 
-        if (distanceToHumanTarget < this.attackDistance && zombie.attackTimer < 0) {
+        if (distanceToHumanTarget < this.attackDistance) {
           zombie.state = this.states.attackingTarget;
           break;
         }
@@ -404,14 +421,15 @@ Zombies = {
       zombie.targetTimer = this.reactionTime;
     }
     
-    if (this.model.gameSpeed > 1) {
+    if (this.model.gameSpeed > 1 || zombie.isDog) {
       var ax = Math.abs(zombie.targetVector.x);
       var ay = Math.abs(zombie.targetVector.y);
       if (Math.max(ax, ay) == 0)
         return;
       var ratio = 1 / Math.max(ax, ay);
       ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
-      var zombieMaxSpeed = Math.max(this.maxSpeed * zombie.speedMultiplier, 8);
+      var dogSpeed = zombie.isDog ? 1.5 : 1;
+      var zombieMaxSpeed = Math.max(this.maxSpeed * zombie.speedMultiplier * dogSpeed, 8);
       zombie.xSpeed = zombie.targetVector.x * ratio * zombieMaxSpeed;
       zombie.ySpeed = zombie.targetVector.y * ratio * zombieMaxSpeed;
     } else {

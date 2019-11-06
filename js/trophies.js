@@ -83,9 +83,9 @@ Trophies = {
       if (window.kongregate) {
         window.kongregate.stats.submit("trophies", GameModel.persistentData.trophies.length);
       }
-      GameModel.messageQueue.push("The VIP has been killed! - New Trophy Aquired");
+      GameModel.sendMessage("The VIP has been killed! - New Trophy Aquired");
     } else {
-      GameModel.messageQueue.push("The VIP has been killed!");
+      GameModel.sendMessage("The VIP has been killed!");
     }
   },
   getTrophyList() {

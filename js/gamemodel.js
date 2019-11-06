@@ -207,10 +207,14 @@ GameModel = {
 
   autoRemoveCollectorsHarpies() {
     if (this.getEnergyRate() < 0) {
-      if (this.persistentData.harpies > 1) {
-        this.persistentData.harpies--;
+      var energyRate = this.getEnergyRate();
+      if (this.persistentData.harpies > 0) {
+        this.persistentData.harpies -= Math.round(Math.abs(energyRate));
+        if (this.persistentData.harpies < 0) {
+          this.persistentData.harpies = 0;
+        }
       }
-      if (this.persistentData.boneCollectors > 1) {
+      if (this.getEnergyRate() < 0 && this.persistentData.boneCollectors > 0) {
         this.persistentData.boneCollectors--;
       }
     }
@@ -393,6 +397,12 @@ GameModel = {
     this.resetToBaseStats();
     this.setupLevel();
     window.location.reload();
+  },
+
+  sendMessage(message) {
+    if (!this.messageQueue.includes(message)) {
+      this.messageQueue.push(message);
+    }
   },
 
   setResolution(resolution) {

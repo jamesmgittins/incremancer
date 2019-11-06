@@ -292,6 +292,7 @@ function startGame() {
     .add('sprites/buildings.json')
     .add('sprites/humans.json')
     .add('sprites/cop.json')
+    .add('sprites/dogs.json')
     .add('sprites/army.json')
     .add('sprites/doctor.json')
     .add('sprites/zombie.json')
