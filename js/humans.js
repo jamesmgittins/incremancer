@@ -777,7 +777,7 @@ Police = {
     var closestDistance = 2000;
 
     for (var i=0; i < this.police.length; i++) {
-      if (!this.police[i].dead && (!this.police[i].zombieTarget || this.police[i].zombieTarget.dead)) {
+      if (!this.police[i].dead && !this.police[i].isDog && (!this.police[i].zombieTarget || this.police[i].zombieTarget.dead)) {
         var distance = fastDistance(police.x, police.y, this.police[i].x, this.police[i].y);
         if (distance < closestDistance) {
           closestPolice = this.police[i];

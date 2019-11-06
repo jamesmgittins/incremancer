@@ -53,7 +53,7 @@ function onDragMove(event) {
       this.x = newPosition.x - this.dragOffset.x;
       this.y = newPosition.y - this.dragOffset.y;
       preventGameContainerLeavingBounds(this);
-      if (distanceBetweenPoints(this.dragStartX, this.dragStartY, this.x, this.y) > 2) {
+      if (distanceBetweenPoints(this.dragStartX, this.dragStartY, this.x, this.y) > 5) {
         this.hasMoved = true;
       }
   }
