@@ -23,6 +23,9 @@ angular.module('zombieApp', [])
     zm.graveyardTab = "minions";
 
     zm.closeSidePanels = function() {
+      zm.currentShopFilter = "blood";
+      zm.currentConstructionFilter = "available";
+      zm.graveyardTab = "minions";
       zm.sidePanels.options = false;
       zm.sidePanels.graveyard = false;
       zm.sidePanels.runesmith = false;
@@ -193,6 +196,12 @@ angular.module('zombieApp', [])
           return "+" + upgrade.effect + " brains per second";
         case Upgrades.types.plagueDamagePC:
           return "+" + Math.round(upgrade.effect * 100) + "% plague damage";
+        case Upgrades.types.spitDistance:
+          return "+" + upgrade.effect + " spit distance";
+        case Upgrades.types.blastHealing:
+          return "+" + Math.round(upgrade.effect * 100) + "% plague healing";
+        case Upgrades.types.plagueArmor:
+          return "+" + Math.round(upgrade.effect * 100) + "% damage reduction";
       }
       return "";
     }
@@ -301,7 +310,8 @@ angular.module('zombieApp', [])
       "Killing a human or turning them into a zombie will earn you 1 brain.",
       "You can spend these currencies in the shop to purchase upgrades for your zombie horde.",
       "The world can be dragged with the mouse to explore it. Or by using the WASD or arrow keys.",
-      "You can zoom in and out using your mouse wheel. Pinch to zoom on mobile."
+      "You can zoom in and out using your mouse wheel. Pinch to zoom on mobile.",
+      "Hold shift or control to spawn multiple zombies with a single click."
     ];
 
     zm.updateMessages = function(timeDiff) {

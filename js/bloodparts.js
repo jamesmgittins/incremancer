@@ -361,7 +361,7 @@ Bullets = {
 		blastCtx.fillStyle = "#ffffff";
 		blastCtx.fillRect(0, 0, 1, 1);
 		return PIXI.Texture.from(blast);
-	},
+  },
 	initialize() {
 
     if (!this.texture) {
@@ -390,8 +390,18 @@ Bullets = {
 		}
   },
   updatePart(sprite, timeDiff) {
-    if (fastDistance(sprite.x, sprite.y + 8, sprite.target.x, sprite.target.y) < this.hitbox) {
-      Zombies.damageZombie(sprite.target, sprite.damage);
+    if (fastDistance(sprite.x, sprite.y + 8, sprite.target.x, sprite.target.y) < sprite.hitbox) {
+      if (sprite.plague) {
+        Zombies.inflictPlague(sprite.target);
+        Humans.damageHuman(sprite.target, sprite.damage);
+      } else {
+        if (sprite.rocket) {
+          Army.droneExplosion(sprite.target.x, sprite.target.y, false, sprite.damage);
+        } else {
+          Zombies.damageZombie(sprite.target, sprite.damage, sprite.source);
+        }
+      }
+      
       sprite.visible = false;
       this.discardedSprites.push(sprite);
       characterContainer.removeChild(sprite);
@@ -407,7 +417,7 @@ Bullets = {
       characterContainer.removeChild(sprite);
     }
   },
-  newBullet(x,y,target,damage) {
+  newBullet(source, target, damage, plague = false, rocket = false) {
     var sprite;
     if (this.discardedSprites.length > 0) {
      sprite = this.discardedSprites.pop();
@@ -417,25 +427,35 @@ Bullets = {
       this.sprites.push(sprite);
     }
     characterContainer.addChild(sprite);
-    sprite.x = x;
-    sprite.y = y - 8;
+    sprite.source = source;
+    sprite.x = source.x;
+    sprite.y = source.y - 8;
+    if (plague) {
+      sprite.y = source.y - 12;
+    }
     sprite.target = target;
     sprite.damage = damage;
     sprite.visible = true;
     sprite.alpha = 1;
 
-    var xVector = target.x - x;
-    var yVector = target.y - y;
+    sprite.hitbox = rocket ? this.hitbox * 1.5 : this.hitbox;
+
+    sprite.plague = plague;
+    sprite.rocket = rocket;
+    sprite.tint = plague ? 0x00FF00 : rocket ? 0xFFEC00 : 0xFFFFFF;
+    sprite.scale.x = sprite.scale.y = rocket ? 2.5 : 2;
+
+    var xVector = target.x - sprite.x;
+    var yVector = target.y - sprite.y;
     var ax = Math.abs(xVector);
     var ay = Math.abs(yVector);
     var ratio = 1 / Math.max(ax, ay);
     ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
     
-    // var aimAngle = Math.atan2(x - target.x, target.y - y);
-    // var bulletSpeed = RotateVector2d(0, this.speed, aimAngle);
-    
     sprite.xSpeed = xVector * ratio * this.speed;
     sprite.ySpeed = yVector * ratio * this.speed;
+
+    sprite.rotation = Math.atan2(sprite.ySpeed, sprite.xSpeed);
   }
 };
 

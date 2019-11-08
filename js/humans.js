@@ -93,7 +93,7 @@ Humans = {
     if (GameModel.level < 10)
       return 0;
     
-    return Math.min(GameModel.level - 10, 10) * 0.05;
+    return Math.min(GameModel.level - 10, 40) * 0.02;
   },
 
   getMaxHealth(level) {
@@ -283,6 +283,12 @@ Humans = {
         human.play();
       }
     }
+
+    if (human.dogStun && human.dogStun > 0) {
+      human.dogStun -= timeDiff;
+      return;
+    }
+
     if (!human.targetTimer || !human.targetVector) {
       human.targetTimer = 0;
     }
@@ -560,7 +566,7 @@ Police = {
   attackDamage : 16,
   attackDistance : 20,
   moveTargetDistance : 5,
-  shootDistance : 100,
+  shootDistance : 110,
   visionDistance : 150,
   scaling :2,
   dogScaling: 1.3,
@@ -591,7 +597,7 @@ Police = {
       return 0;
 
     if (this.isExtraPolice()) {
-      return Math.max(maxPolice * 2, 100);
+      return Math.max(maxPolice * 2, 150);
     }
 
     return maxPolice;
@@ -865,7 +871,7 @@ Police = {
         if (police.zombieTarget && !police.zombieTarget.dead) {
           police.scale.x = police.zombieTarget.x > police.x ? this.scaling : -this.scaling;
           if (police.attackTimer < 0) {
-            Bullets.newBullet(police.x, police.y, police.zombieTarget, this.attackDamage);
+            Bullets.newBullet(police, police.zombieTarget, this.attackDamage);
             police.attackTimer = this.attackSpeed;
           }
         } else {
@@ -891,13 +897,6 @@ Police = {
 
     if (dog.infected)
       Humans.updatePlague(dog, timeDiff);
-
-    if ((!dog.zombieTarget || dog.zombieTarget.dead) && dog.timeToScan < 0) {
-      Humans.scanForZombies(dog, aliveZombies);
-      if (dog.zombieTarget) {
-        dog.state = this.dogStates.attacking;
-      }
-    }
 
     switch (dog.state) {
 
@@ -934,23 +933,31 @@ Police = {
             dog.scale.x = dog.target.x > dog.x ? this.dogScaling : -this.dogScaling;
             if (dog.attackTimer < 0) {
               Zombies.damageZombie(dog.target, this.attackDamage, dog);
+              dog.target.dogStun = 1;
               dog.attackTimer = this.attackSpeed;
             }
           } else {
             dog.target = dog.zombieTarget;
             this.updateDogSpeed(dog, timeDiff);
-
           }
         } else {
           dog.state = this.dogStates.following;
         }
       case this.dogStates.hunting:
-          if (fastDistance(dog.position.x, dog.position.y, dog.target.x, dog.target.y) < this.moveTargetDistance) {
-            dog.target = {x:Math.random() * gameFieldSize.x, y:Math.random() * gameFieldSize.y};
-            dog.maxSpeed = this.maxRunSpeed;
-          } else {
-            this.updateDogSpeed(dog, timeDiff);
+
+        if ((!dog.zombieTarget || dog.zombieTarget.dead) && dog.timeToScan < 0) {
+          Humans.scanForZombies(dog, aliveZombies);
+          if (dog.zombieTarget) {
+            dog.state = this.dogStates.attacking;
           }
+        }
+
+        if (fastDistance(dog.position.x, dog.position.y, dog.target.x, dog.target.y) < this.moveTargetDistance) {
+          dog.target = {x:Math.random() * gameFieldSize.x, y:Math.random() * gameFieldSize.y};
+          dog.maxSpeed = this.maxRunSpeed;
+        } else {
+          this.updateDogSpeed(dog, timeDiff);
+        }
         break;
     }
   }
@@ -962,14 +969,14 @@ Army = {
   maxRunSpeed : 50,
   armymen : [],
   discardedArmymen : [],
-  walkTexture : [],
-  deadTexture :[],
-  armyPerLevel : 0.5,
+  textures : [],
+  aliveZombies : [],
+  armyPerLevel : 0.9,
   attackSpeed : 2,
   attackDamage : 20,
   attackDistance : 25,
   moveTargetDistance : 5,
-  shootDistance : 120,
+  shootDistance : 130,
   visionDistance : 200,
   scaling :2,
   shotsPerBurst : 3,
@@ -995,7 +1002,7 @@ Army = {
       return 0;
 
     if (this.isExtraArmy()) {
-      return Math.max(maxArmy * 2, 100);
+      return Math.max(maxArmy * 2, 150);
     }
 
     return maxArmy;
@@ -1010,11 +1017,17 @@ Army = {
   },
 
   populate() {
-    if (this.walkTexture.length == 0) {
+    if (this.textures.length == 0) {
       for (var i=0; i < 3; i++) {
-        this.walkTexture.push(PIXI.Texture.from('army' + (i + 1) + '.png'))
+        var animated = [];
+        for (var j=0; j < 3; j++) {
+          animated.push(PIXI.Texture.from('army' + (i + 1) + '_' + (j + 1) + '.png'));
+        }
+        this.textures.push({
+          animated : animated,
+          dead : [PIXI.Texture.from('army' + (i + 1) + '_dead.png')]
+        })
       }
-      this.deadTexture = [PIXI.Texture.from('army4.png')];
     }
 
     if (this.armymen.length > 0) {
@@ -1035,14 +1048,23 @@ Army = {
   
     for (var i=0; i < maxArmy; i++) {
       var armyman;
+      var textureId = 0;
+      if (GameModel.level > 35 && Math.random() < 0.3) {
+        textureId = 1;
+      }
+      if (GameModel.level > 45 && Math.random() < 0.3) {
+        textureId = 2;
+      }
       if (this.discardedArmymen.length > 0) {
         armyman = this.discardedArmymen.pop();
         armyman.alpha = 1;
-        armyman.textures = this.walkTexture;
+        armyman.textures = this.textures[textureId].animated;
       } else {
-        armyman = new PIXI.AnimatedSprite(this.walkTexture);
+        armyman = new PIXI.AnimatedSprite(this.textures[textureId].animated);
       }
-      armyman.deadTexture = this.deadTexture;
+      armyman.minigun = textureId == 1;
+      armyman.rocketlauncher = textureId == 2;
+      armyman.deadTexture = this.textures[textureId].dead;
       armyman.animationSpeed = 0.2;
       armyman.anchor = {x:35/80,y:1};
       armyman.currentPoi = this.map.getRandomBuilding();
@@ -1077,6 +1099,7 @@ Army = {
   },
 
   update(timeDiff, aliveZombies) {
+    this.aliveZombies = aliveZombies;
     if (this.droneActive) {
       this.droneStrikeTimer -= timeDiff;
     }
@@ -1093,7 +1116,12 @@ Army = {
       armyman.target = armyman.zombieTarget;
       var distanceToTarget = fastDistance(armyman.position.x, armyman.position.y, armyman.zombieTarget.x, armyman.zombieTarget.y);
 
-      if (distanceToTarget > this.shootDistance) {
+      if (distanceToTarget > this.shootDistance && !armyman.rocketlauncher) {
+        this.changeState(armyman, this.states.running);
+        return;
+      }
+
+      if (distanceToTarget > this.shootDistance * 1.6 && armyman.rocketlauncher) {
         this.changeState(armyman, this.states.running);
         return;
       }
@@ -1195,6 +1223,12 @@ Army = {
           armyman.scale.x = armyman.zombieTarget.x > armyman.x ? this.scaling : -this.scaling;
           if (armyman.attackTimer < 0) {
             armyman.shotsLeft = this.shotsPerBurst;
+            if (armyman.minigun) {
+              armyman.shotsLeft = this.shotsPerBurst * 3;
+            }
+            if (armyman.rocketlauncher) {
+              armyman.shotsLeft = 1;
+            }
             armyman.attackTimer = this.attackSpeed;
             armyman.shotTimer = 0;
           }
@@ -1202,7 +1236,10 @@ Army = {
             armyman.shotTimer -= timeDiff;
             if (armyman.shotTimer < 0) {
               armyman.shotTimer = 0.15;
-              Bullets.newBullet(armyman.x, armyman.y, armyman.zombieTarget, this.attackDamage);
+              if (armyman.minigun) {
+                armyman.shotTimer = 0.08;
+              }
+              Bullets.newBullet(armyman, armyman.zombieTarget, armyman.rocketlauncher ? this.attackDamage * 2 : this.attackDamage, false, armyman.rocketlauncher);
               armyman.shotsLeft--;
             }
           }
@@ -1249,21 +1286,24 @@ Army = {
   },
 
   droneBomb(aliveZombies) {
-    var variance = 16;
-    var bombHit = {
-      x:this.droneStrike.target.x - variance + (Math.random() *  variance * 2),
-      y:this.droneStrike.target.y - variance + (Math.random() *  variance * 2)
-    };
-    Blasts.newDroneBlast(bombHit.x, bombHit.y);
+    var variance = 32;
+    this.droneExplosion(this.droneStrike.target.x + ((Math.random() - 1) * variance), this.droneStrike.target.y + ((Math.random() - 1) * variance), aliveZombies, this.attackDamage * 3);
+    this.droneStrike.timer = 0.3;
+    this.droneStrike.bombsLeft--;
+  },
+
+  droneExplosion(x, y, aliveZombies, damage) {
+    if (!aliveZombies) {
+      aliveZombies = this.aliveZombies;
+    }
+    Blasts.newDroneBlast(x, y);
     for (var i = 0; i < aliveZombies.length; i++) {
-      if (aliveZombies[i].x > bombHit.x - this.droneBlastRadius && aliveZombies[i].x < bombHit.x + this.droneBlastRadius) {
-        if (aliveZombies[i].y > bombHit.y - this.droneBlastRadius && aliveZombies[i].y < bombHit.y + this.droneBlastRadius) {
-          Zombies.damageZombie(aliveZombies[i], this.attackDamage * 5);
+      if (aliveZombies[i].x > x - this.droneBlastRadius && aliveZombies[i].x < x + this.droneBlastRadius) {
+        if (aliveZombies[i].y > y - this.droneBlastRadius && aliveZombies[i].y < y + this.droneBlastRadius) {
+          Zombies.damageZombie(aliveZombies[i], damage);
         }
       }
     }
-    this.droneStrike.timer = 0.3;
-    this.droneStrike.bombsLeft--;
   },
 
   updateDroneStrike(timeDiff, aliveZombies) {

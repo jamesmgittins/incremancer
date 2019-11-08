@@ -110,6 +110,9 @@ GameModel = {
     this.burningSpeedMod = 1;
     this.startingResources = 0;
     this.fenceRadius = 50;
+    this.spitDistance = 0;
+    this.blastHealing = 0;
+    this.plagueDmgReduction = 1;
   },
 
   addEnergy(value) {
@@ -442,6 +445,34 @@ GameModel = {
         }
       };
       reader.readAsText(file);
+    }
+  },
+
+  toggleFullscreen() {
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    } else {
+      var i = document.body;
+      if (i.requestFullscreen) {
+        i.requestFullscreen();
+      } else if (i.webkitRequestFullscreen) {
+        i.webkitRequestFullscreen();
+      } else if (i.mozRequestFullScreen) {
+        i.mozRequestFullScreen();
+      } else if (i.msRequestFullscreen) {
+        i.msRequestFullscreen();
+      }
     }
   }
 

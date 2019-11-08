@@ -40,14 +40,16 @@ function formatWhole(input) {
 
 function formatNumber(input, decimals) {
   if (!input) input = 0;
+  if (input >= 1000000000000000)
+    return input.toExponential(decimals).replace("+","");
   if (input >= 1000000000000)
-  return (input / 1000000000000).toFixed(decimals) + 'T';
+    return (input / 1000000000000).toFixed(decimals) + 'T';
   if (input >= 1000000000)
-  return (input / 1000000000).toFixed(decimals) + 'B';
+    return (input / 1000000000).toFixed(decimals) + 'B';
   if (input >= 1000000)
-  return (input / 1000000).toFixed(decimals) + 'M';
+    return (input / 1000000).toFixed(decimals) + 'M';
   if (input >= 1000)
-  return (input / 1000).toFixed(decimals) + 'K';
+    return (input / 1000).toFixed(decimals) + 'K';
 
   return input.toFixed(decimals);
 }

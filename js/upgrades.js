@@ -20,6 +20,10 @@ Upgrades = {
     plagueDamagePC:"plagueDamagePC",
     burningSpeedPC:"burningSpeedPC",
     unlockSpell:"unlockSpell",
+    spitDistance:"spitDistance",
+    blastHealing:"blastHealing",
+    plagueArmor:"plagueArmor",
+
     // prestige items
     bloodGainPC : "bloodGainPC",
     bloodStoragePC : "bloodStoragePC",
@@ -132,6 +136,15 @@ Upgrades = {
         return;
       case this.types.unlockSpell:
         Spells.unlockSpell(upgrade.effect);
+        return;
+      case this.types.spitDistance:
+        GameModel.spitDistance = 30 + upgrade.effect * upgrade.rank;
+        return
+      case this.types.blastHealing:
+        GameModel.blastHealing += upgrade.effect * upgrade.rank;
+        return;
+      case this.types.plagueArmor:
+        GameModel.plagueDmgReduction -= upgrade.effect * upgrade.rank;
         return;
         // prestige items
       case this.types.bonesGainPC:
@@ -289,6 +302,12 @@ Upgrades = {
         return "Zombie Cost: " + GameModel.zombieCost + " energy";
       case this.types.burningSpeedPC:
         return "Burning zombie speed: " + Math.round(GameModel.burningSpeedMod * 100) + "%";
+      case this.types.blastHealing:
+        return "Plague heal: " + Math.round(GameModel.blastHealing * 100) + "%";
+      case this.types.spitDistance:
+        return "Zombie spit distance: " + GameModel.spitDistance;
+      case this.types.plagueArmor:
+        return "Infected damage reduction: " + Math.round(100 - (GameModel.plagueDmgReduction * 100)) + "%";
     }
   },
 
@@ -681,6 +700,7 @@ Upgrades = {
     fence : "fence",
     fenceSize : "fenceSize",
     plagueWorkshop : "plagueWorkshop",
+    plagueLaboratory : "plagueLaboratory",
     plagueSpikes : "plagueSpikes",
     spellTower : "spellTower",
     runesmith : "runesmith",
@@ -736,6 +756,7 @@ Upgrades.constructionUpgrades = [
   new Upgrades.Construction(215, "Third Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:1800, blood:2700}, 30, 1, 10, 1, 206, "Build an additional cage to contain surplus zombies once a town is defeated."),
   new Upgrades.Construction(216, "Fourth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:2400, blood:3600}, 30, 1, 10, 1, 207, "Build an additional cage to contain surplus zombies once a town is defeated."),
   new Upgrades.Construction(217, "Fifth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:3000, blood:4500}, 30, 1, 15, 1, 211, "Build an additional cage to contain surplus zombies once a town is defeated."),
+  new Upgrades.Construction(218, "Plague Laboratory", Upgrades.constructionTypes.plagueLaboratory, {brains:25000, blood:1000000}, 50, 1, 15, 1, 211, "Expand the plague workshop into a well equipped laboratory in order to unlock additional plague upgrades."),
 ];
 
 Upgrades.prestigeUpgrades = [
@@ -766,6 +787,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(7, "Detonate", Upgrades.types.unlockSpell, Upgrades.costs.blood, 25000, 1, 3, 1, "Learn the Detonate spell which can explode all of your zombies into a cloud of plague. Not exactly sure how useful that will be.", "New spell learned, Detonate!", 209),
   new Upgrades.Upgrade(8, "Gigazombies?", Upgrades.types.unlockSpell, Upgrades.costs.blood, 50000, 1, 5, 1, "Learn the Gigazombies spell which will turn some of your zombies into hulking monstrosities with increased health and damage.", "New spell learned, Gigazombies!", 209),
   new Upgrades.Upgrade(13, "Blazing Speed", Upgrades.types.burningSpeedPC, Upgrades.costs.blood, 30000, 1.25, 0.05, 10, "The humans are using torches to set your zombies on fire. Perhaps we can turn the tables on them? Each rank increases the movement and attack speed of burning zombies by 5%", false, 207),
+  new Upgrades.Upgrade(14, "Spit it Out", Upgrades.types.spitDistance, Upgrades.costs.blood, 500000, 1.6, 5, 10, "The first rank gives your zombies the ability to spit plague at enemies beyond normal attack range range. Spit attacks do 50% zombie damage and infect the victim with plague. Subsequent ranks will increase the range of spit attacks.", false, 218),
 
   // brain upgrades
   new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 20, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),
@@ -774,7 +796,8 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(23, "Blood Harvest", Upgrades.types.bloodStoragePC, Upgrades.costs.brains, 50, 1.12, 0.1, 0, "All this brain power has enabled you to devise some superior blood storage methods. Each rank increases your maximum blood by 10%."),
   new Upgrades.Upgrade(24, "Unholy Construction", Upgrades.types.construction, Upgrades.costs.brains, 50, 1, 1, 1, "Learn the art of Unholy Construction in order to build structures that will solidify your foothold on the town.", "Construction menu now available!"),
   new Upgrades.Upgrade(25, "Infected Corpse", Upgrades.types.infectedBlast, Upgrades.costs.brains, 500, 1.4, 0.1, 10, "Fill your zombies with so much plague they are ready to explode! Each rank adds 10% chance for a zombie to explode into a cloud of plague upon death.", false, 204),
-  new Upgrades.Upgrade(26, "Energy Charge", Upgrades.types.unlockSpell, Upgrades.costs.brains, 2000, 1, 2, 1, "Learn the Energy Charge spell which can drastically increase your energy rate for 30 seconds.", "New spell learned, Energy Charge!", 209),
+  new Upgrades.Upgrade(26, "Energy Charge", Upgrades.types.unlockSpell, Upgrades.costs.brains, 2000, 1, 2, 1, "Learn the Energy Charge spell which can drastically increase your energy rate for a short time.", "New spell learned, Energy Charge!", 209),
+  new Upgrades.Upgrade(27, "What Doesn't Kill You", Upgrades.types.blastHealing, Upgrades.costs.brains, 10000, 1.3, 0.1, 20, "Plague explosions from zombies and harpies will also heal nearby zombies for 10% of the explosion damage with each rank.", false, 218),
   
   // bone upgrades
   new Upgrades.Upgrade(40, "Bone Throne", Upgrades.types.energyCap, Upgrades.costs.bones, 50, 1.55, 10, 15, "Sitting atop your throne of bones you can finally think clearly. Each rank increases maximum energy by 10."),
@@ -783,4 +806,5 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(43, "Bone Reinforced Tanks", Upgrades.types.bloodCap, Upgrades.costs.bones, 500, 1.07, 2000, 0, "Finally! Now that we have a solid construction material we can get to work building better storage for our other resources. Each rank increases blood storage by 2000."),
   new Upgrades.Upgrade(44, "Brain Cage", Upgrades.types.brainsCap, Upgrades.costs.bones, 650, 1.07, 500, 0, "There's nothing I love more than a mind enslaved. Now we can put these brains where they belong. In cages! Each rank increases brain storage by 500."),
   new Upgrades.Upgrade(45, "Earth Freeze", Upgrades.types.unlockSpell, Upgrades.costs.bones, 5000, 1, 4, 1, "Learn the Earth Freeze spell which can freeze all humans in place for a short time.", "New spell learned, Earth Freeze!", 209),
+  new Upgrades.Upgrade(46, "Plague Armor", Upgrades.types.plagueArmor, Upgrades.costs.bones, 15000, 1.6, 0.02, 10, "The best defense is a good offense? True in the case of Plague Armor which reduces the damage done by infected humans by 2% per rank.", false, 218),
 ];

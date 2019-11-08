@@ -74,7 +74,12 @@ function preventGameContainerLeavingBounds(gc) {
 
 function onClickTap(event) {
   if (!this.hasMoved && GameModel.currentState == GameModel.states.playingLevel) {
-    Zombies.spawnZombie(event.data.getLocalPosition(this).x, event.data.getLocalPosition(this).y);
+    if (KeysPressed.shift) {
+      Zombies.spawnAllZombies(event.data.getLocalPosition(this).x, event.data.getLocalPosition(this).y);
+    } else {
+      Zombies.spawnZombie(event.data.getLocalPosition(this).x, event.data.getLocalPosition(this).y);
+    }
+    
   }
   this.hasMoved = false;
 }
@@ -132,7 +137,7 @@ function onWheel(event) {
     y:event.clientY * (canvasSize.y / document.body.clientHeight)
   };
 
-  if (event.deltaY < 0)
+  if (event.deltaY < 0 || event.deltaX < 0)
     zoom(+1, coords);
   else
     zoom(-1, coords);
@@ -367,7 +372,8 @@ KeysPressed = {
   w:false,
   a:false,
   s:false,
-  d:false
+  d:false,
+  shift:false
 }
 
 window.onblur = function() {
@@ -376,6 +382,10 @@ window.onblur = function() {
 
 window.onkeydown = function (e) {
 	switch (e.keyCode) {
+    case 16:
+    case 17:
+      KeysPressed.shift = true;
+      break;
     case 87:
     case 38:
       KeysPressed.w = true;
@@ -399,6 +409,10 @@ window.onkeydown = function (e) {
 };
 window.onkeyup = function (e) {
 	switch (e.keyCode) {
+    case 16:
+    case 17:
+      KeysPressed.shift = false;
+      break;
 		case 87:
     case 38:
       KeysPressed.w = false;

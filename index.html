@@ -331,6 +331,11 @@
           <button ng-click="zm.addToHomeScreen();">Add to Home Screen</button>
         </div>
         <div class="upgrade">
+          <h4>Toggle Full Screen</h4>
+          <p>Toggle full screen mode. Can be helpful on smaller screen devices.</p>
+          <button ng-click="zm.model.toggleFullscreen();">Toggle Full Screen</button>
+        </div>
+        <div class="upgrade">
           <h4>Show Zoom Buttons</h4>
           <p>If you're unable to zoom with other methods this will add some buttons to the screen for zooming the map.</p>
           <button ng-click="zm.toggleZoomButtons();">{{zm.model.persistentData.zoomButtons ? "On" : "Off"}}</button>

@@ -63,11 +63,30 @@ Zombies = {
       this.aliveZombies.length = 0;
     }
     if (!this.zombieCursor) {
-      this.zombieCursor = new PIXI.Sprite(PIXI.Texture.from('zombie1_1.png'));
-      this.zombieCursor.alpha = 0.6;
-      this.zombieCursor.scale.x = this.zombieCursor.scale.y = this.zombieCursorScale;
-      this.zombieCursor.anchor = {x:35/80, y:1};
+      this.zombieCursor = new PIXI.Container();
+      var cursorSprite = new PIXI.Sprite(PIXI.Texture.from('zombie1_1.png'));
+      cursorSprite.alpha = 0.6;
+      cursorSprite.scale.x = cursorSprite.scale.y = 1;
+      cursorSprite.anchor = {x:35/80, y:1};
+      this.zombieCursorText = new PIXI.Text("1", {
+        fontFamily: 'sans-serif',
+        fontSize : 40,
+        fill: "#FFF",
+        stroke: "#000",
+        strokeThickness: 0,
+        align: 'center'
+      });
+      this.zombieCursorText.anchor = {x:0.5, y:1};
+      this.zombieCursorText.scale.x = this.zombieCursorText.scale.y = 0.1;
+      this.zombieCursorText.y = -9
+      this.zombieCursorText.visible = false;
+      this.zombieCursorText.alpha = 0.7;
+
+      this.zombieCursor.addChild(cursorSprite);
+      this.zombieCursor.addChild(this.zombieCursorText);
       uiContainer.addChild(this.zombieCursor);
+
+      
     }
   },
 
@@ -100,6 +119,7 @@ Zombies = {
     zombie.animationSpeed = 0.15;
     zombie.anchor = {x:35/80,y:1};
     zombie.position = {x:x,y:y};
+    zombie.target = false;
     zombie.zIndex = zombie.position.y;
     zombie.visible = true;
     zombie.health = zombie.super ? this.model.zombieHealth * 10 : this.model.zombieHealth;
@@ -133,10 +153,20 @@ Zombies = {
     this.createZombie(x,y);
   },
 
+  spawnAllZombies(x,y) {
+    var numZombies = Math.floor(this.model.energy / this.model.zombieCost);
+    for (var i = 0; i < numZombies; i++) {
+      this.spawnZombie(x + 4 * (Math.random() -1 ), y + 4 * (Math.random() -1 ));
+    }
+  },
+
   damageZombie(zombie, damage, human) {
     if (this.graveyard.isWithinFence(zombie)) {
       damage *= 0.5;
       Exclamations.newShield(zombie);
+    }
+    if (human && human.infected) {
+      damage *= this.model.plagueDmgReduction;
     }
     zombie.health -= damage * this.model.runeEffects.damageReduction;
     zombie.speedMultiplier = Math.max(Math.min(1, zombie.health / this.model.zombieHealth), 0.4);
@@ -162,6 +192,7 @@ Zombies = {
 
   causePlagueExplosion(zombie, killZombie = true) {
     var explosionRadius = 50;
+    var damage = zombie.super ? this.model.zombieDamage * 10 : this.model.zombieDamage;
     Blood.newPlagueSplatter(zombie.x, zombie.y);
     Blasts.newBlast(zombie.x, zombie.y - 4);
     if (killZombie) {
@@ -173,7 +204,19 @@ Zombies = {
         if (Math.abs(this.aliveHumans[i].y - zombie.y) < explosionRadius) {
           if (this.fastDistance(zombie.x, zombie.y, this.aliveHumans[i].x, this.aliveHumans[i].y) < explosionRadius) {
             this.inflictPlague(this.aliveHumans[i]);
-            Humans.damageHuman(this.aliveHumans[i], zombie.super ? this.model.zombieDamage * 10 : this.model.zombieDamage);
+            Humans.damageHuman(this.aliveHumans[i], damage);
+          }
+        }
+      }
+    }
+    if (this.model.blastHealing > 0) {
+      var healingDone = damage * this.model.blastHealing;
+      for (var i = 0; i < this.aliveZombies.length; i++) {
+        if (Math.abs(this.aliveZombies[i].x - zombie.x) < explosionRadius) {
+          if (Math.abs(this.aliveZombies[i].y - zombie.y) < explosionRadius) {
+            if (this.fastDistance(zombie.x, zombie.y, this.aliveZombies[i].x, this.aliveZombies[i].y) < explosionRadius) {
+              this.healZombie(this.aliveZombies[i], healingDone);
+            }
           }
         }
       }
@@ -226,6 +269,15 @@ Zombies = {
     this.zombiePartition = zombiePartition;
     if (this.model.energy >= this.model.zombieCost && this.model.currentState == this.model.states.playingLevel) {
       this.zombieCursor.visible = true;
+      if (KeysPressed.shift) {
+        this.zombieCursorText.visible = true;
+        var numZombies = Math.floor(this.model.energy / this.model.zombieCost);
+        if (this.zombieCursorText.text != numZombies) {
+          this.zombieCursorText.text = numZombies;
+        }
+      } else {
+        this.zombieCursorText.visible = false;
+      }
     } else {
       this.zombieCursor.visible = false;
     }
@@ -298,10 +350,16 @@ Zombies = {
           zombie.state = this.states.attackingTarget;
           break;
         }
+        if (zombie.attackTimer < 0 && distanceToHumanTarget < this.model.spitDistance) {
+          Bullets.newBullet(zombie, zombie.target, this.model.zombieDamage / 2, true);
+          zombie.attackTimer = this.attackSpeed * this.model.runeEffects.attackSpeed;
+        }
+
         if (distanceToHumanTarget > this.attackDistance * 3 && zombie.scanTime < 0) {
           this.searchClosestTarget(zombie);
         }
         this.updateZombieSpeed(zombie, timeDiff);
+
         break;
 
       case this.states.attackingTarget:
@@ -310,6 +368,9 @@ Zombies = {
           zombie.scale.x = zombie.target.x > zombie.x ? zombie.scaling : -zombie.scaling;
           if (zombie.attackTimer < 0) {
             Humans.damageHuman(zombie.target, this.calculateDamage(zombie));
+            if (zombie.isDog) {
+              zombie.target.dogStun = 1;
+            }
             if (Math.random() < this.model.infectedBiteChance) {
               this.inflictPlague(zombie.target);
             }
@@ -338,6 +399,16 @@ Zombies = {
         if (zombie.health > this.model.zombieHealth) {
           zombie.health = this.model.zombieHealth;
         }
+      }
+    }
+  },
+
+  healZombie(zombie, healingDone) {
+    if (zombie.health < this.model.zombieHealth) {
+      zombie.health += healingDone;
+      Exclamations.newHealing(zombie);
+      if (zombie.health > this.model.zombieHealth) {
+        zombie.health = this.model.zombieHealth;
       }
     }
   },
@@ -411,6 +482,11 @@ Zombies = {
   },
 
   updateZombieSpeed(zombie, timeDiff) {
+
+    if (zombie.dogStun && zombie.dogStun > 0) {
+      zombie.dogStun -= timeDiff;
+      return;
+    }
 
     if (!zombie.targetTimer || !zombie.targetVector) {
       zombie.targetTimer = 0;
