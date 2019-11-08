@@ -357,6 +357,7 @@ window.onload = function() {
       if (document.referrer.indexOf("kongregate.com") !== -1 || document.referrer.indexOf("konggames.com") !== -1) {
         kongregateAPI.loadAPI(function(){
           window.kongregate = kongregateAPI.getAPI();
+          GameModel.kongregate = true;
         });
       }
     }
