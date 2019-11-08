@@ -1,6 +1,6 @@
 GameModel = {
   storageName: "ZombieData",
-
+  kongregate: false,
   energy:0,
   energyMax:10,
   energyRate:1,
