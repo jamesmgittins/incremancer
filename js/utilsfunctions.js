@@ -55,6 +55,9 @@ function formatNumber(input, decimals) {
 }
 
 function getMaxUpgrades(basePrice, exponent, numberOwned, resourcesOwned) {
+  if (exponent == 1) {
+    return Math.floor(resourcesOwned / basePrice);
+  }
   return Math.floor(
     Math.log(
       ((resourcesOwned * (exponent - 1)) / (basePrice * Math.pow(exponent, numberOwned))) + 1
@@ -63,6 +66,9 @@ function getMaxUpgrades(basePrice, exponent, numberOwned, resourcesOwned) {
 }
 
 function getCostForUpgrades(basePrice, exponent, numberOwned, numberToBuy) {
+  if (exponent == 1) {
+    return basePrice * numberToBuy;
+  }
   return basePrice * (
     (Math.pow(exponent, numberOwned) * (Math.pow(exponent, numberToBuy) - 1)) / (exponent - 1)
   )
