@@ -109,6 +109,7 @@ Zombies = {
       
     }
     zombie.isDog = isDog;
+    zombie.deadTexture = zombie.isDog ? this.deadDogTexture : this.textures[textureId].dead;
     zombie.super = this.super;
     zombie.textureId = textureId;
     zombie.dead = false;
@@ -122,7 +123,7 @@ Zombies = {
     zombie.target = false;
     zombie.zIndex = zombie.position.y;
     zombie.visible = true;
-    zombie.health = zombie.super ? this.model.zombieHealth * 10 : this.model.zombieHealth;
+    zombie.maxHealth = zombie.health = zombie.super ? this.model.zombieHealth * 10 : this.model.zombieHealth;
     zombie.regenTimer = 5;
     zombie.state = this.states.lookingForTarget;
     var dogScale = isDog ? 0.7 : 1;
@@ -169,7 +170,7 @@ Zombies = {
       damage *= this.model.plagueDmgReduction;
     }
     zombie.health -= damage * this.model.runeEffects.damageReduction;
-    zombie.speedMultiplier = Math.max(Math.min(1, zombie.health / this.model.zombieHealth), 0.4);
+    zombie.speedMultiplier = Math.max(Math.min(1, zombie.health / zombie.maxHealth), 0.4);
     if (zombie.burning) {
       zombie.speedMultiplier = this.model.burningSpeedMod;
     }
@@ -178,9 +179,10 @@ Zombies = {
       Bones.newBones(zombie.x, zombie.y);
       zombie.dead = true;
       if (Math.random() < this.model.infectedBlastChance) {
-        this.causePlagueExplosion(zombie);
+        this.causePlagueExplosion(zombie, true);
       }
-      zombie.textures = zombie.isDog ? this.deadDogTexture : this.textures[zombie.textureId].dead;
+      zombie.textures = zombie.deadTexture;
+      zombie.gotoAndStop(0);
       if (Math.random() < this.model.brainRecoverChance) {
         this.model.addBrains(1);
       }
@@ -394,21 +396,21 @@ Zombies = {
 
     if (zombie.regenTimer < 0) {
       zombie.regenTimer = 5;
-      if (zombie.health < this.model.zombieHealth) {
-        zombie.health += this.model.zombieHealth * this.model.runeEffects.healthRegen;
-        if (zombie.health > this.model.zombieHealth) {
-          zombie.health = this.model.zombieHealth;
+      if (zombie.health < zombie.maxHealth) {
+        zombie.health += zombie.maxHealth * this.model.runeEffects.healthRegen;
+        if (zombie.health > zombie.maxHealth) {
+          zombie.health = zombie.maxHealth;
         }
       }
     }
   },
 
   healZombie(zombie, healingDone) {
-    if (zombie.health < this.model.zombieHealth) {
+    if (zombie.health < zombie.maxHealth) {
       zombie.health += healingDone;
       Exclamations.newHealing(zombie);
-      if (zombie.health > this.model.zombieHealth) {
-        zombie.health = this.model.zombieHealth;
+      if (zombie.health > zombie.maxHealth) {
+        zombie.health = zombie.maxHealth;
       }
     }
   },

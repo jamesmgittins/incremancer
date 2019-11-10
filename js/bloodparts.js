@@ -166,7 +166,7 @@ Bones = {
       }
     }
     this.uncollected = uncollectedBones;
-    this.fadeBones = uncollectedBones.length > 250;
+    this.fadeBones = uncollectedBones.length > 200;
   },
   updatePart(sprite, timeDiff) {
     if (sprite.collected) {
@@ -362,10 +362,28 @@ Bullets = {
 		blastCtx.fillRect(0, 0, 1, 1);
 		return PIXI.Texture.from(blast);
   },
+  getFireballTexture() {
+		var blast = document.createElement('canvas');
+		blast.width = 8;
+		blast.height = 8;
+		var blastCtx = blast.getContext('2d');
+
+		var radgrad = blastCtx.createRadialGradient(4, 4, 0, 4, 4, 4);
+		radgrad.addColorStop(0, 'rgba(255,255,0,1)');
+		radgrad.addColorStop(0.8, 'rgba(255,0,0,0.2)');
+		radgrad.addColorStop(1, 'rgba(255,0,0,0)');
+
+		// draw shape
+		blastCtx.fillStyle = radgrad;
+		blastCtx.fillRect(0, 0, 8, 8);
+
+		return PIXI.Texture.from(blast);
+	},
 	initialize() {
 
     if (!this.texture) {
       this.texture = this.getTexture();
+      this.fireballTexture = this.getFireballTexture();
     }
     for (var i = 0; i < this.sprites.length; i++) {
       characterContainer.removeChild(this.sprites[i]);
@@ -394,6 +412,9 @@ Bullets = {
       if (sprite.plague) {
         Zombies.inflictPlague(sprite.target);
         Humans.damageHuman(sprite.target, sprite.damage);
+      } else if (sprite.fireball) {
+        Humans.burnHuman(sprite.target, sprite.damage);
+        Humans.damageHuman(sprite.target, sprite.damage);
       } else {
         if (sprite.rocket) {
           Army.droneExplosion(sprite.target.x, sprite.target.y, false, sprite.damage);
@@ -417,7 +438,7 @@ Bullets = {
       characterContainer.removeChild(sprite);
     }
   },
-  newBullet(source, target, damage, plague = false, rocket = false) {
+  newBullet(source, target, damage, plague = false, rocket = false, fireball = false) {
     var sprite;
     if (this.discardedSprites.length > 0) {
      sprite = this.discardedSprites.pop();
@@ -427,6 +448,7 @@ Bullets = {
       this.sprites.push(sprite);
     }
     characterContainer.addChild(sprite);
+    sprite.texture = fireball ? this.fireballTexture : this.texture;
     sprite.source = source;
     sprite.x = source.x;
     sprite.y = source.y - 8;
@@ -442,8 +464,12 @@ Bullets = {
 
     sprite.plague = plague;
     sprite.rocket = rocket;
+    sprite.fireball = fireball;
     sprite.tint = plague ? 0x00FF00 : rocket ? 0xFFEC00 : 0xFFFFFF;
     sprite.scale.x = sprite.scale.y = rocket ? 2.5 : 2;
+    if (fireball) {
+      sprite.scale.x = sprite.scale.y = 1.5;
+    }
 
     var xVector = target.x - sprite.x;
     var yVector = target.y - sprite.y;
