@@ -23,13 +23,15 @@ Upgrades = {
     spitDistance:"spitDistance",
     blastHealing:"blastHealing",
     plagueArmor:"plagueArmor",
-
+    monsterLimit:"monsterLimit",
+    runicSyphon:"runicSyphon",
     // prestige items
     bloodGainPC : "bloodGainPC",
     bloodStoragePC : "bloodStoragePC",
     brainsGainPC : "brainsGainPC",
     brainsStoragePC : "brainsStoragePC",
     bonesGainPC : "bonesGainPC",
+    partsGainPC : "partsGainPC",
     zombieDmgPC : "zombieDmgPC",
     zombieHealthPC : "zombieHealthPC",
     startingPC : "startingPC",
@@ -146,25 +148,28 @@ Upgrades = {
       case this.types.plagueArmor:
         GameModel.plagueDmgReduction -= upgrade.effect * upgrade.rank;
         return;
+      case this.types.monsterLimit:
+        GameModel.creatureLimit += upgrade.effect * upgrade.rank;
+        return;
+      case this.types.runicSyphon:
+        GameModel.runicSyphon.percentage += upgrade.effect * upgrade.rank;
         // prestige items
       case this.types.bonesGainPC:
-        // GameModel.bonesPCMod += upgrade.effect * upgrade.rank;
         GameModel.bonesPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
+      case this.types.partsGainPC:
+        GameModel.partsPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        return;
       case this.types.bloodGainPC:
-        // GameModel.bloodPCMod += upgrade.effect * upgrade.rank;
         GameModel.bloodPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.bloodStoragePC:
-        // GameModel.bloodStorePCMod += upgrade.effect * upgrade.rank;
         GameModel.bloodStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.brainsGainPC:
-        // GameModel.brainsPCMod += upgrade.effect * upgrade.rank;
         GameModel.brainsPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.brainsStoragePC:
-        // GameModel.brainsStorePCMod += upgrade.effect * upgrade.rank;
         GameModel.brainsStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.zombieDmgPC:
@@ -249,6 +254,14 @@ Upgrades = {
       case this.constructionTypes.zombieCage:
         GameModel.zombieCages += upgrade.effect * upgrade.rank;
         return;
+      case this.constructionTypes.partFactory:
+        GameModel.constructions.partFactory = true;
+        GameModel.constructions.factory = true;
+        return;
+      case this.constructionTypes.monsterFactory:
+        GameModel.constructions.monsterFactory = true;
+        GameModel.constructions.factory = true;
+        return;
     }
   },
 
@@ -282,6 +295,8 @@ Upgrades = {
         return "Bone collector capacity: " + formatWhole(GameModel.boneCollectorCapacity);
       case this.types.bonesGainPC:
         return "Bones: " + Math.round(GameModel.bonesPCMod * 100) + "%";
+      case this.types.partsGainPC:
+        return "Parts: " + Math.round(GameModel.partsPCMod * 100) + "%";
       case this.types.bloodGainPC:
         return "Blood: " + Math.round(GameModel.bloodPCMod * 100) + "%";
       case this.types.bloodStoragePC:
@@ -308,6 +323,10 @@ Upgrades = {
         return "Zombie spit distance: " + GameModel.spitDistance;
       case this.types.plagueArmor:
         return "Infected damage reduction: " + Math.round(100 - (GameModel.plagueDmgReduction * 100)) + "%";
+      case this.types.monsterLimit:
+        return "Creature limit: " + GameModel.creatureLimit;
+      case this.types.runicSyphon:
+        return "Syphon amount: " + Math.round(GameModel.runicSyphon.percentage * 100) + "%";
     }
   },
 
@@ -336,6 +355,33 @@ Upgrades = {
     return Math.round(upgrade.basePrice * Math.pow(upgrade.multiplier, this.currentRank(upgrade)));
   },
 
+  upgradeMaxAffordable(upgrade) {
+    var currentRank = this.currentRank(upgrade);
+    var maxAffordable = 0;
+    switch(upgrade.costType) {
+      case this.costs.blood:
+        maxAffordable = getMaxUpgrades(upgrade.basePrice, upgrade.multiplier, currentRank, GameModel.persistentData.blood);
+        break;
+      case this.costs.brains:
+        maxAffordable = getMaxUpgrades(upgrade.basePrice, upgrade.multiplier, currentRank, GameModel.persistentData.brains);
+        break;
+      case this.costs.bones:
+        maxAffordable = getMaxUpgrades(upgrade.basePrice, upgrade.multiplier, currentRank, GameModel.persistentData.bones);
+        break;
+      case this.costs.prestigePoints:
+        maxAffordable = getMaxUpgrades(upgrade.basePrice, upgrade.multiplier, currentRank, GameModel.persistentData.prestigePointsToSpend);
+        break;
+    }
+    if (upgrade.cap != 0) {
+      return Math.min(maxAffordable, upgrade.cap - currentRank);
+    }
+    return maxAffordable;
+  },
+
+  upgradeMaxPrice(upgrade, number) {
+    return getCostForUpgrades(upgrade.basePrice, upgrade.multiplier, this.currentRank(upgrade), number);
+  },
+
   canAffordUpgrade(upgrade) {
     switch(upgrade.costType) {
       case this.costs.energy:
@@ -358,7 +404,15 @@ Upgrades = {
       .map(upgrade => upgrade.name).join(", ");
   },
 
-  purchaseUpgrade(upgrade) {
+  purchaseMaxUpgrades(upgrade) {
+    var amount = this.upgradeMaxAffordable(upgrade);
+    for (var i = 0; i < amount; i++) {
+      this.purchaseUpgrade(upgrade, false);
+    }
+    GameModel.saveData();
+  },
+
+  purchaseUpgrade(upgrade, save = true) {
     if (this.canAffordUpgrade(upgrade)) {
       switch(upgrade.costType) {
         case this.costs.energy:
@@ -397,7 +451,9 @@ Upgrades = {
           effect:upgrade.effect
         });
       
-      GameModel.saveData();
+      if (save)
+        GameModel.saveData();
+
       this.applyUpgrades();
       if (upgrade.purchaseMessage) {
         GameModel.sendMessage(upgrade.purchaseMessage);
@@ -635,29 +691,43 @@ Upgrades = {
     }
   ],
 
+  updateRunicSyphon(runicSyphon) {
+    if (runicSyphon.percentage > 0) {
+      GameModel.persistentData.runes.life.blood += runicSyphon.blood / 2;
+      GameModel.persistentData.runes.death.blood += runicSyphon.blood / 2;
+      GameModel.persistentData.runes.life.brains += runicSyphon.brains / 2;
+      GameModel.persistentData.runes.death.brains += runicSyphon.brains / 2;
+      GameModel.persistentData.runes.life.bones += runicSyphon.bones / 2;
+      GameModel.persistentData.runes.death.bones += runicSyphon.bones / 2;
+      runicSyphon.blood = 0;
+      runicSyphon.brains = 0;
+      runicSyphon.bones = 0;
+      this.updateRuneEffects();
+    }
+  },
+
   infuseRune(runeType, costType, amount) {
     var rune = runeType == "life" ? GameModel.persistentData.runes.life : GameModel.persistentData.runes.death;
     switch(costType) {
       case "blood":
-        if (GameModel.persistentData.blood > amount) {
+        if (GameModel.persistentData.blood >= amount) {
           rune.blood += amount;
           GameModel.persistentData.blood -= amount;
         }
         break;
       case "brains":
-        if (GameModel.persistentData.brains > amount) {
+        if (GameModel.persistentData.brains >= amount) {
           rune.brains += amount;
           GameModel.persistentData.brains -= amount;
         }
         break;
       case "bones":
-        if (GameModel.persistentData.bones > amount) {
+        if (GameModel.persistentData.bones >= amount) {
           rune.bones += amount;
           GameModel.persistentData.bones -= amount;
         }
         break;
     }
-    GameModel.saveData();
     this.updateRuneEffects();
   },
 
@@ -679,11 +749,13 @@ Upgrades = {
       var infusionAmount = GameModel.persistentData.runes[calculation.rune][calculation.cost];
       if (infusionAmount > 0) {
         var result = (Math.log(infusionAmount) / Math.log(calculation.logBase) + calculation.adjustment) / 100;
-        if (!calculation.cap || result < calculation.cap) {
-          if (calculation.subtract) {
-            runeEffects[calculation.effect] -= result;
-          } else {
-            runeEffects[calculation.effect] += result;
+        if (result > 0) {
+          if (!calculation.cap || result < calculation.cap) {
+            if (calculation.subtract) {
+              runeEffects[calculation.effect] -= result;
+            } else {
+              runeEffects[calculation.effect] += result;
+            }
           }
         }
       }
@@ -705,7 +777,9 @@ Upgrades = {
     spellTower : "spellTower",
     runesmith : "runesmith",
     aviary : "aviary",
-    zombieCage : "zombieCage"
+    zombieCage : "zombieCage",
+    partFactory : "partFactory",
+    monsterFactory : "monsterFactory"
   },
 
   Upgrade : function(id, name, type, costType, basePrice, multiplier, effect, cap, description, purchaseMessage, requires) {
@@ -756,7 +830,9 @@ Upgrades.constructionUpgrades = [
   new Upgrades.Construction(215, "Third Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:1800, blood:2700}, 30, 1, 10, 1, 206, "Build an additional cage to contain surplus zombies once a town is defeated."),
   new Upgrades.Construction(216, "Fourth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:2400, blood:3600}, 30, 1, 10, 1, 207, "Build an additional cage to contain surplus zombies once a town is defeated."),
   new Upgrades.Construction(217, "Fifth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:3000, blood:4500}, 30, 1, 15, 1, 211, "Build an additional cage to contain surplus zombies once a town is defeated."),
-  new Upgrades.Construction(218, "Plague Laboratory", Upgrades.constructionTypes.plagueLaboratory, {brains:25000, blood:1000000}, 50, 1, 15, 1, 211, "Expand the plague workshop into a well equipped laboratory in order to unlock additional plague upgrades."),
+  new Upgrades.Construction(218, "Plague Laboratory", Upgrades.constructionTypes.plagueLaboratory, {brains:25000, blood:1000000}, 50, 1, 1, 1, 211, "Expand the plague workshop into a well equipped laboratory in order to unlock additional plague upgrades."),
+  new Upgrades.Construction(219, "Part Factory", Upgrades.constructionTypes.partFactory, {brains:35000, blood:15000000}, 50, 1, 1, 1, 218, "Build a factory to create parts that can be used to construct more powerful beings for your army.", "Factory menu now available!"),
+  new Upgrades.Construction(220, "Creature Factory", Upgrades.constructionTypes.monsterFactory, {brains:45000, blood:40000000}, 50, 1, 1, 1, 219, "Build a factory to turn creature parts into living entities of destruction", "Creatures now available in factory menu!"),
 ];
 
 Upgrades.prestigeUpgrades = [
@@ -770,6 +846,7 @@ Upgrades.prestigeUpgrades = [
   new Upgrades.Upgrade(105, "Bone Rate", Upgrades.types.bonesGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% bones income rate for each rank."),
   // new Upgrades.Upgrade(106, "Zombie Health", Upgrades.types.zombieHealthPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% zombie health for each rank"),
   // new Upgrades.Upgrade(107, "Zombie Damage", Upgrades.types.zombieDmgPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% zombie damage for each rank")
+  new Upgrades.Upgrade(111, "Parts Rate", Upgrades.types.partsGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% creature parts income rate for each rank.")
 ];
 
 Upgrades.upgrades = [
@@ -788,6 +865,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(8, "Gigazombies?", Upgrades.types.unlockSpell, Upgrades.costs.blood, 50000, 1, 5, 1, "Learn the Gigazombies spell which will turn some of your zombies into hulking monstrosities with increased health and damage.", "New spell learned, Gigazombies!", 209),
   new Upgrades.Upgrade(13, "Blazing Speed", Upgrades.types.burningSpeedPC, Upgrades.costs.blood, 30000, 1.25, 0.05, 10, "The humans are using torches to set your zombies on fire. Perhaps we can turn the tables on them? Each rank increases the movement and attack speed of burning zombies by 5%", false, 207),
   new Upgrades.Upgrade(14, "Spit it Out", Upgrades.types.spitDistance, Upgrades.costs.blood, 500000, 1.6, 5, 10, "The first rank gives your zombies the ability to spit plague at enemies beyond normal attack range range. Spit attacks do 50% zombie damage and infect the victim with plague. Subsequent ranks will increase the range of spit attacks.", false, 218),
+  new Upgrades.Upgrade(15, "Runic Syphon", Upgrades.types.runicSyphon, Upgrades.costs.blood, 34000, 1.9, 0.01, 10, "Infuse your runes for free! Each rank gives your Runesmith the ability to infuse 1% of your resource income, without using it", false, 210),
 
   // brain upgrades
   new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 20, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),
@@ -798,6 +876,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(25, "Infected Corpse", Upgrades.types.infectedBlast, Upgrades.costs.brains, 500, 1.4, 0.1, 10, "Fill your zombies with so much plague they are ready to explode! Each rank adds 10% chance for a zombie to explode into a cloud of plague upon death.", false, 204),
   new Upgrades.Upgrade(26, "Energy Charge", Upgrades.types.unlockSpell, Upgrades.costs.brains, 2000, 1, 2, 1, "Learn the Energy Charge spell which can drastically increase your energy rate for a short time.", "New spell learned, Energy Charge!", 209),
   new Upgrades.Upgrade(27, "What Doesn't Kill You", Upgrades.types.blastHealing, Upgrades.costs.brains, 10000, 1.3, 0.1, 20, "Plague explosions from zombies and harpies will also heal nearby zombies for 10% of the explosion damage with each rank.", false, 218),
+  new Upgrades.Upgrade(28, "One is Never Enough", Upgrades.types.monsterLimit, Upgrades.costs.brains, 20000, 1.2, 1, 15, "We're definitely going to need more than one golem to finish the job. Each rank increases your creature limit by 1", false, 220),
   
   // bone upgrades
   new Upgrades.Upgrade(40, "Bone Throne", Upgrades.types.energyCap, Upgrades.costs.bones, 50, 1.55, 10, 15, "Sitting atop your throne of bones you can finally think clearly. Each rank increases maximum energy by 10."),

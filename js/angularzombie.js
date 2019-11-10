@@ -12,6 +12,7 @@ angular.module('zombieApp', [])
     var zm = this;
     zm.model = GameModel;
     zm.spells = Spells;
+    zm.keysPressed = KeysPressed;
 
     zm.messageTimer = 4;
     zm.message = false;
@@ -21,11 +22,14 @@ angular.module('zombieApp', [])
     zm.currentShopFilter = "blood";
     zm.currentConstructionFilter = "available";
     zm.graveyardTab = "minions";
+    zm.factoryTab = "parts"
+    zm.factoryStats = {};
 
     zm.closeSidePanels = function() {
       zm.currentShopFilter = "blood";
       zm.currentConstructionFilter = "available";
       zm.graveyardTab = "minions";
+      zm.factoryTab = "parts"
       zm.sidePanels.options = false;
       zm.sidePanels.graveyard = false;
       zm.sidePanels.runesmith = false;
@@ -33,6 +37,7 @@ angular.module('zombieApp', [])
       zm.sidePanels.construction = false;
       zm.sidePanels.shop = false;
       zm.sidePanels.open = false;
+      zm.sidePanels.factory = false;
     }
 
     zm.openSidePanel = function(type) {
@@ -52,6 +57,11 @@ angular.module('zombieApp', [])
           break;
         case "runesmith":
           zm.sidePanels.runesmith = true;
+          break;
+        case "factory":
+          zm.sidePanels.factory = true;
+          zm.upgrades = PartFactory.generators;
+          zm.factoryStats = PartFactory.factoryStats();
           break;
         case "prestige":
           zm.upgrades = Upgrades.prestigeUpgrades.filter(upgrade => upgrade.cap == 0 || zm.currentRank(upgrade) < upgrade.cap);
@@ -122,8 +132,103 @@ angular.module('zombieApp', [])
     }
 
     zm.upgradePrice = function(upgrade) {
+      if (zm.sidePanels.factory) {
+        return PartFactory.purchasePrice(upgrade);
+      }
       return Upgrades.upgradePrice(upgrade);
     }
+
+    // ---- Factory Functions ---- //
+    zm.factory = {
+      changeFactoryTab(tab) {
+        zm.factoryTab = tab;
+        if (tab == 'parts') {
+          zm.upgrades = PartFactory.generators;
+        } else {
+          zm.upgrades = CreatureFactory.creatures;
+        }
+      },
+      buyGenerator(generator) {
+        if (zm.keysPressed.shift) {
+          PartFactory.purchaseMaxGenerators(generator);
+        } else {
+          PartFactory.purchaseGenerator(generator);
+        }
+        zm.factoryStats = PartFactory.factoryStats();
+      },
+      generatorPrice(upgrade) {
+        return PartFactory.purchasePrice(upgrade);
+      },
+      creaturePrice(creature) {
+        return CreatureFactory.purchasePrice(creature);
+      },
+      creatureLevelPrice(creature) {
+        return CreatureFactory.levelPrice(creature);
+      },
+      creaturePercent(creature) {
+        return Math.min(Math.round(zm.model.persistentData.parts / this.creaturePrice(creature) * 100), 100);
+      },
+      creatureLevelPercent(creature) {
+        return Math.min(Math.round(zm.model.persistentData.parts / this.creatureLevelPrice(creature) * 100), 100);
+      },
+      buyCreature(creature) {
+        return CreatureFactory.startBuilding(creature);
+      },
+      creatureTooExpensive(creature) {
+        return !CreatureFactory.canAffordCreature(creature);
+      },
+      creatureButtonText(creature) {
+        if (creature.building) {
+          return "Building...";
+        }
+        if (this.creatureTooExpensive(creature)) {
+          return formatWhole(this.creaturePrice(creature) - zm.model.persistentData.parts) + ' parts required';
+        } else {
+          return "Build (" + formatWhole(this.creaturePrice(creature)) + " parts)";
+        }
+      },
+      creatureLevelButtonText(creature) {
+        if (this.canLevelCreature(creature)) {
+          return "Upgrade Level " + (creature.level + 1) + " (" + formatWhole(this.creatureLevelPrice(creature)) + " parts)";
+        }
+        return formatWhole(this.creatureLevelPrice(creature) - zm.model.persistentData.parts) + ' parts required';
+      },
+      canBuildCreature(creature) {
+        if (this.creatureTooExpensive(creature))
+          return false;
+        if (creature.building)
+          return false;
+        return CreatureFactory.creaturesInProgress + zm.model.creatureCount < zm.model.creatureLimit;
+      },
+      canLevelCreature(creature) {
+        return this.creatureLevelPrice(creature) < zm.model.persistentData.parts;
+      },
+      levelCreature(creature) {
+        CreatureFactory.levelCreature(creature);
+      },
+      autoBuild(creature, number) {
+        if (creature.autobuild + number >= 0 && creature.autobuild + number <= zm.model.creatureLimit) {
+          CreatureFactory.creatureAutoBuildNumber(creature, number);
+        }
+      },
+      creatureStats(creature) {
+        return {
+          thisLevel : {
+            level : creature.level,
+            health : creature.baseHealth * Math.pow(2, creature.level - 1),
+            damage : creature.baseDamage * Math.pow(2, creature.level - 1),
+            cost : creature.baseCost * Math.pow(2, creature.level - 1)
+          },
+          nextLevel : {
+            level : creature.level + 1,
+            health : creature.baseHealth * Math.pow(2, creature.level),
+            damage : creature.baseDamage * Math.pow(2, creature.level),
+            cost : creature.baseCost * Math.pow(2, creature.level)
+          }
+        }
+      }
+    }
+    // ---- Factory Functions ---- //
 
     zm.addToHomeScreen = function() {
       if (zm.model.deferredPrompt) {
@@ -168,6 +273,18 @@ angular.module('zombieApp', [])
           return "+" + upgrade.effect + " max blood";
         case Upgrades.types.bloodStoragePC:
           return "+" + Math.round(upgrade.effect * 100) + "% max blood";
+        case Upgrades.types.bloodGainPC:
+          return "+" + Math.round(upgrade.effect * 100) + "% blood income";
+        case Upgrades.types.brainsGainPC:
+          return "+" + Math.round(upgrade.effect * 100) + "% brains income";
+        case Upgrades.types.bonesGainPC:
+          return "+" + Math.round(upgrade.effect * 100) + "% bones income";
+        case Upgrades.types.partsGainPC:
+          return "+" + Math.round(upgrade.effect * 100) + "% parts income";
+        case Upgrades.types.brainsStoragePC:
+          return "+" + Math.round(upgrade.effect * 100) + "% max brains";
+        case Upgrades.types.energyCost:
+          return "-" + upgrade.effect + " zombie energy cost";
         case Upgrades.types.brainsCap:
           return "+" + upgrade.effect + " max brains";
         case Upgrades.types.damage:
@@ -202,11 +319,18 @@ angular.module('zombieApp', [])
           return "+" + Math.round(upgrade.effect * 100) + "% plague healing";
         case Upgrades.types.plagueArmor:
           return "+" + Math.round(upgrade.effect * 100) + "% damage reduction";
+        case Upgrades.types.monsterLimit:
+          return "+" + upgrade.effect + " creature limit";
+        case Upgrades.types.runicSyphon:
+          return "+" + upgrade.effect * 100 + "% runic syphon";
       }
       return "";
     }
 
     zm.currentRank = function(upgrade) {
+      if (zm.sidePanels.factory) {
+        return PartFactory.currentRank(upgrade);
+      }
       return Upgrades.currentRank(upgrade);
     }
 
@@ -215,6 +339,9 @@ angular.module('zombieApp', [])
     }
 
     zm.upgradeTooExpensive = function(upgrade) {
+      if (zm.sidePanels.factory) {
+        return !PartFactory.canAffordGenerator(upgrade);
+      }
       return !Upgrades.canAffordUpgrade(upgrade) || (upgrade.cap != 0 && Upgrades.currentRank(upgrade) >= upgrade.cap);
     }
 
@@ -225,6 +352,7 @@ angular.module('zombieApp', [])
         case Upgrades.costs.energy:
           return formatWhole(cost - zm.model.energy) + ' energy required';
         case Upgrades.costs.blood:
+        case PartFactory.costs.blood:
           return formatWhole(cost - zm.model.persistentData.blood) + ' blood required';
         case Upgrades.costs.brains:
           return formatWhole(cost - zm.model.persistentData.brains) + ' brains required';
@@ -232,15 +360,33 @@ angular.module('zombieApp', [])
           return formatWhole(cost - zm.model.persistentData.bones) + ' bones required';
         case Upgrades.costs.prestigePoints:
           return formatWhole(cost - zm.model.persistentData.prestigePointsToSpend) + ' prestige points required';
+        case PartFactory.costs.parts:
+          return formatWhole(cost - zm.model.persistentData.parts) + ' parts required';
       }
     }
 
     zm.purchaseText = function(upgrade) {
+      if (zm.keysPressed.shift) {
+        if (zm.sidePanels.factory) {
+          var amount = PartFactory.upgradeMaxAffordable(upgrade);
+          var price = PartFactory.upgradeMaxPrice(upgrade, amount);
+          return 'Purchase ' + amount + ' (' + formatWhole(price) + ' ' + upgrade.costType + ')';
+        } else {
+          var amount = Upgrades.upgradeMaxAffordable(upgrade);
+          var price = Upgrades.upgradeMaxPrice(upgrade, amount);
+          return 'Purchase ' + amount + ' (' + formatWhole(price) + ' ' + upgrade.costType + ')';
+        }
+        
+      }
       return 'Purchase (' + formatWhole(zm.upgradePrice(upgrade)) + ' ' + upgrade.costType + ')';
     }
 
     zm.buyUpgrade = function(upgrade) {
-      Upgrades.purchaseUpgrade(upgrade);
+      if (zm.keysPressed.shift) {
+        Upgrades.purchaseMaxUpgrades(upgrade);
+      } else {
+        Upgrades.purchaseUpgrade(upgrade);
+      }
     }
 
     zm.upgradeStatInfo = function(upgrade) {
@@ -281,7 +427,7 @@ angular.module('zombieApp', [])
     }
 
     zm.resetZoom = function() {
-      zm.model.centerGameContainer();
+      zm.model.centerGameContainer(true);
     }
 
     zm.toggleShowFps = function() {
@@ -306,12 +452,13 @@ angular.module('zombieApp', [])
 
     zm.howToPlay = [
       "Energy refills over time. You need 10 energy to spawn a zombie by clicking on the ground.",
+      "Hold shift or control to spawn multiple zombies with a single click.",
       "Whenever one of your zombies attacks a human you will collect some blood.",
       "Killing a human or turning them into a zombie will earn you 1 brain.",
       "You can spend these currencies in the shop to purchase upgrades for your zombie horde.",
+      "Hold shift to buy the maximum affordable number of upgrades.",
       "The world can be dragged with the mouse to explore it. Or by using the WASD or arrow keys.",
       "You can zoom in and out using your mouse wheel. Pinch to zoom on mobile.",
-      "Hold shift or control to spawn multiple zombies with a single click."
     ];
 
     zm.updateMessages = function(timeDiff) {
@@ -330,9 +477,32 @@ angular.module('zombieApp', [])
     }
 
     zm.infusionAmount = 1000;
+    zm.infusionMax = false;
 
     zm.infuseRune = function(rune, cost) {
-      Upgrades.infuseRune(rune, cost, zm.infusionAmount);
+      if (zm.infusionMax) {
+        switch(cost) {
+          case "blood":
+            Upgrades.infuseRune(rune, cost, zm.model.persistentData.blood);
+            break;
+          case "brains":
+            Upgrades.infuseRune(rune, cost, zm.model.persistentData.brains);
+            break;
+          case "bones":
+            Upgrades.infuseRune(rune, cost, zm.model.persistentData.bones);
+            break;
+        }
+      } else {
+        Upgrades.infuseRune(rune, cost, zm.infusionAmount);
+      }
+    }
+
+    zm.infuseButtonText = function() {
+      if (zm.infusionMax) {
+        return "Max";
+      } else {
+        return formatWhole(zm.infusionAmount);
+      }
     }
 
     zm.energyPercent = function() {
@@ -385,6 +555,8 @@ angular.module('zombieApp', [])
           return Math.round(Math.min(1, zm.model.persistentData.brains / zm.upgradePrice(upgrade)) * 100);
         case "bones":
           return Math.round(Math.min(1, zm.model.persistentData.bones / zm.upgradePrice(upgrade)) * 100);
+        case "parts":
+          return Math.round(Math.min(1, zm.model.persistentData.parts / zm.upgradePrice(upgrade)) * 100);
         case "prestigePoints":
           return Math.round(Math.min(1, zm.model.persistentData.prestigePointsToSpend / zm.upgradePrice(upgrade)) * 100);
       }
@@ -392,6 +564,9 @@ angular.module('zombieApp', [])
     }
 
     function update() {
+      if (zm.model.hidden) {
+        return;
+      }
       var updateTime = new Date().getTime();
       var timeDiff = (Math.min(1000, Math.max(updateTime - zm.lastUpdate,0))) / 1000;
       innerUpdate(timeDiff, updateTime);
@@ -407,5 +582,39 @@ angular.module('zombieApp', [])
       $scope.updatePromise = $interval(update, 200);
       Upgrades.angularModel = zm;
     });
-
-  }]);
+  }])
+  .directive('graveyardMenu',function(){
+    return {
+      templateUrl: "templates/graveyardmenu.html"
+    };
+  })
+  .directive('runesmithMenu',function(){
+    return {
+      templateUrl: "templates/runesmithmenu.html"
+    };
+  })
+  .directive('optionsMenu',function(){
+    return {
+      templateUrl: "templates/optionsmenu.html"
+    };
+  })
+  .directive('shopMenu',function(){
+    return {
+      templateUrl: "templates/shopmenu.html"
+    };
+  })
+  .directive('constructionMenu',function(){
+    return {
+      templateUrl: "templates/constructionmenu.html"
+    };
+  })
+  .directive('prestigeMenu',function(){
+    return {
+      templateUrl: "templates/prestigemenu.html"
+    };
+  })
+  .directive('factoryMenu',function(){
+    return {
+      templateUrl: "templates/factorymenu.html"
+    };
+  });

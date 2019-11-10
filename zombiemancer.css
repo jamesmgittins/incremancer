@@ -158,11 +158,16 @@ button:disabled {
 }
 button:focus {outline:0;}
 
+div.shop > p {
+  margin:8px 0 6px 0;
+}
+
 div.start-game button, 
 div.end-level button,
 div.shop button {
   padding: 8px 10px;
   font-size: 18px;
+  position: relative;
 }
 div.shop div.shop-title h2 {
   float:left;
@@ -396,9 +401,33 @@ p.prestige-info {
   background-color: #ccc;
 }
 
+.parts {
+  color: #fb2;
+}
+
+.parts span.percent {
+  background-color: #fb2;
+}
+
 ul {
   padding-inline-start: 20px;
   clear:both;
+}
+
+div.generator-progress.active {
+  height: 12px;
+  margin: 8px 0;
+}
+
+div.generator-progress {
+  height: 1px;
+  margin: 2px;
+  position: relative;
+}
+div.generator-progress.active > span.percent {
+  height: 100%;
+  border-radius: 15px;
+  animation:width-animation 4s linear infinite reverse;
 }
 
 @media screen and (max-width: 1800px) {
@@ -418,13 +447,19 @@ ul {
     font-size: 16px;
   }
 }
-@media screen and (max-width: 1530px) and (min-width: 820px) {
+@media screen and (max-width: 2078px) {
   div.top-bar.open {
     left: 0;
     transform: none;
-    width: calc(100% - 340px);
+    width: calc(80% - 40px);
   }
-
+}
+@media screen and (max-width: 1550px) and (min-width: 820px) {
+  div.top-bar.open {
+    left: 0;
+    transform: none;
+    width: calc(100% - 350px);
+  }
   div.top-bar.open div.resources {
     white-space: normal;
   }
@@ -446,7 +481,14 @@ ul {
     width: 90%;
   }
 }
-
+@media screen and (max-width: 920px) {
+  div.buttons {
+    top: 120px;
+  }
+  div.spells {
+    top: 125px;
+  }
+}
 @media screen and (max-width: 579px) {
   div.top-bar label {
     margin:5px;

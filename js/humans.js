@@ -26,6 +26,8 @@ Humans = {
   fadeSpeed : 0.1,
   plagueTickTimer : 5,
   healTickTimer : 4,
+  burnTickTimer : 5,
+  smokeTimer : 0.3,
   fastDistance:fastDistance,
   frozen : false,
 
@@ -59,6 +61,22 @@ Humans = {
         this.vipText.visible = false;
         Trophies.trophyAquired(GameModel.level);
       }
+    }
+  },
+
+  updateBurns(human, timeDiff) {
+    human.burnTickTimer -= timeDiff;
+    human.smokeTimer -= timeDiff;
+
+    if (human.smokeTimer < 0) {
+      Smoke.newFireSmoke(human.x, human.y - 14);
+      human.smokeTimer = this.smokeTimer;
+    }
+
+    if (human.burnTickTimer < 0) {
+      this.damageHuman(human, human.burnDamage);
+      human.burnTickTimer = this.burnTickTimer;
+      Exclamations.newFire(human);
     }
   },
 
@@ -205,6 +223,10 @@ Humans = {
     
     if (vipNeeded) {
       this.escapeTarget = {x:gameFieldSize.x / 2, y:gameFieldSize.y + 50};
+    } else {
+      if (this.vipText) {
+        this.vipText.visible = false;
+      }
     }
   
     for (var i=0; i < maxHumans; i++) {
@@ -236,6 +258,8 @@ Humans = {
       }
       human.vip = false;
       human.dead = false;
+      human.burning = false;
+      human.burnDamage = 0;
       human.animationSpeed = 0.15;
       human.anchor = {x:35/80,y:1};
       human.currentPoi = this.map.getRandomBuilding();
@@ -406,6 +430,18 @@ Humans = {
     }
   },
 
+  burnHuman(human, damage) {
+    if (!human.burning) {
+      human.burnTickTimer = this.burnTickTimer;
+      human.smokeTimer = this.smokeTimer;
+      Exclamations.newFire(human);
+      human.burnDamage = damage;
+    } else {
+      human.burnDamage += damage;
+    }
+    human.burning = true;
+  },
+
   updatePlague(human, timeDiff) {
     human.plagueTickTimer -= timeDiff;
 
@@ -465,6 +501,8 @@ Humans = {
       this.updatePlague(human, timeDiff);
     if (human.doctor)
       this.doHeal(human, timeDiff);
+    if (human.burning)
+      this.updateBurns(human, timeDiff);
 
     if ((!human.zombieTarget || human.zombieTarget.dead) && human.timeToScan < 0) {
       var count = Humans.scanForZombies(human, aliveZombies);
@@ -658,6 +696,8 @@ Police = {
       police.speedMod = 1;
       police.dead = false;
       police.infected = false;
+      police.burning = false;
+      police.burnDamage = 0;
       police.lastKnownBuilding = false;
       police.plagueDamage = 0;
       police.plagueTickTimer = Math.random() * Humans.plagueTickTimer;
@@ -706,6 +746,8 @@ Police = {
     dog.speedMod = 1;
     dog.dead = false;
     dog.infected = false;
+    dog.burning = false;
+    dog.burnDamage = 0;
     dog.lastKnownBuilding = false;
     dog.plagueDamage = 0;
     dog.plagueTickTimer = Math.random() * Humans.plagueTickTimer;
@@ -812,6 +854,8 @@ Police = {
 
     if (police.infected)
       Humans.updatePlague(police, timeDiff);
+    if (police.burning)
+      Humans.updateBurns(police, timeDiff);
 
     if ((!police.zombieTarget || police.zombieTarget.dead) && police.timeToScan < 0) {
       Humans.scanForZombies(police, aliveZombies);
@@ -897,6 +941,8 @@ Police = {
 
     if (dog.infected)
       Humans.updatePlague(dog, timeDiff);
+    if (dog.burning)
+      Humans.updateBurns(dog, timeDiff);
 
     switch (dog.state) {
 
@@ -1075,6 +1121,8 @@ Army = {
       armyman.speedMod = 1;
       armyman.dead = false;
       armyman.infected = false;
+      armyman.burning = false;
+      armyman.burnDamage = 0;
       armyman.lastKnownBuilding = false;
       armyman.plagueDamage = 0;
       armyman.plagueTickTimer = Math.random() * Humans.plagueTickTimer;
@@ -1121,7 +1169,7 @@ Army = {
         return;
       }
 
-      if (distanceToTarget > this.shootDistance * 1.6 && armyman.rocketlauncher) {
+      if (distanceToTarget > this.shootDistance * 1.2 && armyman.rocketlauncher) {
         this.changeState(armyman, this.states.running);
         return;
       }
@@ -1167,6 +1215,8 @@ Army = {
 
     if (armyman.infected)
       Humans.updatePlague(armyman, timeDiff);
+    if (armyman.burning)
+      Humans.updateBurns(armyman, timeDiff);
 
     if ((!armyman.zombieTarget || armyman.zombieTarget.dead) && armyman.timeToScan < 0) {
       var zombies = Humans.scanForZombies(armyman, aliveZombies);
@@ -1239,7 +1289,7 @@ Army = {
               if (armyman.minigun) {
                 armyman.shotTimer = 0.08;
               }
-              Bullets.newBullet(armyman, armyman.zombieTarget, armyman.rocketlauncher ? this.attackDamage * 2 : this.attackDamage, false, armyman.rocketlauncher);
+              Bullets.newBullet(armyman, armyman.zombieTarget, armyman.rocketlauncher ? this.attackDamage * 1.5 : this.attackDamage, false, armyman.rocketlauncher);
               armyman.shotsLeft--;
             }
           }
