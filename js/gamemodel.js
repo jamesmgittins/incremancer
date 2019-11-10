@@ -1,7 +1,6 @@
 GameModel = {
   storageName: "ZombieData",
   kongregate: false,
-  hidden: false,
   energy:0,
   energyMax:10,
   energyRate:1,
@@ -10,7 +9,6 @@ GameModel = {
   energySpellMultiplier:1,
   zombieCost:10,
   bonesPCMod : 1,
-  partsPCMod : 1,
   bloodMax:1000,
   bloodPCMod : 1,
   bloodStorePCMod : 1,
@@ -37,14 +35,6 @@ GameModel = {
   frameRate : 0,
   humanCount : 50,
   zombieCount:0,
-  creatureCount:0,
-  creatureLimit:1,
-  runicSyphon : {
-    percentage: 0,
-    blood: 0,
-    bones: 0,
-    brains: 0
-  },
   endLevelTimer : 3,
   endLevelDelay : 3,
   messageQueue : [],
@@ -110,7 +100,6 @@ GameModel = {
     this.constructions = {};
     this.boneCollectorCapacity = this.baseStats.boneCollectorCapacity;
     this.bonesPCMod = 1;
-    this.partsPCMod = 1;
     this.bloodPCMod = 1;
     this.bloodStorePCMod = 1;
     this.brainsPCMod = 1;
@@ -124,8 +113,6 @@ GameModel = {
     this.spitDistance = 0;
     this.blastHealing = 0;
     this.plagueDmgReduction = 1;
-    this.creatureLimit = 1;
-    this.runicSyphon.percentage = 0;
   },
 
   addEnergy(value) {
@@ -138,29 +125,17 @@ GameModel = {
     this.persistentData.blood += (value * this.bloodPCMod);
     if (this.persistentData.blood > this.bloodMax)
       this.persistentData.blood = this.bloodMax;
-
-    if (this.runicSyphon.percentage > 0) {
-      this.runicSyphon.blood += value * this.bloodPCMod * this.runicSyphon.percentage;
-    }
   },
 
   addBrains(value) {
     this.persistentData.brains += (value * this.brainsPCMod);
     if (this.persistentData.brains > this.brainsMax)
       this.persistentData.brains = this.brainsMax;
-
-    if (this.runicSyphon.percentage > 0) {
-      this.runicSyphon.brains += value * this.brainsPCMod * this.runicSyphon.percentage;
-    }
   },
 
   addBones(value) {
     this.persistentData.bones += (value * this.bonesPCMod);
     this.persistentData.bonesTotal += (value * this.bonesPCMod);
-
-    if (this.runicSyphon.percentage > 0) {
-      this.runicSyphon.bones += value * this.bonesPCMod * this.runicSyphon.percentage;
-    }
   },
 
   getHumanCount(){
@@ -172,21 +147,14 @@ GameModel = {
   },
 
   update(timeDiff, updateTime) {
-
-    // spell update before gamespeed modifier
     Spells.updateSpells(timeDiff);
 
     timeDiff *= this.gameSpeed;
-
-    PartFactory.update(timeDiff);
-    CreatureFactory.update(timeDiff);
     this.autoRemoveCollectorsHarpies();
     this.addEnergy(this.getEnergyRate() * timeDiff);
-
     if (this.currentState == this.states.playingLevel) {
       this.addBones(this.bonesRate * timeDiff);
       this.addBrains(this.brainsRate * timeDiff);
-      Upgrades.updateRunicSyphon(this.runicSyphon);
 
       if (this.lastSave + 30000 < updateTime) {
         this.saveData();
@@ -305,12 +273,10 @@ GameModel = {
     Smoke.initialize();
     Humans.populate();
     Zombies.populate();
-    Creatures.populate();
     Graveyard.initialize();
-    setTimeout(centerGameContainer);
+    centerGameContainer();
     Upgrades.applyUpgrades();
     Upgrades.updateRuneEffects();
-    PartFactory.applyGenerators();
     this.addStartLevelResources();
   },
 
@@ -361,7 +327,6 @@ GameModel = {
     blood : 0,
     brains : 0,
     bones: 0,
-    parts: 0,
     bonesTotal : 0,
     upgrades : [],
     constructions : [],
@@ -371,11 +336,7 @@ GameModel = {
     graveyardZombies : 1,
     harpies : 0,
     resolution : 1,
-    zoomButtons : false,
-    generators : [],
-    creatureLevels : [],
-    creatures : [],
-    creatureAutobuild : []
+    zoomButtons : false
   },
 
   addPrestigePoints(points) {
@@ -393,8 +354,6 @@ GameModel = {
       this.persistentData.blood = 0;
       this.persistentData.brains = 0;
       this.persistentData.bones = 0;
-      this.persistentData.parts = 0;
-      this.persistentData.generators = [];
       this.persistentData.bonesTotal = 0;
       this.persistentData.upgrades = this.persistentData.upgrades.filter(upgrade => upgrade.costType == Upgrades.costs.prestigePoints);
       this.persistentData.constructions = [];
@@ -406,10 +365,7 @@ GameModel = {
       this.persistentData.prestigePointsEarned = 0;
       this.persistentData.runes = false;
       this.persistentData.vipEscaped = [];
-      this.persistentData.creatureLevels = [];
-      this.persistentData.creatureAutobuild = [];
       BoneCollectors.update(0.1);
-      PartFactory.generatorsApplied = [];
       this.level = 1;
       this.currentState = this.states.prestiged;
       this.setupLevel();
@@ -429,8 +385,7 @@ GameModel = {
     try {
       if (localStorage.getItem(this.storageName) !== null) {
         this.persistentData = JSON.parse(localStorage.getItem(this.storageName));
-        this.level = this.persistentData.levelUnlocked;
-        this.updatePersistentData();
+        this.level = this.persistentData.levelUnlocked;        
       } 
     } catch (e) {
       console.log(e);
@@ -445,21 +400,6 @@ GameModel = {
     this.resetToBaseStats();
     this.setupLevel();
     window.location.reload();
-  },
-  updatePersistentData() {
-    if (!this.persistentData.generators) {
-      this.persistentData.generators = [];
-    }
-    if (!this.persistentData.parts) {
-      this.persistentData.parts = 0;
-    }
-    if (!this.persistentData.creatureLevels) {
-      this.persistentData.creatureLevels = [];
-    }
-    if (!this.persistentData.creatureAutobuild) {
-      this.persistentData.creatureAutobuild = [];
-    }
-    CreatureFactory.updateAutoBuild();
   },
 
   sendMessage(message) {
@@ -498,7 +438,6 @@ GameModel = {
         var savegame = JSON.parse(LZString.decompressFromEncodedURIComponent(event.target.result));
         if (savegame.dateOfSave) {
           GameModel.persistentData = savegame;
-          GameModel.updatePersistentData();
           GameModel.level = GameModel.persistentData.levelUnlocked;
           GameModel.setupLevel();
         } else {

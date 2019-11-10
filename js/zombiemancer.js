@@ -175,11 +175,9 @@ function setupContainers(app) {
   };
 }
 
-function centerGameContainer(resetZoom = false) {
-  if (resetZoom) {
-    gameContainer.scale.x = canvasSize.defaultScale;
-    gameContainer.scale.y = canvasSize.defaultScale;
-  }
+function centerGameContainer() {
+  gameContainer.scale.x = canvasSize.defaultScale;
+  gameContainer.scale.y = canvasSize.defaultScale;
   gameContainer.x = (canvasSize.x - gameContainer.width) / 2;
   gameContainer.y = (canvasSize.y - gameContainer.height) / 2;
   if (Zombies.zombieCursor)
@@ -244,10 +242,6 @@ var timeSinceLastFrameCount = 1;
 
 function update(timeDiff) {
 
-  if (GameModel.hidden) {
-    return;
-  }
-
   if (GameModel.persistentData.showfps) {
     frames++;
     timeSinceLastFrameCount -= timeDiff;
@@ -265,7 +259,6 @@ function update(timeDiff) {
   Graveyard.update(timeDiff);
   Humans.update(timeDiff);
   Zombies.update(timeDiff);
-  Creatures.update(timeDiff);
   Blood.update(timeDiff);
   Bullets.update(timeDiff);
   Exclamations.update(timeDiff);
@@ -308,7 +301,6 @@ function startGame() {
     .add('sprites/army.json')
     .add('sprites/doctor.json')
     .add('sprites/zombie.json')
-    .add('sprites/golem.json')
     .add('sprites/bonecollector.json')
     .add('sprites/harpy.json')
     .add('sprites/objects.json')
@@ -328,7 +320,7 @@ function startGame() {
     
     setGameFieldSizeForLevel();
 
-    centerGameContainer(true);
+    centerGameContainer();
 
     // Listen for animate update
     app.ticker.add((delta) => {
@@ -370,14 +362,6 @@ window.onload = function() {
       }
     }
   }
-
-  document.addEventListener("visibilitychange", function(){
-    if (document.visibilityState == "hidden") {
-      GameModel.hidden = true;
-    } else {
-      GameModel.hidden = false;
-    }
-  }, false);
 };
 
 window.onresize = function() {

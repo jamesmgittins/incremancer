@@ -53,17 +53,3 @@ function formatNumber(input, decimals) {
 
   return input.toFixed(decimals);
 }
-
-function getMaxUpgrades(basePrice, exponent, numberOwned, resourcesOwned) {
-  return Math.floor(
-    Math.log(
-      ((resourcesOwned * (exponent - 1)) / (basePrice * Math.pow(exponent, numberOwned))) + 1
-    ) / Math.log(exponent)
-  );
-}
-
-function getCostForUpgrades(basePrice, exponent, numberOwned, numberToBuy) {
-  return basePrice * (
-    (Math.pow(exponent, numberOwned) * (Math.pow(exponent, numberToBuy) - 1)) / (exponent - 1)
-  )
-}
