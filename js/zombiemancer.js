@@ -179,11 +179,11 @@ function centerGameContainer(resetZoom = false) {
   if (resetZoom) {
     gameContainer.scale.x = canvasSize.defaultScale;
     gameContainer.scale.y = canvasSize.defaultScale;
+    if (Zombies.zombieCursor)
+      Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursorScale * canvasSize.defaultScale;
   }
   gameContainer.x = (canvasSize.x - gameContainer.width) / 2;
   gameContainer.y = (canvasSize.y - gameContainer.height) / 2;
-  if (Zombies.zombieCursor)
-    Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursorScale * canvasSize.defaultScale;
 }
 
 function scrollGameContainer(timeDiff) {

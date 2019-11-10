@@ -103,8 +103,8 @@ CreatureFactory = {
 }
 
 CreatureFactory.creatures = [
-  new CreatureFactory.Creature(1, CreatureFactory.types.earthGolem, "Earth Golem", 6000, 50, 25, 800, "A golem born from rocks and mud, able to take a lot of punishment and taunt enemies to attack it"),
-  new CreatureFactory.Creature(2, CreatureFactory.types.airGolem, "Air Golem", 1200, 120, 45, 900, "A fast moving golem able to cover large distances and chase targets down"),
-  new CreatureFactory.Creature(3, CreatureFactory.types.fireGolem, "Fire Golem", 1200, 150, 32, 1000, "A fireball spewing golem that ignites everything it touches"),
-  new CreatureFactory.Creature(4, CreatureFactory.types.waterGolem, "Water Golem", 1400, 140, 30, 1100, "A calming golem that restores health to nearby units")
+  new CreatureFactory.Creature(1, CreatureFactory.types.earthGolem, "Earth Golem", 6000, 150, 25, 800, "A golem born from rocks and mud, able to take a lot of punishment and taunt enemies to attack it"),
+  new CreatureFactory.Creature(2, CreatureFactory.types.airGolem, "Air Golem", 2200, 220, 45, 900, "A fast moving golem able to cover large distances and chase targets down"),
+  new CreatureFactory.Creature(3, CreatureFactory.types.fireGolem, "Fire Golem", 2200, 250, 32, 1000, "A fireball spewing golem that ignites everything it touches"),
+  new CreatureFactory.Creature(4, CreatureFactory.types.waterGolem, "Water Golem", 2500, 180, 30, 1100, "A calming golem that restores health to nearby units")
 ];

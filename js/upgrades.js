@@ -125,7 +125,7 @@ Upgrades = {
         GameModel.infectedBlastChance += upgrade.effect * upgrade.rank;
         return;
       case this.types.plagueDamagePC:
-        GameModel.plagueDamagePCMod += upgrade.effect * upgrade.rank;
+        GameModel.plagueDamagePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.burningSpeedPC:
         GameModel.burningSpeedMod += upgrade.effect * upgrade.rank;
@@ -173,12 +173,12 @@ Upgrades = {
         GameModel.brainsStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.zombieDmgPC:
-        GameModel.zombieDamagePCMod += upgrade.effect * upgrade.rank;
-        // GameModel.zombieDamagePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        // GameModel.zombieDamagePCMod += upgrade.effect * upgrade.rank;
+        GameModel.zombieDamagePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.zombieHealthPC:
-        GameModel.zombieHealthPCMod += upgrade.effect * upgrade.rank;
-        // GameModel.zombieHealthPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        // GameModel.zombieHealthPCMod += upgrade.effect * upgrade.rank;
+        GameModel.zombieHealthPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
         return;
       case this.types.startingPC:
         GameModel.startingResources += upgrade.effect * upgrade.rank;

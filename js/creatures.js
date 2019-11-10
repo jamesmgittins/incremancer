@@ -360,6 +360,7 @@ Creatures = {
       if (Math.abs(this.aliveHumans[i].x - creature.x) < this.targetDistance) {
         if (Math.abs(this.aliveHumans[i].y - creature.y) < this.targetDistance) {
           if (!this.aliveHumans[i].vip) {
+            this.aliveHumans[i].zombieTarget = creature;
             this.aliveHumans[i].target = creature;
           }
         }
