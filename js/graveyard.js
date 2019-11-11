@@ -505,7 +505,7 @@ Harpies = {
       if (bomb.y >= bomb.floor - 2) {
         bomb.visible = false;
         this.discardedBombSprites.push(bomb);
-        Zombies.causePlagueExplosion(bomb, false);
+        Zombies.causePlagueExplosion(bomb, GameModel.zombieHealth * 0.2, false);
       }
     } else {
       bomb.x = bomb.harpy.x;

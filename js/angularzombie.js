@@ -259,8 +259,10 @@ angular.module('zombieApp', [])
     }
 
     zm.cancelConstruction = function() {
-      Upgrades.cancelConstruction();
-      zm.upgrades = Upgrades.getAvailableConstructions();
+      if(confirm("Are you sure you want to cancel construction?")) {
+        Upgrades.cancelConstruction();
+        zm.upgrades = Upgrades.getAvailableConstructions();
+      }
     }
 
     zm.upgradeSubtitle = function(upgrade) {

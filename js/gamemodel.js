@@ -135,6 +135,11 @@ GameModel = {
   },
 
   addBlood(value) {
+    if (isNaN(this.persistentData.blood)) {
+      this.persistentData.blood = 0;  
+    }
+    if (isNaN(value))
+      return;
     this.persistentData.blood += (value * this.bloodPCMod);
     if (this.persistentData.blood > this.bloodMax)
       this.persistentData.blood = this.bloodMax;
@@ -145,6 +150,11 @@ GameModel = {
   },
 
   addBrains(value) {
+    if (isNaN(this.persistentData.brains)) {
+      this.persistentData.blood = 0;  
+    }
+    if (isNaN(value))
+      return;
     this.persistentData.brains += (value * this.brainsPCMod);
     if (this.persistentData.brains > this.brainsMax)
       this.persistentData.brains = this.brainsMax;
@@ -155,6 +165,11 @@ GameModel = {
   },
 
   addBones(value) {
+    if (isNaN(this.persistentData.bones)) {
+      this.persistentData.blood = 0;  
+    }
+    if (isNaN(value))
+      return;
     this.persistentData.bones += (value * this.bonesPCMod);
     this.persistentData.bonesTotal += (value * this.bonesPCMod);
 
@@ -426,8 +441,11 @@ GameModel = {
       this.persistentData.vipEscaped = [];
       this.persistentData.creatureLevels = [];
       this.persistentData.creatureAutobuild = [];
+      this.zombiesInCages = 0;
       BoneCollectors.update(0.1);
       PartFactory.generatorsApplied = [];
+      CreatureFactory.updateAutoBuild();
+      CreatureFactory.resetLevels();
       this.level = 1;
       this.currentState = this.states.prestiged;
       this.setupLevel();

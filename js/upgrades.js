@@ -43,7 +43,8 @@ Upgrades = {
     blood : "blood",
     brains : "brains",
     bones : "bones",
-    prestigePoints : "prestigePoints"
+    prestigePoints : "prestigePoints",
+    parts : "parts"
   },
 
   hasRequirement(upgrade) {
@@ -230,6 +231,10 @@ Upgrades = {
         return;
       case this.constructionTypes.fenceSize:
         GameModel.fenceRadius += upgrade.effect * upgrade.rank;
+        return;
+      case this.constructionTypes.pit:
+        GameModel.bloodMax += 1000000 * upgrade.rank;
+        GameModel.brainsMax += 100000 * upgrade.rank;
         return;
       case this.constructionTypes.runesmith:
         GameModel.constructions.runesmith = 1;
@@ -488,7 +493,11 @@ Upgrades = {
     if (costPerTick.bones && costPerTick.bones > GameModel.persistentData.bones) {
       hasEnough = false;
       GameModel.persistentData.currentConstruction.shortfall.bones = true;
-    } 
+    }
+    if (costPerTick.parts && costPerTick.parts > GameModel.persistentData.parts) {
+      hasEnough = false;
+      GameModel.persistentData.currentConstruction.shortfall.parts = true;
+    }
     if (!hasEnough)
       return false;
 
@@ -502,6 +511,8 @@ Upgrades = {
       GameModel.persistentData.brains -= costPerTick.brains;
     if (costPerTick.bones)
       GameModel.persistentData.bones -= costPerTick.bones;
+    if (costPerTick.parts)
+      GameModel.persistentData.parts -= costPerTick.parts;
     return true;
   },
 
@@ -565,6 +576,8 @@ Upgrades = {
       costPerTick.brains = upgrade.costs.brains / upgrade.time;
     if (upgrade.costs.bones)
       costPerTick.bones = upgrade.costs.bones / upgrade.time;
+    if (upgrade.costs.parts)
+      costPerTick.parts = upgrade.costs.parts / upgrade.time;
 
     GameModel.persistentData.currentConstruction = {
       state:this.constructionStates.building,
@@ -780,7 +793,8 @@ Upgrades = {
     aviary : "aviary",
     zombieCage : "zombieCage",
     partFactory : "partFactory",
-    monsterFactory : "monsterFactory"
+    monsterFactory : "monsterFactory",
+    pit : "pit"
   },
 
   Upgrade : function(id, name, type, costType, basePrice, multiplier, effect, cap, description, purchaseMessage, requires) {
@@ -834,6 +848,7 @@ Upgrades.constructionUpgrades = [
   new Upgrades.Construction(218, "Plague Laboratory", Upgrades.constructionTypes.plagueLaboratory, {brains:25000, blood:1000000}, 50, 1, 1, 1, 211, "Expand the plague workshop into a well equipped laboratory in order to unlock additional plague upgrades."),
   new Upgrades.Construction(219, "Part Factory", Upgrades.constructionTypes.partFactory, {brains:35000, blood:15000000}, 50, 1, 1, 1, 218, "Build a factory to create parts that can be used to construct more powerful beings for your army.", "Factory menu now available!"),
   new Upgrades.Construction(220, "Creature Factory", Upgrades.constructionTypes.monsterFactory, {brains:45000, blood:40000000}, 50, 1, 1, 1, 219, "Build a factory to turn creature parts into living entities of destruction", "Creatures now available in factory menu!"),
+  new Upgrades.Construction(221, "Bottomless Pit", Upgrades.constructionTypes.pit, {bones:75000, parts:5000000}, 50, 1, 1, 5, 219, "A bottomless pit with walls made from creature parts. Drastically increases your capacity to store blood and brains."),
 ];
 
 Upgrades.prestigeUpgrades = [
@@ -858,7 +873,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(2, "Like Leather", Upgrades.types.health, Upgrades.costs.blood, 100, 1.2, 10, 40, "Your zombies gain tougher skin and +10 health with each rank."),
   new Upgrades.Upgrade(10, "Thick Skull", Upgrades.types.health, Upgrades.costs.blood, 5000, 1.23, 25, 0, "Your zombies gain +25 health with each rank.", false, 206),
   new Upgrades.Upgrade(12, "Battle Hardened", Upgrades.types.health, Upgrades.costs.blood, 32000, 1.25, 40, 0, "Your zombies gain +40 health with each rank.", false, 211),
-  new Upgrades.Upgrade(3, "Cold Storage", Upgrades.types.brainsCap, Upgrades.costs.blood, 150, 1.2, 50, 15, "Turns out you can use all of your spare blood to store brains and keep them fresh. Each rank increases your maximum brain capacity by 50."),
+  new Upgrades.Upgrade(3, "Cold Storage", Upgrades.types.brainsCap, Upgrades.costs.blood, 150, 1.2, 50, 20, "Turns out you can use all of your spare blood to store brains and keep them fresh. Each rank increases your maximum brain capacity by 50."),
   new Upgrades.Upgrade(4, "Recycling is Cool", Upgrades.types.brainRecoverChance, Upgrades.costs.blood, 1000, 1.2, 0.1, 10, "Why are we wasting so many good brains on this project? Each rank increases your chance to get a brain back from a dead zombie by 10%"),
   new Upgrades.Upgrade(5, "Your Soul is Mine!", Upgrades.types.riseFromTheDeadChance, Upgrades.costs.blood, 1500, 1.4, 0.1, 10, "Using your most powerful blood magic you command the bodies of the dead to rise as your servants! Each rank grants 10% chance that dead humans will turn into zombies."),
   new Upgrades.Upgrade(6, "Infected Bite", Upgrades.types.infectedBite, Upgrades.costs.blood, 3500, 1.4, 0.1, 10, "Your zombies are now infected with plague and could infect their victims too. Each rank adds 10% chance to inflict damage over time when a zombie attacks a target.", false, 204),

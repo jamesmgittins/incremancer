@@ -79,6 +79,12 @@ CreatureFactory = {
     }
   },
 
+  resetLevels() {
+    for (var i = 0; i < this.creatures.length; i++) {
+      this.creatures[i].level = 1;
+    }
+  },
+
   spawnCreature(creature) {
     var health = creature.baseHealth * Math.pow(1.5, creature.level - 1);
     var damage = creature.baseDamage * Math.pow(1.5, creature.level - 1);

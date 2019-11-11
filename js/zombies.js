@@ -179,7 +179,7 @@ Zombies = {
       Bones.newBones(zombie.x, zombie.y);
       zombie.dead = true;
       if (Math.random() < this.model.infectedBlastChance) {
-        this.causePlagueExplosion(zombie, true);
+        this.causePlagueExplosion(zombie, zombie.maxHealth * 0.2, true);
       }
       zombie.textures = zombie.deadTexture;
       zombie.gotoAndStop(0);
@@ -192,9 +192,8 @@ Zombies = {
     }
   },
 
-  causePlagueExplosion(zombie, killZombie = true) {
+  causePlagueExplosion(zombie, damage, killZombie = true) {
     var explosionRadius = 50;
-    var damage = zombie.super ? this.model.zombieDamage * 10 : this.model.zombieDamage;
     Blood.newPlagueSplatter(zombie.x, zombie.y);
     Blasts.newBlast(zombie.x, zombie.y - 4);
     if (killZombie) {
@@ -293,7 +292,7 @@ Zombies = {
     if (zombie.detonateTimer < 0) {
       Bones.newBones(zombie.x, zombie.y);
       zombie.dead = true;
-      this.causePlagueExplosion(zombie);
+      this.causePlagueExplosion(zombie, zombie.maxHealth * 0.2, true);
       if (Math.random() < this.model.brainRecoverChance) {
         this.model.addBrains(1);
       }
