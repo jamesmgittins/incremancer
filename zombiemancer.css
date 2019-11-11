@@ -585,3 +585,36 @@ div.upgrade .col button {
 div.upgrade .col:nth-of-type(2) {
   width: 35%;
 }
+
+div.level-stats {
+  position: absolute;
+  bottom: 10px;
+  left:10px;
+  /* transform: translateX(-50%); */
+}
+
+div.level-stats.zoom {
+  bottom: 60px;
+}
+
+div.level-stats button {
+  padding:4px 8px;
+}
+div.level-stats button:not(:hover) {
+  opacity: 0.5;
+}
+
+div.level-stats > div {
+  background-color: rgba(0,0,0,0.7);
+  padding:10px;
+  position: absolute;
+  top: -10px;
+  left: 0;
+  transform:translateY(-100%);
+  text-align: left;
+  /* color: #fb2; */
+}
+
+div.level-stats > div td {
+  padding-right: 20px;
+}

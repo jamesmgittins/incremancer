@@ -642,7 +642,7 @@ Police = {
   },
 
   getMaxHealth() {
-    return Math.round(Humans.getMaxHealth(GameModel.level) * 1.5);
+    return Math.round(Humans.getMaxHealth(GameModel.level) * 1.1);
   },
 
   getAttackDamage() {
@@ -1027,7 +1027,7 @@ Army = {
   scaling :2,
   shotsPerBurst : 3,
   droneStrikeTimer : 0,
-  droneStrikeTime : 30,
+  droneStrikeTime : 35,
 
   states : {
     shooting : "shooting",
@@ -1055,7 +1055,7 @@ Army = {
   },
 
   getMaxHealth() {
-    return Math.round(Humans.getMaxHealth(GameModel.level) * 1);
+    return Math.round(Humans.getMaxHealth(GameModel.level) * 1.2);
   },
 
   getAttackDamage() {
@@ -1279,7 +1279,7 @@ Army = {
             if (armyman.rocketlauncher) {
               armyman.shotsLeft = 1;
             }
-            armyman.attackTimer = armyman.rocketlauncher ? this.attackSpeed * 1.3 : this.attackSpeed;
+            armyman.attackTimer = armyman.rocketlauncher ? this.attackSpeed * 1.5 : this.attackSpeed;
             armyman.shotTimer = 0;
           }
           if (armyman.shotsLeft > 0) {
@@ -1289,7 +1289,7 @@ Army = {
               if (armyman.minigun) {
                 armyman.shotTimer = 0.08;
               }
-              Bullets.newBullet(armyman, armyman.zombieTarget, armyman.rocketlauncher ? this.attackDamage * 1.5 : armyman.minigun ? this.attackDamage / 2 : this.attackDamage, false, armyman.rocketlauncher);
+              Bullets.newBullet(armyman, armyman.zombieTarget, armyman.rocketlauncher ? this.attackDamage * 1.2 : armyman.minigun ? this.attackDamage / 2 : this.attackDamage, false, armyman.rocketlauncher);
               armyman.shotsLeft--;
             }
           }

@@ -312,6 +312,24 @@ GameModel = {
     Upgrades.updateRuneEffects();
     PartFactory.applyGenerators();
     this.addStartLevelResources();
+    this.populateStats();
+  },
+
+  populateStats() {
+    this.stats = {
+      human : {
+        health : Humans.getMaxHealth(this.level),
+        damage : Humans.attackDamage
+      },
+      police : {
+        health : Police.getMaxHealth(),
+        damage : Police.attackDamage
+      },
+      army : {
+        health : Army.getMaxHealth(),
+        damage : Army.attackDamage
+      }
+    }
   },
 
   vipEscaped() {

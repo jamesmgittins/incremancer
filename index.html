@@ -75,6 +75,7 @@
     <runesmith-menu></runesmith-menu>
     <factory-menu></factory-menu>
     <options-menu></options-menu>
+    <level-stats></level-stats>
 
     <div class="spells">
       <button ng-repeat="spell in zm.spells.getUnlockedSpells()" ng-click="zm.spells.castSpell(spell)" class="spell {{spell.active ? 'active' : (spell.onCooldown ? 'cooldown' : '')}}" ng-disabled="spell.onCooldown || spell.energyCost > zm.model.energy">

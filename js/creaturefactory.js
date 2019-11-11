@@ -80,8 +80,8 @@ CreatureFactory = {
   },
 
   spawnCreature(creature) {
-    var health = creature.baseHealth * Math.pow(2, creature.level - 1);
-    var damage = creature.baseDamage * Math.pow(2, creature.level - 1);
+    var health = creature.baseHealth * Math.pow(1.5, creature.level - 1);
+    var damage = creature.baseDamage * Math.pow(1.5, creature.level - 1);
     Creatures.spawnCreature(health, damage, creature.speed, creature.type);
   },
 

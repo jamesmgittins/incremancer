@@ -750,12 +750,13 @@ Upgrades = {
       if (infusionAmount > 0) {
         var result = (Math.log(infusionAmount) / Math.log(calculation.logBase) + calculation.adjustment) / 100;
         if (result > 0) {
-          if (!calculation.cap || result < calculation.cap) {
-            if (calculation.subtract) {
-              runeEffects[calculation.effect] -= result;
-            } else {
-              runeEffects[calculation.effect] += result;
-            }
+          if (calculation.cap && result > calculation.cap) {
+            result = calculation.cap;
+          }
+          if (calculation.subtract) {
+            runeEffects[calculation.effect] -= result;
+          } else {
+            runeEffects[calculation.effect] += result;
           }
         }
       }
