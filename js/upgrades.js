@@ -868,11 +868,13 @@ Upgrades.prestigeUpgrades = [
 Upgrades.upgrades = [
   // blood upgrades
   new Upgrades.Upgrade(1, "Bloodthirst", Upgrades.types.damage, Upgrades.costs.blood, 50, 1.2, 1, 40, "Your zombies thirst for blood and do +1 damage for each rank of Bloodthirst."),
-  new Upgrades.Upgrade(9, "Sharpened Teeth", Upgrades.types.damage, Upgrades.costs.blood, 3000, 1.23, 3, 0, "Your zombies bites do +3 damage with each rank of Sharpened Teeth.", false, 206),
+  new Upgrades.Upgrade(9, "Sharpened Teeth", Upgrades.types.damage, Upgrades.costs.blood, 3000, 1.23, 3, 50, "Your zombies bites do +3 damage with each rank of Sharpened Teeth.", false, 206),
   new Upgrades.Upgrade(11, "Razor Claws", Upgrades.types.damage, Upgrades.costs.blood, 28000, 1.25, 5, 0, "Your zombies attacks do +5 damage with each rank of Razor Claws.", false, 211),
+  new Upgrades.Upgrade(16, "Killer Instinct", Upgrades.types.damage, Upgrades.costs.blood, 1000000, 1.27, 8, 0, "Your zombies attacks do +8 damage with each rank of Killer Instinct.", false, 220),
   new Upgrades.Upgrade(2, "Like Leather", Upgrades.types.health, Upgrades.costs.blood, 100, 1.2, 10, 40, "Your zombies gain tougher skin and +10 health with each rank."),
-  new Upgrades.Upgrade(10, "Thick Skull", Upgrades.types.health, Upgrades.costs.blood, 5000, 1.23, 25, 0, "Your zombies gain +25 health with each rank.", false, 206),
-  new Upgrades.Upgrade(12, "Battle Hardened", Upgrades.types.health, Upgrades.costs.blood, 32000, 1.25, 40, 0, "Your zombies gain +40 health with each rank.", false, 211),
+  new Upgrades.Upgrade(10, "Thick Skull", Upgrades.types.health, Upgrades.costs.blood, 5000, 1.23, 25, 50, "Your zombies gain +25 health with each rank.", false, 206),
+  new Upgrades.Upgrade(12, "Battle Hardened", Upgrades.types.health, Upgrades.costs.blood, 32000, 1.25, 40, 0, "Your zombies gain +40 health with each rank of Battle Hardened.", false, 211),
+  new Upgrades.Upgrade(17, "Tough as Nails", Upgrades.types.health, Upgrades.costs.blood, 1000000, 1.27, 100, 0, "Your zombies gain +100 health with each rank of Tough as Nails.", false, 220),
   new Upgrades.Upgrade(3, "Cold Storage", Upgrades.types.brainsCap, Upgrades.costs.blood, 150, 1.2, 50, 20, "Turns out you can use all of your spare blood to store brains and keep them fresh. Each rank increases your maximum brain capacity by 50."),
   new Upgrades.Upgrade(4, "Recycling is Cool", Upgrades.types.brainRecoverChance, Upgrades.costs.blood, 1000, 1.2, 0.1, 10, "Why are we wasting so many good brains on this project? Each rank increases your chance to get a brain back from a dead zombie by 10%"),
   new Upgrades.Upgrade(5, "Your Soul is Mine!", Upgrades.types.riseFromTheDeadChance, Upgrades.costs.blood, 1500, 1.4, 0.1, 10, "Using your most powerful blood magic you command the bodies of the dead to rise as your servants! Each rank grants 10% chance that dead humans will turn into zombies."),
