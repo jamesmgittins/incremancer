@@ -265,9 +265,9 @@ div.stats label {
 div.zoom-buttons {
   position: absolute;
   bottom:0;
-  left: 50%;
+  left: 10px;
   padding: 10px;
-  transform: translateX(-50%);
+  /* transform: translateX(-50%); */
 }
 
 div.zoom-buttons button {
@@ -543,33 +543,16 @@ div.upgrade .col:nth-of-type(2) {
 
 div.level-stats {
   position: absolute;
-  bottom: 50px;
-  left:10px;
-}
-
-div.level-stats.zoom {
-  bottom: 60px;
-}
-
-div.level-stats button {
-  padding:4px 8px;
-}
-div.level-stats button:not(:hover) {
-  opacity: 0.5;
-}
-
-div.level-stats > div {
+  bottom: 55px;
+  left: 50%;
+  transform: translateX(-50%);
   background-color: rgba(0,0,0,0.5);
-  padding:10px;
-  position: absolute;
-  top: -10px;
-  left: 0;
-  transform:translateY(-100%);
   text-align: left;
   text-shadow: 2px 2px #000;
+  padding:10px;
 }
 
-div.level-stats > div td {
+div.level-stats td {
   padding-right: 10px;
 }
 
