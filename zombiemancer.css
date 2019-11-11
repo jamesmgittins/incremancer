@@ -489,6 +489,7 @@ div.message {
 div.message > p {
   position: relative;
   text-shadow: 2px 2px #000;
+  margin: 15px;
 }
 
 div.message > p::after {

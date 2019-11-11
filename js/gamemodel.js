@@ -354,9 +354,11 @@ GameModel = {
   },
 
   updateStats() {
-    this.stats.zombie.health = this.zombieHealth;
-    this.stats.zombie.damage = this.zombieDamage;
-    this.stats.zombie.count = this.zombieCount;
+    if (this.stats) {
+      this.stats.zombie.health = this.zombieHealth;
+      this.stats.zombie.damage = this.zombieDamage;
+      this.stats.zombie.count = this.zombieCount;
+    }
   },
 
   vipEscaped() {
