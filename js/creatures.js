@@ -329,14 +329,7 @@ Creatures = {
       creature.targetTimer = 0.2;
     }
 
-    var ax = Math.abs(creature.targetVector.x);
-    var ay = Math.abs(creature.targetVector.y);
-    if (Math.max(ax, ay) == 0)
-      return;
-    var ratio = 1 / Math.max(ax, ay);
-    ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
-
-    var speedMod = creature.speedMultiplier * ratio * creature.maxSpeed;
+    var speedMod = creature.speedMultiplier * creature.maxSpeed;
     
     creature.xSpeed = creature.targetVector.x * speedMod;
     creature.ySpeed = creature.targetVector.y * speedMod;

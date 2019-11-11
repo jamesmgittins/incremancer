@@ -86,9 +86,26 @@ CreatureFactory = {
   },
 
   spawnCreature(creature) {
-    var health = creature.baseHealth * Math.pow(1.5, creature.level - 1);
-    var damage = creature.baseDamage * Math.pow(1.5, creature.level - 1);
+    var health = creature.baseHealth * Math.pow(1.6, creature.level - 1);
+    var damage = creature.baseDamage * Math.pow(1.6, creature.level - 1);
     Creatures.spawnCreature(health, damage, creature.speed, creature.type);
+  },
+
+  creatureStats(creature) {
+    return {
+      thisLevel : {
+        level : creature.level,
+        health : creature.baseHealth * Math.pow(1.6, creature.level - 1),
+        damage : creature.baseDamage * Math.pow(1.6, creature.level - 1),
+        cost : creature.baseCost * Math.pow(2, creature.level - 1)
+      },
+      nextLevel : {
+        level : creature.level + 1,
+        health : creature.baseHealth * Math.pow(1.6, creature.level),
+        damage : creature.baseDamage * Math.pow(1.6, creature.level),
+        cost : creature.baseCost * Math.pow(2, creature.level)
+      }
+    }
   },
 
   Creature : function(id, type, name, baseHealth, baseDamage, speed, baseCost, description) {

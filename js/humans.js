@@ -324,15 +324,7 @@ Humans = {
       human.targetVector = this.map.howDoIGetToMyTarget(human, human.target);
       human.targetTimer = 0.2;
     }
-
-    var ax = Math.abs(human.targetVector.x);
-    var ay = Math.abs(human.targetVector.y);
-    if (Math.max(ax, ay) == 0)
-      return;
-    var ratio = 1 / Math.max(ax, ay);
-    ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
-
-    var humanSpeedMod = human.speedMod * ratio * human.maxSpeed;
+    var humanSpeedMod = human.speedMod * human.maxSpeed;
     
     human.xSpeed = human.targetVector.x * humanSpeedMod;
     human.ySpeed = human.targetVector.y * humanSpeedMod;

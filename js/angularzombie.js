@@ -212,20 +212,7 @@ angular.module('zombieApp', [])
         }
       },
       creatureStats(creature) {
-        return {
-          thisLevel : {
-            level : creature.level,
-            health : creature.baseHealth * Math.pow(1.5, creature.level - 1),
-            damage : creature.baseDamage * Math.pow(1.5, creature.level - 1),
-            cost : creature.baseCost * Math.pow(2, creature.level - 1)
-          },
-          nextLevel : {
-            level : creature.level + 1,
-            health : creature.baseHealth * Math.pow(1.5, creature.level),
-            damage : creature.baseDamage * Math.pow(1.5, creature.level),
-            cost : creature.baseCost * Math.pow(2, creature.level)
-          }
-        }
+        return CreatureFactory.creatureStats(creature);
       }
     }
     // ---- Factory Functions ---- //

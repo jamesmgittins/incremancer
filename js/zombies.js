@@ -482,6 +482,10 @@ Zombies = {
     zombie.target = getRandomElementFromArray(this.aliveHumans, Math.random());
   },
 
+  dotProduct(x, y){
+    return x * x + y * y;
+  },
+
   updateZombieSpeed(zombie, timeDiff) {
 
     if (zombie.dogStun && zombie.dogStun > 0) {
@@ -499,27 +503,21 @@ Zombies = {
     }
     
     if (this.model.gameSpeed > 1 || zombie.isDog) {
-      var ax = Math.abs(zombie.targetVector.x);
-      var ay = Math.abs(zombie.targetVector.y);
-      if (Math.max(ax, ay) == 0)
-        return;
-      var ratio = 1 / Math.max(ax, ay);
-      ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
       var dogSpeed = zombie.isDog ? 1.5 : 1;
       var zombieMaxSpeed = Math.max(this.maxSpeed * zombie.speedMultiplier * dogSpeed, 8);
-      zombie.xSpeed = zombie.targetVector.x * ratio * zombieMaxSpeed;
-      zombie.ySpeed = zombie.targetVector.y * ratio * zombieMaxSpeed;
+      zombie.xSpeed = zombie.targetVector.x * zombieMaxSpeed;
+      zombie.ySpeed = zombie.targetVector.y * zombieMaxSpeed;
     } else {
-      var factor = this.maxSpeed * 5 / (this.magnitude(zombie.targetVector.x, zombie.targetVector.y) || 1);
+      var factor = this.maxSpeed * 5;
 
       zombie.xSpeed += zombie.targetVector.x * factor * timeDiff;
       zombie.ySpeed += zombie.targetVector.y * factor * timeDiff;
     
-      var speedMagnitude = this.magnitude(zombie.xSpeed, zombie.ySpeed);
-      var zombieMaxSpeed = Math.max(this.maxSpeed * zombie.speedMultiplier, 8);
-      if (speedMagnitude > zombieMaxSpeed) {
-        zombie.xSpeed *= zombieMaxSpeed / speedMagnitude;
-        zombie.ySpeed *= zombieMaxSpeed / speedMagnitude;
+      var speedMagnitudeSq = this.dotProduct(zombie.xSpeed, zombie.ySpeed);
+      var zombieMaxSpeedSq = Math.pow(Math.max(this.maxSpeed * zombie.speedMultiplier, 8),2);
+      if (speedMagnitudeSq > zombieMaxSpeedSq) {
+        zombie.xSpeed *= zombieMaxSpeedSq / speedMagnitudeSq;
+        zombie.ySpeed *= zombieMaxSpeedSq / speedMagnitudeSq;
       }
     }
 

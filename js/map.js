@@ -426,12 +426,24 @@ Map = {
     return false;
   },
 
-  modifyVectorForCollision(vector, building, position) {
-    // no building = no collision
-    if (!building && !this.graveyardCollision) {
+  normalizeVector(vector) {
+
+    if (vector.x + vector.y == 0) {
       return vector;
     }
-      
+
+    var magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+    vector.x /= magnitude;
+    vector.y /= magnitude;
+    return vector;
+  },
+
+  modifyVectorForCollision(vector, building, position) {
+
+    // no building = no collision
+    if (!building && !this.graveyardCollision) {
+      return this.normalizeVector(vector);
+    }
 
     // check 5 distance from position
     var collision = {x:false, y:false};
@@ -459,7 +471,7 @@ Map = {
     if (collision.y) {
       vector.y = 0;
     }
-    return vector;
+    return this.normalizeVector(vector);
   },
 
   willVectorHitBuilding(start, end, building) {
@@ -523,7 +535,7 @@ Map = {
       distance: distanceToTarget
     };
     if (!building) {
-      return vector;
+      return this.normalizeVector(vector);
     }
 
     // am I going to hit this building
