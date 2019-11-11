@@ -32,24 +32,32 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
   </head>
   <body ng-controller="ZombieController as zm">
-    <div class="top-bar {{zm.sidePanels.open ? 'open' : ''}}">
-      <div class="resources">
-          <label class="energy">Energy: {{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}<span class="percent" ng-style="{'width':zm.energyPercent() + '%'}"></span></label>
-          <label class="blood">Blood: {{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}<span class="percent" ng-style="{'width':zm.bloodPercent() + '%'}"></span></label>
-          <label class="brains">Brains: {{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}<span class="percent" ng-style="{'width':zm.brainsPercent() + '%'}"></span></label>
-          <label class="bones" ng-if="zm.model.constructions.graveyard || zm.model.persistentData.bones > 0">Bones: {{zm.model.persistentData.bones|whole}}</label>
-          <label class="parts" ng-if="zm.model.constructions.factory || zm.model.persistentData.parts > 0">Parts: {{zm.model.persistentData.parts|whole}}</label>
+    <div class="message" ng-if="zm.message">
+      <p>{{zm.message}}</p>
+    </div>
+      
+    <div class="stats">
+      <label>Level: {{zm.model.level}}</label>
+      <button ng-click="zm.showStats = !zm.showStats" class="{{zm.showStats ? 'active' : ''}}">Stats</button>
+      <label>Humans: {{zm.model.getHumanCount()}}</label>
+      <label>Zombies: {{zm.model.zombieCount}}</label>
+      <label ng-if="zm.model.constructions.monsterFactory">Creatures: {{zm.model.creatureCount}} / {{zm.model.creatureLimit}}</label>
+      <label ng-if="zm.model.persistentData.showfps">FPS: {{zm.model.frameRate}}</label>
+    </div>
+
+    <div class="resources {{zm.model.persistentData.zoomButtons ? 'zoom' : ''}}">
+      <label class="energy">Energy: {{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}<span class="percent" ng-style="{'width':zm.energyPercent() + '%'}"></span></label>
+      <label class="blood">Blood: {{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}<span class="percent" ng-style="{'width':zm.bloodPercent() + '%'}"></span></label>
+      <label class="brains">Brains: {{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}<span class="percent" ng-style="{'width':zm.brainsPercent() + '%'}"></span></label>
+      <label class="bones" ng-if="zm.model.constructions.graveyard || zm.model.persistentData.bones > 0">Bones: {{zm.model.persistentData.bones|whole}}</label>
+      <label class="parts" ng-if="zm.model.constructions.factory || zm.model.persistentData.parts > 0">Parts: {{zm.model.persistentData.parts|whole}}</label>
+      <div class="spells">
+        <button ng-repeat="spell in zm.spells.getUnlockedSpells()" ng-click="zm.spells.castSpell(spell)" class="spell {{spell.active ? 'active' : (spell.onCooldown ? 'cooldown' : '')}}" ng-disabled="spell.onCooldown || spell.energyCost > zm.model.energy">
+          <span class="icon">{{spell.name}}</span>
+          <span class="timer" ng-if="spell.active || spell.onCooldown">{{spell.active ? spell.timer : spell.cooldownLeft|whole}}</span>
+          <span class="tooltip" ng-if="!spell.active && !spell.onCooldown">{{spell.tooltip}}</span>
+        </button>
       </div>
-      <div class="stats">
-        <label>Level: {{zm.model.level}}</label>
-        <label>Humans: {{zm.model.getHumanCount()}}</label>
-        <label>Zombies: {{zm.model.zombieCount}}</label>
-        <label ng-if="zm.model.constructions.monsterFactory">Creatures: {{zm.model.creatureCount}} / {{zm.model.creatureLimit}}</label>
-        <label ng-if="zm.model.persistentData.showfps">FPS: {{zm.model.frameRate}}</label>
-      </div>
-      <div class="message" ng-if="zm.message">
-          <p>{{zm.message}}</p>
-        </div>
     </div>
 
     <div class="buttons {{zm.sidePanels.open ? 'open' : ''}}">
@@ -77,13 +85,7 @@
     <options-menu></options-menu>
     <level-stats></level-stats>
 
-    <div class="spells">
-      <button ng-repeat="spell in zm.spells.getUnlockedSpells()" ng-click="zm.spells.castSpell(spell)" class="spell {{spell.active ? 'active' : (spell.onCooldown ? 'cooldown' : '')}}" ng-disabled="spell.onCooldown || spell.energyCost > zm.model.energy">
-        <span class="icon">{{spell.name}}</span>
-        <span class="timer" ng-if="spell.active || spell.onCooldown">{{spell.active ? spell.timer : spell.cooldownLeft|whole}}</span>
-        <span class="tooltip" ng-if="!spell.active && !spell.onCooldown">{{spell.tooltip}}</span>
-      </button>
-    </div>
+    
 
     <div class="start-game" ng-if="zm.model.currentState == zm.model.states.startGame">
       <h2>Incremancer</h2>
@@ -91,6 +93,7 @@
       <ul>
         <li ng-repeat="text in zm.howToPlay">{{text}}</li>
       </ul>
+      <h2 ng-if="zm.model.offlineMessage">{{zm.model.offlineMessage}}</h2>
       <button ng-click="zm.startGame();">Start Level {{zm.model.level}}</button>
     </div>
 

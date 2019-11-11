@@ -7,7 +7,8 @@
     <button ng-click="zm.filterShop('blood');" class="blood {{zm.currentShopFilter == 'blood' ? 'active' : ''}}">Blood</button>
     <button ng-click="zm.filterShop('brains');" class="brains {{zm.currentShopFilter == 'brains' ? 'active' : ''}}">Brains</button>
     <button ng-click="zm.filterShop('bones');" class="bones {{zm.currentShopFilter == 'bones' ? 'active' : ''}}" ng-if="zm.model.constructions.graveyard">Bones</button>
-    <button ng-click="zm.filterShop('completed');" class="bones {{zm.currentShopFilter == 'completed' ? 'active' : ''}}">Completed</button>
+    <button ng-click="zm.filterShop('parts');" class="parts {{zm.currentShopFilter == 'parts' ? 'active' : ''}}" ng-if="zm.model.constructions.monsterFactory">Parts</button>
+    <button ng-click="zm.filterShop('completed');" class="bones {{zm.currentShopFilter == 'completed' ? 'active' : ''}}">Complete</button>
   </div>
   <div class="upgrades">
     <div ng-repeat="upgrade in zm.upgrades" class="upgrade {{upgrade.costType}}">

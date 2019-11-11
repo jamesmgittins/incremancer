@@ -59,6 +59,7 @@ Upgrades = {
       case this.costs.blood:
       case this.costs.brains:
       case this.costs.bones:
+      case this.costs.parts:
         return this.upgrades.filter(upgrade => upgrade.costType == type && (upgrade.cap == 0 || this.currentRank(upgrade) < upgrade.cap) && this.hasRequirement(upgrade));    
       case "completed":
         return this.upgrades.filter(upgrade => upgrade.cap > 0 && this.currentRank(upgrade) >= upgrade.cap);
@@ -373,6 +374,9 @@ Upgrades = {
       case this.costs.bones:
         maxAffordable = getMaxUpgrades(upgrade.basePrice, upgrade.multiplier, currentRank, GameModel.persistentData.bones);
         break;
+      case this.costs.parts:
+        maxAffordable = getMaxUpgrades(upgrade.basePrice, upgrade.multiplier, currentRank, GameModel.persistentData.parts);
+        break;
       case this.costs.prestigePoints:
         maxAffordable = getMaxUpgrades(upgrade.basePrice, upgrade.multiplier, currentRank, GameModel.persistentData.prestigePointsToSpend);
         break;
@@ -397,6 +401,8 @@ Upgrades = {
         return GameModel.persistentData.brains >= this.upgradePrice(upgrade);
       case this.costs.bones:
         return GameModel.persistentData.bones >= this.upgradePrice(upgrade);
+      case this.costs.parts:
+        return GameModel.persistentData.parts >= this.upgradePrice(upgrade);
       case this.costs.prestigePoints:
         return GameModel.persistentData.prestigePointsToSpend >= this.upgradePrice(upgrade);
     }
@@ -434,6 +440,9 @@ Upgrades = {
           break;
         case this.costs.prestigePoints:
           GameModel.persistentData.prestigePointsToSpend -= this.upgradePrice(upgrade);
+          break;
+        case this.costs.parts:
+          GameModel.persistentData.parts -= this.upgradePrice(upgrade);
           break;
       }
       var ownedUpgrade;
@@ -904,4 +913,8 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(44, "Brain Cage", Upgrades.types.brainsCap, Upgrades.costs.bones, 650, 1.07, 500, 0, "There's nothing I love more than a mind enslaved. Now we can put these brains where they belong. In cages! Each rank increases brain storage by 500."),
   new Upgrades.Upgrade(45, "Earth Freeze", Upgrades.types.unlockSpell, Upgrades.costs.bones, 5000, 1, 4, 1, "Learn the Earth Freeze spell which can freeze all humans in place for a short time.", "New spell learned, Earth Freeze!", 209),
   new Upgrades.Upgrade(46, "Plague Armor", Upgrades.types.plagueArmor, Upgrades.costs.bones, 15000, 1.6, 0.02, 10, "The best defense is a good offense? True in the case of Plague Armor which reduces the damage done by infected humans by 2% per rank.", false, 218),
+
+  // parts upgrades
+  new Upgrades.Upgrade(60, "Extra Limbs", Upgrades.types.zombieDmgPC, Upgrades.costs.parts, 900, 1.3, 0.02, 0, "Your zombies gain +2% damage with each rank of Extra Limbs.", false, 220),
+  new Upgrades.Upgrade(61, "Big Boned", Upgrades.types.zombieHealthPC, Upgrades.costs.parts, 1000, 1.31, 0.02, 0, "Your zombies gain +2% health with each rank of Big Boned.", false, 220),
 ];

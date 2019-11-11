@@ -347,6 +347,7 @@ Humans = {
         aliveHumans.push(this.humans[i]);
     }
     this.aliveHumans = aliveHumans;
+    GameModel.stats.human.count = this.aliveHumans.length;
     Police.update(timeDiff, aliveZombies);
     Army.update(timeDiff, aliveZombies);
 
@@ -762,15 +763,19 @@ Police = {
   },
 
   update(timeDiff, aliveZombies) {
+    var count = 0;
     for (var i=0; i < this.police.length; i++) {
       if (this.police[i].isDog) {
         this.updatePoliceDog(this.police[i], timeDiff, aliveZombies);
       } else {
         this.updatePolice(this.police[i], timeDiff, aliveZombies);
       }
-      if (!this.police[i].dead)
+      if (!this.police[i].dead) {
         Humans.aliveHumans.push(this.police[i]);
+        count++;
+      }
     }
+    GameModel.stats.police.count = count;
   },
 
   decideStateOnZombieDistance(police) {
@@ -1142,15 +1147,19 @@ Army = {
   },
 
   update(timeDiff, aliveZombies) {
+    var count = 0;
     this.aliveZombies = aliveZombies;
     if (this.droneActive) {
       this.droneStrikeTimer -= timeDiff;
     }
     for (var i=0; i < this.armymen.length; i++) {
       this.updateArmy(this.armymen[i], timeDiff, aliveZombies);
-      if (!this.armymen[i].dead)
+      if (!this.armymen[i].dead) {
         Humans.aliveHumans.push(this.armymen[i]);
+        count++;
+      } 
     }
+    GameModel.stats.army.count = count;
     this.updateDroneStrike(timeDiff, aliveZombies);
   },
 

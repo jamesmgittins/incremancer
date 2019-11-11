@@ -2,11 +2,18 @@
   <div ng-if="zm.showStats">
     <table>
       <tr>
-        <th colspan="2">Civilians</th>
-        <th colspan="2">Police</th>
-        <th colspan="2">Army</th>
+        <th>Zombies</th>
+        <td>{{zm.model.stats.zombie.count|whole}}</td>
+        <th>Civilians</th>
+        <td>{{zm.model.stats.human.count|whole}}</td>
+        <th>Police</th>
+        <td>{{zm.model.stats.police.count|whole}}</td>
+        <th>Army</th>
+        <td>{{zm.model.stats.army.count|whole}}</td>
       </tr>
       <tr>
+        <th>Health</th>
+        <td>{{zm.model.stats.zombie.health|whole}}</td>
         <th>Health</th>
         <td>{{zm.model.stats.human.health|whole}}</td>
         <th>Health</th>
@@ -16,6 +23,8 @@
       </tr>
       <tr>
         <th>Damage</th>
+        <td>{{zm.model.stats.zombie.damage|whole}}</td>
+        <th>Damage</th>
         <td>{{zm.model.stats.human.damage|whole}}</td>
         <th>Damage</th>
         <td>{{zm.model.stats.police.damage|whole}}</td>
@@ -24,5 +33,4 @@
       </tr>
     </table>
   </div>
-  <button ng-click="zm.showStats = !zm.showStats" class="{{zm.showStats ? 'active' : ''}}">Level Stats</button>
 </div>

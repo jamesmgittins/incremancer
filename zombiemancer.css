@@ -13,6 +13,7 @@ html,body {
   user-select: none;
   touch-action: manipulation;
   overscroll-behavior: contain;
+  font-size:16px;
 }
 
 .clear {clear:both;}
@@ -27,29 +28,14 @@ canvas {
 }
 
 div.top-bar {
+  top: 10px;
   position: absolute;
   max-width: 100%;
-  top:0;
   left:50%;
   transform:translateX(-50%);
   padding: 10px;
   text-align: center;
   background-color: rgba(0,0,0,0.4);
-}
-
-div.top-bar div.message {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%,100%);
-  bottom: -15px;
-  background-color: rgba(0,0,0,0.4);
-  font-size: 20px;
-  line-height: 24px;
-  width: 75%;
-}
-
-div.top-bar div.resources {
-  white-space: nowrap;
 }
 
 div.shop {
@@ -69,7 +55,7 @@ div.shop {
 }
 div.shop div.tabs button {
   margin-right: 5px;
-  padding: 8px;
+  padding: 8px 5px;
 }
 button.active {
   box-shadow: inset 0 0 5px #ffee10;
@@ -132,12 +118,12 @@ div.start-game ul > li {
 }
 
 button {
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.5);
   border: none;
   color: #ccc;
   cursor: pointer;
   text-shadow: 2px 2px #000;
-  font-size: 20px;
+  font-size: 1.2em;
 }
 
 a.button {
@@ -164,18 +150,24 @@ div.shop > p {
 }
 
 div.start-game button, 
-div.end-level button,
-div.shop button {
+div.end-level button {
   padding: 8px 10px;
-  font-size: 18px;
+  font-size: 1.2em;
+  
+}
+div.shop button {
   position: relative;
+  font-size: 1em;
+  padding: 8px 8px;
 }
 div.shop div.shop-title h2 {
   float:left;
-  margin: 8px 0;
+  margin: 4px 0 8px;
+  font-size: 1.2em;
 }
 div.shop div.shop-title button {
   float: right;
+  padding: 6px 8px;
 }
 
 button.info {
@@ -205,15 +197,15 @@ div.shop div.bone-collectors label {
   margin:10px;
 }
 div.shop h3 {
-  margin: 0 0 5px 0;
-  font-size: 18px;
+  margin: 0;
+  font-size: 1em;
 }
 div.shop div.upgrade h4 {
   float:left;
 }
 div.shop div.upgrade h4, div.shop div.bone-collectors h4 {
-  font-size: 18px;
-  line-height: 18px;
+  font-size: 1em;
+  line-height: 1em;
   margin: 0 0 5px 0;
   clear: both;
 }
@@ -237,7 +229,7 @@ div.shop div.upgrade label {
 
 div.shop div.upgrade label, div.shop div.bone-collectors label {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 1em;
   margin-bottom: 5px;
   clear:both;
 }
@@ -248,36 +240,39 @@ div.shop div.upgrade h4.cost {
   margin-bottom: 0;
 }
 
-div.top-bar label {
-  position: relative;
-  font-size:24px;
-  margin: 15px;
-  white-space: nowrap;
-  text-shadow: 2px 2px #000;
-}
 span.percent {
   position: absolute;
   bottom: 0;
   left: 0;
   height: 2px;
 }
-div.top-bar div.stats {
-  padding-top:10px;
+div.stats {
+  white-space: nowrap;
+  bottom:10px;
+  left:50%;
+  transform: translateX(-50%);
+  position: absolute;
+  background-color: rgba(0,0,0,0.5);
+  padding:5px;
 }
-div.top-bar div.stats label {
-  font-size:20px;
+div.stats label {
+  font-size:1em;
+  text-shadow: 2px 2px #000;
+  margin: 10px;
+  white-space: nowrap;
 }
 
 div.zoom-buttons {
   position: absolute;
   bottom:0;
-  left:0;
-  padding:10px;
+  left: 50%;
+  padding: 10px;
+  transform: translateX(-50%);
 }
 
 div.zoom-buttons button {
   padding:10px 15px;
-  font-size:20px;
+  font-size:1em;
 }
 
 div.buttons {
@@ -289,9 +284,9 @@ div.buttons {
 
 div.spells {
   position:absolute;
-  top:95px;
+  bottom:-10px;
   left:0;
-  padding:10px;
+  transform: translateY(100%);
 }
 
 div.spells > button.spell {
@@ -300,7 +295,7 @@ div.spells > button.spell {
   display: block;
   width: 100%;
   margin-bottom: 5px;
-  font-size: 18px;
+  font-size: 1em;
 }
 
 div.spells > button.spell.active {
@@ -345,10 +340,10 @@ div.buttons button {
   position: relative;
   display:block;
   padding: 8px 10px;
-  font-size: 18px;
+  font-size: 1em;
   margin: 5px 5px 0 0;
   width:100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.5);
   border: none;
   color: #ccc;
   cursor: pointer;
@@ -431,38 +426,24 @@ div.generator-progress.active > span.percent {
   animation:width-animation 4s linear infinite reverse;
 }
 
+@media screen and (min-width: 1700px) {
+  html,body {
+    font-size: 18px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  html,body {
+    font-size: 14px;
+  }
+}
+
 @media screen and (max-width: 1800px) {
   div.shop div.tabs button {
     margin-right: 0;
-    font-size: 16px;
-  }
-  div.top-bar label {
-    font-size:20px;
-  }
-
-  div.top-bar div.stats label {
-    font-size:18px;
   }
   div.start-game button, div.end-level button, div.shop button {
-    padding: 8px 10px;
-    font-size: 16px;
-  }
-}
-@media screen and (max-width: 2078px) {
-  div.top-bar.open {
-    left: 0;
-    transform: none;
-    width: calc(80% - 40px);
-  }
-}
-@media screen and (max-width: 1550px) and (min-width: 820px) {
-  div.top-bar.open {
-    left: 0;
-    transform: none;
-    width: calc(100% - 350px);
-  }
-  div.top-bar.open div.resources {
-    white-space: normal;
+    padding: 6px 6px;
   }
 }
 @media screen and (max-width: 1509px) {
@@ -472,41 +453,11 @@ div.generator-progress.active > span.percent {
 }
 
 @media screen and (max-width: 1040px) {
-  div.top-bar {
-    width:100%;
-  }
-  div.top-bar div.resources {
-    white-space: normal;
-  }
   div.start-game, div.end-level {
     width: 90%;
   }
 }
-@media screen and (max-width: 920px) {
-  div.buttons {
-    top: 120px;
-  }
-  div.spells {
-    top: 125px;
-  }
-}
 @media screen and (max-width: 579px) {
-  div.top-bar label {
-    margin:5px;
-    font-size:16px;
-  }
-  div.top-bar div.resources label {
-    width:40%;
-    display: inline-block;
-    margin: 5px 0;
-  }
-  div.top-bar div.stats label {
-    font-size : 16px;
-  }
-  div.top-bar div.stats {
-    padding-top:5px;
-    clear:both;
-  }
   div.shop {
     width:80%;
   }
@@ -520,24 +471,27 @@ div.generator-progress.active > span.percent {
   div.buttons button {
     padding: 5px 10px;
   }
-
-  div.top-bar div.message {
-    font-size: 18px;
-    line-height: 24px;
-    padding: 0 20px;
-    width:80%;
-  }
   div.start-game button, div.end-level button, div.shop button {
     padding:10px;
   }
 }
 
-.message > p {
+div.message {
+  background-color: rgba(0,0,0,0.4);
+  position: absolute;
+  top:10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5em;
+  padding:0 15px;
+}
+
+div.message > p {
   position: relative;
   text-shadow: 2px 2px #000;
 }
 
-.message > p::after {
+div.message > p::after {
   content:"";
   height:2px;
   background-color: #fff;
@@ -588,9 +542,8 @@ div.upgrade .col:nth-of-type(2) {
 
 div.level-stats {
   position: absolute;
-  bottom: 10px;
+  bottom: 50px;
   left:10px;
-  /* transform: translateX(-50%); */
 }
 
 div.level-stats.zoom {
@@ -605,16 +558,31 @@ div.level-stats button:not(:hover) {
 }
 
 div.level-stats > div {
-  background-color: rgba(0,0,0,0.7);
+  background-color: rgba(0,0,0,0.5);
   padding:10px;
   position: absolute;
   top: -10px;
   left: 0;
   transform:translateY(-100%);
   text-align: left;
-  /* color: #fb2; */
+  text-shadow: 2px 2px #000;
 }
 
 div.level-stats > div td {
-  padding-right: 20px;
+  padding-right: 10px;
+}
+
+div.resources {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  background-color: rgba(0,0,0,0.5);
+}
+
+div.resources label {
+  position: relative;
+  display:block;
+  font-size:1.2em;
+  margin:10px;
+  text-shadow: 2px 2px #000;
 }

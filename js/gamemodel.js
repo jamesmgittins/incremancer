@@ -194,7 +194,7 @@ GameModel = {
     timeDiff *= this.gameSpeed;
 
     PartFactory.update(timeDiff);
-    CreatureFactory.update(timeDiff);
+    
     this.autoRemoveCollectorsHarpies();
     this.addEnergy(this.getEnergyRate() * timeDiff);
 
@@ -202,7 +202,7 @@ GameModel = {
       this.addBones(this.bonesRate * timeDiff);
       this.addBrains(this.brainsRate * timeDiff);
       Upgrades.updateRunicSyphon(this.runicSyphon);
-
+      
       if (this.lastSave + 30000 < updateTime) {
         this.saveData();
         this.lastSave = updateTime;
@@ -230,6 +230,7 @@ GameModel = {
         } 
       }
       Upgrades.updateConstruction(timeDiff);
+      CreatureFactory.update(timeDiff);
     }
     if (this.currentState == this.states.levelCompleted) {
       this.startTimer -= timeDiff;
@@ -237,6 +238,7 @@ GameModel = {
         this.nextLevel();
       }
     }
+    this.updateStats();
   },
 
   calculateEndLevelBones() {
@@ -332,6 +334,10 @@ GameModel = {
 
   populateStats() {
     this.stats = {
+      zombie : {
+        health : this.zombieHealth,
+        damage : this.zombieDamage
+      },
       human : {
         health : Humans.getMaxHealth(this.level),
         damage : Humans.attackDamage
@@ -345,6 +351,12 @@ GameModel = {
         damage : Army.attackDamage
       }
     }
+  },
+
+  updateStats() {
+    this.stats.zombie.health = this.zombieHealth;
+    this.stats.zombie.damage = this.zombieDamage;
+    this.stats.zombie.count = this.zombieCount;
   },
 
   vipEscaped() {
@@ -467,9 +479,23 @@ GameModel = {
         this.persistentData = JSON.parse(localStorage.getItem(this.storageName));
         this.level = this.persistentData.levelUnlocked;
         this.updatePersistentData();
+        this.calcOfflineProgress();
       } 
     } catch (e) {
       console.log(e);
+    }
+  },
+  calcOfflineProgress() {
+    Upgrades.applyUpgrades();
+    Upgrades.updateRuneEffects();
+    PartFactory.applyGenerators();
+    if (this.constructions.partFactory) {
+      var timeDiff = Date.now() - this.persistentData.dateOfSave;
+      var partsCreated = PartFactory.updateLongTime(timeDiff);
+      if (partsCreated > 0) {
+        this.offlineMessage = "Your factory has generated " + formatWhole(partsCreated) + " parts while you were away";
+        this.persistentData.parts += partsCreated;
+      }
     }
   },
   resetData() {
