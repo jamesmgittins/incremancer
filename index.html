@@ -36,7 +36,7 @@
       <p>{{zm.message}}</p>
     </div>
       
-    <div class="stats">
+    <div class="stats {{zm.model.persistentData.zoomButtons ? 'zoom' : ''}}">
       <label>Level: {{zm.model.level}}</label>
       <button ng-click="zm.showStats = !zm.showStats" class="{{zm.showStats ? 'active' : ''}}">Stats</button>
       <label>Humans: {{zm.model.getHumanCount()}}</label>
@@ -45,7 +45,7 @@
       <label ng-if="zm.model.persistentData.showfps">FPS: {{zm.model.frameRate}}</label>
     </div>
 
-    <div class="resources {{zm.model.persistentData.zoomButtons ? 'zoom' : ''}}">
+    <div class="resources">
       <label class="energy">Energy: {{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}<span class="percent" ng-style="{'width':zm.energyPercent() + '%'}"></span></label>
       <label class="blood">Blood: {{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}<span class="percent" ng-style="{'width':zm.bloodPercent() + '%'}"></span></label>
       <label class="brains">Brains: {{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}<span class="percent" ng-style="{'width':zm.brainsPercent() + '%'}"></span></label>
