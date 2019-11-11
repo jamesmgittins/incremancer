@@ -44,7 +44,7 @@
         <label>Level: {{zm.model.level}}</label>
         <label>Humans: {{zm.model.getHumanCount()}}</label>
         <label>Zombies: {{zm.model.zombieCount}}</label>
-        <label ng-if="zm.model.constructions.monsterFactory">Creatures: {{zm.model.creatureCount}}</label>
+        <label ng-if="zm.model.constructions.monsterFactory">Creatures: {{zm.model.creatureCount}} / {{zm.model.creatureLimit}}</label>
         <label ng-if="zm.model.persistentData.showfps">FPS: {{zm.model.frameRate}}</label>
       </div>
       <div class="message" ng-if="zm.message">

@@ -69,6 +69,7 @@ div.shop {
 }
 div.shop div.tabs button {
   margin-right: 5px;
+  padding: 8px;
 }
 button.active {
   box-shadow: inset 0 0 5px #ffee10;

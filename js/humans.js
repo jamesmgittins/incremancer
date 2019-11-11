@@ -1279,7 +1279,7 @@ Army = {
             if (armyman.rocketlauncher) {
               armyman.shotsLeft = 1;
             }
-            armyman.attackTimer = this.attackSpeed;
+            armyman.attackTimer = armyman.rocketlauncher ? this.attackSpeed * 1.3 : this.attackSpeed;
             armyman.shotTimer = 0;
           }
           if (armyman.shotsLeft > 0) {
@@ -1289,7 +1289,7 @@ Army = {
               if (armyman.minigun) {
                 armyman.shotTimer = 0.08;
               }
-              Bullets.newBullet(armyman, armyman.zombieTarget, armyman.rocketlauncher ? this.attackDamage * 1.5 : this.attackDamage, false, armyman.rocketlauncher);
+              Bullets.newBullet(armyman, armyman.zombieTarget, armyman.rocketlauncher ? this.attackDamage * 1.5 : armyman.minigun ? this.attackDamage / 2 : this.attackDamage, false, armyman.rocketlauncher);
               armyman.shotsLeft--;
             }
           }
