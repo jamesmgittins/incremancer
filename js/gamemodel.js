@@ -56,6 +56,8 @@ GameModel = {
     healthRegen : 0,
     damageReflection : 0
   },
+  autoconstruction : false,
+  autoconstructionUnlocked : false,
 
   gameSpeed : 1,
   
@@ -126,6 +128,7 @@ GameModel = {
     this.plagueDmgReduction = 1;
     this.creatureLimit = 1;
     this.runicSyphon.percentage = 0;
+    this.autoconstructionUnlocked = false;
   },
 
   addEnergy(value) {
@@ -322,12 +325,12 @@ GameModel = {
     Smoke.initialize();
     Humans.populate();
     Zombies.populate();
-    Creatures.populate();
     Graveyard.initialize();
     setTimeout(centerGameContainer);
     Upgrades.applyUpgrades();
     Upgrades.updateRuneEffects();
     PartFactory.applyGenerators();
+    Creatures.populate();
     this.addStartLevelResources();
     this.populateStats();
   },
@@ -456,6 +459,7 @@ GameModel = {
       this.persistentData.creatureLevels = [];
       this.persistentData.creatureAutobuild = [];
       this.zombiesInCages = 0;
+      this.autoconstruction = false;
       BoneCollectors.update(0.1);
       PartFactory.generatorsApplied = [];
       CreatureFactory.updateAutoBuild();
@@ -492,7 +496,7 @@ GameModel = {
     Upgrades.updateRuneEffects();
     PartFactory.applyGenerators();
     if (this.constructions.partFactory) {
-      var timeDiff = Date.now() - this.persistentData.dateOfSave;
+      var timeDiff = (Date.now() - this.persistentData.dateOfSave) / 1000;
       var partsCreated = PartFactory.updateLongTime(timeDiff);
       if (partsCreated > 0) {
         this.offlineMessage = "Your factory has generated " + formatWhole(partsCreated) + " parts while you were away";

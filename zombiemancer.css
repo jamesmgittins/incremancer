@@ -574,3 +574,8 @@ div.resources label {
   margin:10px;
   text-shadow: 2px 2px #000;
 }
+
+div.resources label > span.value {
+  float:right;
+  margin-left: 0.5em;
+}

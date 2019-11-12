@@ -46,11 +46,11 @@
     </div>
 
     <div class="resources">
-      <label class="energy">Energy: {{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}<span class="percent" ng-style="{'width':zm.energyPercent() + '%'}"></span></label>
-      <label class="blood">Blood: {{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}<span class="percent" ng-style="{'width':zm.bloodPercent() + '%'}"></span></label>
-      <label class="brains">Brains: {{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}<span class="percent" ng-style="{'width':zm.brainsPercent() + '%'}"></span></label>
-      <label class="bones" ng-if="zm.model.constructions.graveyard || zm.model.persistentData.bones > 0">Bones: {{zm.model.persistentData.bones|whole}}</label>
-      <label class="parts" ng-if="zm.model.constructions.factory || zm.model.persistentData.parts > 0">Parts: {{zm.model.persistentData.parts|whole}}</label>
+      <label class="energy">Energy:<span class="value">{{zm.model.energy|decimal}} / {{zm.model.energyMax|whole}}</span><span class="percent" ng-style="{'width':zm.energyPercent() + '%'}"></span></label>
+      <label class="blood">Blood:<span class="value">{{zm.model.persistentData.blood|whole}} / {{zm.model.bloodMax|whole}}</span><span class="percent" ng-style="{'width':zm.bloodPercent() + '%'}"></span></label>
+      <label class="brains">Brains:<span class="value">{{zm.model.persistentData.brains|whole}} / {{zm.model.brainsMax|whole}}</span><span class="percent" ng-style="{'width':zm.brainsPercent() + '%'}"></span></label>
+      <label class="bones" ng-if="zm.model.constructions.graveyard || zm.model.persistentData.bones > 0">Bones:<span class="value">{{zm.model.persistentData.bones|whole}}</span></label>
+      <label class="parts" ng-if="zm.model.constructions.factory || zm.model.persistentData.parts > 0">Parts:<span class="value">{{zm.model.persistentData.parts|whole}}</span></label>
       <div class="spells">
         <button ng-repeat="spell in zm.spells.getUnlockedSpells()" ng-click="zm.spells.castSpell(spell)" class="spell {{spell.active ? 'active' : (spell.onCooldown ? 'cooldown' : '')}}" ng-disabled="spell.onCooldown || spell.energyCost > zm.model.energy">
           <span class="icon">{{spell.name}}</span>

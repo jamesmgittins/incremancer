@@ -35,7 +35,8 @@ Upgrades = {
     zombieDmgPC : "zombieDmgPC",
     zombieHealthPC : "zombieHealthPC",
     startingPC : "startingPC",
-    energyCost : "energyCost"
+    energyCost : "energyCost",
+    autoconstruction : "autoconstruction"
   },
 
   costs : {
@@ -188,6 +189,9 @@ Upgrades = {
       case this.types.energyCost:
         GameModel.zombieCost -= upgrade.effect * upgrade.rank;
         return;
+      case this.types.autoconstruction:
+        GameModel.autoconstructionUnlocked = true;
+        return;
     }
   },
 
@@ -333,6 +337,8 @@ Upgrades = {
         return "Creature limit: " + GameModel.creatureLimit;
       case this.types.runicSyphon:
         return "Syphon amount: " + Math.round(GameModel.runicSyphon.percentage * 100) + "%";
+      case this.types.autoconstruction:
+        return this.currentRank(upgrade) > 0 ? "You have unlocked automatic construction" : "You have yet to unlock automatic construction"
     }
   },
 
@@ -554,20 +560,39 @@ Upgrades = {
   },
 
   updateConstruction(timeDiff) {
-    if (!GameModel.persistentData.currentConstruction || GameModel.persistentData.currentConstruction.state == this.constructionStates.paused)
+    if ((!GameModel.persistentData.currentConstruction && !GameModel.autoconstruction) || GameModel.persistentData.currentConstruction.state == this.constructionStates.paused)
       return false;
     
-    this.constructionTickTimer -= timeDiff;
-    if (this.constructionTickTimer < 0) {
-      this.constructionTickTimer = 1;
-      if(this.consumeResources(GameModel.persistentData.currentConstruction.costPerTick)) {
-        GameModel.persistentData.currentConstruction.state = this.constructionStates.building;
-        GameModel.persistentData.currentConstruction.timeRemaining -= 1;
-        if (GameModel.persistentData.currentConstruction.timeRemaining <= 0) {
-          this.completeConstruction();
+    if (GameModel.persistentData.currentConstruction) {
+      this.constructionTickTimer -= timeDiff;
+      if (this.constructionTickTimer < 0) {
+        this.constructionTickTimer = 1;
+        if(this.consumeResources(GameModel.persistentData.currentConstruction.costPerTick)) {
+          GameModel.persistentData.currentConstruction.state = this.constructionStates.building;
+          GameModel.persistentData.currentConstruction.timeRemaining -= 1;
+          if (GameModel.persistentData.currentConstruction.timeRemaining <= 0) {
+            this.completeConstruction();
+          }
+        } else {
+          GameModel.persistentData.currentConstruction.state = this.constructionStates.autoPaused;
         }
-      } else {
-        GameModel.persistentData.currentConstruction.state = this.constructionStates.autoPaused;
+      }
+    } else if(GameModel.autoconstruction) {
+      var upgrades = this.getAvailableConstructions();
+      if (!upgrades || upgrades.length == 0) {
+        return;
+      }
+      var cheapestUpgrade = false;
+      var lowestCost = 0;
+      for (var i = 0; i < upgrades.length; i++) {
+        var cost = (upgrades[i].costs.energy || 0) + (upgrades[i].costs.blood || 0) + (upgrades[i].costs.brains || 0) + (upgrades[i].costs.bones || 0) + (upgrades[i].costs.parts || 0);
+        if (cost < lowestCost || !cheapestUpgrade) {
+          lowestCost = cost;
+          cheapestUpgrade = upgrades[i];
+        }
+      }
+      if (cheapestUpgrade) {
+        setTimeout(function(){Upgrades.startConstruction(cheapestUpgrade);});
       }
     }
   },
@@ -575,25 +600,31 @@ Upgrades = {
   startConstruction(upgrade) {
     if (GameModel.persistentData.currentConstruction)
       return false;
+
+    var fastMode = GameModel.persistentData.blood >= (upgrade.costs.blood || 0) 
+                && GameModel.persistentData.brains >= (upgrade.costs.brains || 0)
+                && GameModel.persistentData.bones >= (upgrade.costs.bones || 0)
+                && GameModel.persistentData.parts >= (upgrade.costs.parts || 0)
+                && GameModel.energy >= (upgrade.costs.energy || 0);
     
     var costPerTick = {};
     if (upgrade.costs.energy)
-      costPerTick.energy = upgrade.costs.energy / upgrade.time;
+      costPerTick.energy = upgrade.costs.energy / (fastMode ? 5 : upgrade.time);
     if (upgrade.costs.blood)
-      costPerTick.blood = upgrade.costs.blood / upgrade.time;
+      costPerTick.blood = upgrade.costs.blood / (fastMode ? 5 : upgrade.time);
     if (upgrade.costs.brains)
-      costPerTick.brains = upgrade.costs.brains / upgrade.time;
+      costPerTick.brains = upgrade.costs.brains / (fastMode ? 5 : upgrade.time);
     if (upgrade.costs.bones)
-      costPerTick.bones = upgrade.costs.bones / upgrade.time;
+      costPerTick.bones = upgrade.costs.bones / (fastMode ? 5 : upgrade.time);
     if (upgrade.costs.parts)
-      costPerTick.parts = upgrade.costs.parts / upgrade.time;
+      costPerTick.parts = upgrade.costs.parts / (fastMode ? 5 : upgrade.time);
 
     GameModel.persistentData.currentConstruction = {
       state:this.constructionStates.building,
       name:upgrade.name,
       id:upgrade.id,
-      timeRemaining:upgrade.time,
-      time:upgrade.time,
+      timeRemaining:(fastMode ? 5 : upgrade.time),
+      time:(fastMode ? 5 : upgrade.time),
       costPerTick:costPerTick
     }
   },
@@ -837,7 +868,7 @@ Upgrades = {
 };
 
 Upgrades.constructionUpgrades = [
-  new Upgrades.Construction(201, "Cursed Graveyard", Upgrades.constructionTypes.graveyard, {blood:1800, energy:30}, 30, 1, 1, 1, false, "Construct a Cursed Graveyard in the town that will automatically spawn zombies when your energy is at its maximum!", "Graveyard menu now available!"),
+  new Upgrades.Construction(201, "Cursed Graveyard", Upgrades.constructionTypes.graveyard, {blood:1800}, 30, 1, 1, 1, false, "Construct a Cursed Graveyard in the town that will automatically spawn zombies when your energy is at its maximum!", "Graveyard menu now available!"),
   new Upgrades.Construction(205, "Crypt", Upgrades.constructionTypes.crypt, {blood:21000, bones:2220}, 60, 1, 1, 1, 201, "Construct a Crypt in your graveyard. This will give you a nice dark and quiet place to think. The additional space will also allow you to store 50% more blood and brains!"),
   new Upgrades.Construction(206, "Bone Fort", Upgrades.constructionTypes.fort, {blood:60000, bones:6000, energy:60}, 60, 1, 1, 1, 205, "Turn your crypt into a fort. The additional space will also allow you to store 60% more blood and brains.", "New upgrades are available in the shop!"),
   new Upgrades.Construction(207, "Bone Fortress", Upgrades.constructionTypes.fortress, {blood:100000, bones:9000, energy:90}, 60, 1, 1, 1, 206, "Turn your fort into a fortress. The additional space will also allow you to store 70% more blood and brains."),
@@ -871,7 +902,8 @@ Upgrades.prestigeUpgrades = [
   new Upgrades.Upgrade(105, "Bone Rate", Upgrades.types.bonesGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% bones income rate for each rank."),
   // new Upgrades.Upgrade(106, "Zombie Health", Upgrades.types.zombieHealthPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% zombie health for each rank"),
   // new Upgrades.Upgrade(107, "Zombie Damage", Upgrades.types.zombieDmgPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% zombie damage for each rank")
-  new Upgrades.Upgrade(111, "Parts Rate", Upgrades.types.partsGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% creature parts income rate for each rank.")
+  new Upgrades.Upgrade(111, "Parts Rate", Upgrades.types.partsGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% creature parts income rate for each rank."),
+  new Upgrades.Upgrade(112, "Automate Construction", Upgrades.types.autoconstruction, Upgrades.costs.prestigePoints, 250, 1, 1, 1, "Unlock the ability to automatically start construction of the cheapest available building option.")
 ];
 
 Upgrades.upgrades = [
