@@ -35,7 +35,7 @@ PartFactory = {
     for (var i = 0; i < this.generatorsApplied.length; i++) {
       partsCreated += this.generatorsApplied[i].total * (timeDiff / this.generatorsApplied[i].time);
     }
-    return partsCreated;
+    return partsCreated * GameModel.partsPCMod;
   },
 
   currentRank(generator) {
