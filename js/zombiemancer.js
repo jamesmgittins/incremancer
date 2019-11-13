@@ -244,10 +244,6 @@ var timeSinceLastFrameCount = 1;
 
 function update(timeDiff) {
 
-  if (GameModel.hidden) {
-    return;
-  }
-
   if (GameModel.persistentData.showfps) {
     frames++;
     timeSinceLastFrameCount -= timeDiff;

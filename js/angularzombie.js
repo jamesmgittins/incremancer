@@ -553,9 +553,6 @@ angular.module('zombieApp', [])
     }
 
     function update() {
-      if (zm.model.hidden) {
-        return;
-      }
       var updateTime = new Date().getTime();
       var timeDiff = (Math.min(1000, Math.max(updateTime - zm.lastUpdate,0))) / 1000;
       innerUpdate(timeDiff, updateTime);

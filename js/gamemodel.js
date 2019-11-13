@@ -196,6 +196,10 @@ GameModel = {
 
     timeDiff *= this.gameSpeed;
 
+    if (this.hidden) { // force PIXI update
+      update(timeDiff);
+    }
+
     PartFactory.update(timeDiff);
     
     this.autoRemoveCollectorsHarpies();
