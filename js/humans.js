@@ -142,6 +142,9 @@ Humans = {
     if (level < 92) {
       return (level - 52) * 300;
     }
+    if (level > 499) {
+      return 6000000 * Math.pow(1.05, level - 499);
+    }
     if (level > 99) {
       return 16000 * Math.pow(1.015, level-99);
     }
