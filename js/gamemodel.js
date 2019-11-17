@@ -446,7 +446,9 @@ GameModel = {
     generators : [],
     creatureLevels : [],
     creatures : [],
-    creatureAutobuild : []
+    creatureAutobuild : [],
+    savedCreatures : [],
+    levelsCompleted : []
   },
 
   addPrestigePoints(points) {
