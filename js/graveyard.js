@@ -7,6 +7,17 @@ Graveyard = {
   spikeTimer : 5,
   fenceRadius : 50,
   fastDistance : fastDistance,
+
+  graveyardHealth : 0,
+  graveyardMaxHealth : 0,
+  target : {
+    graveyard : true,
+    x : 0,
+    y: 0
+  },
+
+  healthBar : false,
+
   initialize() {
 
     if (typeof GameModel.persistentData.graveyardZombies == 'undefined') {
@@ -15,9 +26,75 @@ Graveyard = {
 
     this.drawGraveyard();
     this.drawFence();
+    this.drawHealthBar();
     Bones.initialize();
     BoneCollectors.populate();
     Harpies.populate();
+  },
+
+  damageGraveyard(damage) {
+    if (GameModel.isBossStage(GameModel.level)) {
+      this.graveyardHealth -= damage;
+      if (this.graveyardHealth < 0) {
+        GameModel.currentState = GameModel.states.failed;
+        GameModel.startTimer = 3;
+      }
+    }
+  },
+
+  drawHealthBar() {
+    if (GameModel.isBossStage(GameModel.level)) {
+      GameModel.sendMessage("Defend the Graveyard!");
+      this.graveyardHealth = this.graveyardMaxHealth = GameModel.zombieHealth * 100 * GameModel.graveyardHealthMod;
+      if (!this.healthBar) {
+        this.healthBar = {
+          container : new PIXI.Container(),
+          background : new PIXI.Graphics(),
+          foreground : new PIXI.Graphics(),
+          percentage : 100
+        }
+        this.healthBar.container.addChild(this.healthBar.background);
+        this.healthBar.container.addChild(this.healthBar.foreground);
+        foregroundContainer.addChild(this.healthBar.container);
+      }
+
+      this.target.x = gameFieldSize.x / 2;
+      this.target.y = gameFieldSize.y / 2;
+
+      this.healthBar.container.visible = true;
+      this.healthBar.container.x = this.target.x - 50;
+      this.healthBar.container.y = this.target.y - 100;
+
+      this.healthBar.background.clear();
+      this.healthBar.background.lineStyle(12, 0x333333);
+      this.healthBar.background.moveTo(-2,0);
+      this.healthBar.background.lineTo(102,0);
+
+      this.healthBar.foreground.clear();
+      this.healthBar.foreground.lineStyle(8, 0xfd5252);
+      this.healthBar.foreground.moveTo(0,0);
+      this.healthBar.foreground.lineTo(100,0);
+
+    } else {
+      if (this.healthBar) {
+        this.healthBar.background.clear();
+        this.healthBar.foreground.clear();
+        this.healthBar.container.visible = false;
+      }
+    }
+  },
+
+  updateHealthBar() {
+    var percentage = Math.max(Math.round((this.graveyardHealth / this.graveyardMaxHealth) * 100),0);
+    if (percentage != this.healthBar.percentage) {
+      this.healthBar.foreground.clear();
+      if (percentage > 0) {
+        this.healthBar.foreground.lineStyle(8, 0xfd5252);
+        this.healthBar.foreground.moveTo(0,0);
+        this.healthBar.foreground.lineTo(percentage, 0);
+      }
+      this.healthBar.percentage = percentage;
+    }
   },
 
   drawGraveyard() {
@@ -133,6 +210,10 @@ Graveyard = {
   update(timeDiff) {
     BoneCollectors.addAndRemoveBoneCollectors();
     Harpies.addAndRemoveHarpies();
+
+    if (GameModel.isBossStage(GameModel.level)) {
+      this.updateHealthBar();
+    }
     
     if (!GameModel.constructions.graveyard || GameModel.currentState != GameModel.states.playingLevel) {
       this.sprite.visible = false;
@@ -158,7 +239,7 @@ Graveyard = {
       }
     }
 
-    if (GameModel.energy >= GameModel.energyMax) {
+    if (GameModel.energy >= GameModel.energyMax && !GameModel.hidden) {
       for (var i = 0; i < GameModel.persistentData.graveyardZombies; i ++)  {
         Zombies.spawnZombie(this.sprite.x, this.sprite.y + (this.level > 2 ? 8 : 0));
       }

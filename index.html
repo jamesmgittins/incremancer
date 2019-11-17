@@ -68,6 +68,7 @@
       <button ng-click="zm.openSidePanel('runesmith');" ng-if="zm.model.constructions.runesmith" class="{{zm.sidePanels.runesmith ? 'active' : ''}}">Runesmith</button>
       <button ng-click="zm.openSidePanel('prestige');" ng-if="zm.isShowPrestige()" class="{{zm.sidePanels.prestige ? 'active' : ''}}">Prestige</button>
       <button ng-click="zm.openSidePanel('options');" class="{{zm.sidePanels.options ? 'active' : ''}}">Options</button>
+      <button ng-click="zm.levelSelect.show()" class="{{zm.levelSelect.shown ? 'active' : ''}}" ng-if="zm.levelSelect.showButton()">Level Select</button>
     </div>
 
     <div class="zoom-buttons" ng-if="zm.model.persistentData.zoomButtons">
@@ -76,6 +77,7 @@
       <button ng-click="zm.zoom(+1);">+</button>
     </div>
     
+    <level-select></level-select>
     <prestige-menu></prestige-menu>
     <shop-menu></shop-menu>
     <construction-menu></construction-menu>
@@ -84,8 +86,6 @@
     <factory-menu></factory-menu>
     <options-menu></options-menu>
     <level-stats></level-stats>
-
-    
 
     <div class="start-game" ng-if="zm.model.currentState == zm.model.states.startGame">
       <h2>Incremancer</h2>
@@ -97,10 +97,17 @@
       <button ng-click="zm.startGame();">Start Level {{zm.model.level}}</button>
     </div>
 
+    <div class="end-level" ng-if="zm.model.currentState == zm.model.states.failed">
+      <h2>Level {{zm.model.level}} Failed</h2>
+      <h4>You have been defeated</h4>
+      <button ng-click="zm.model.startLevel(zm.model.level - 1);">Go back to Level {{zm.model.level - 1}}</button>
+      <button ng-click="zm.model.startLevel(zm.model.level);">Retry Level {{zm.model.level}}</button>
+    </div>
+
     <div class="end-level" ng-if="zm.model.currentState == zm.model.states.levelCompleted">
       <h2>Level {{zm.model.level}} Complete</h2>
       <h4>All the humans are either dead or undead!</h4>
-      <h4>You have earned {{zm.model.level}} prestige points</h4>
+      <h4 ng-if="zm.model.prestigePointsEarned > 0">You have earned {{zm.model.prestigePointsEarned}} prestige points</h4>
       <h4 ng-if="zm.model.endLevelBones">Your bone collectors have gathered the remaining {{zm.model.endLevelBones}} bones from the town</h4>
       <button ng-click="zm.nextLevel();">Start Level {{zm.model.level + 1}}</button>
     </div>

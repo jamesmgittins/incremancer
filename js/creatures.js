@@ -75,6 +75,8 @@ Creatures = {
           creatures.push(this.creatures[i]);
           this.creatures[i].x = this.graveyard.sprite.x;
           this.creatures[i].zIndex = this.creatures[i].y = this.graveyard.sprite.y + (this.graveyard.level > 2 ? 8 : 0);
+          this.creatures[i].target = false;
+          this.creatures[i].state = this.states.lookingForTarget;
         } else {
           this.discardedSprites.push(this.creatures[i]);
           characterContainer.removeChild(this.creatures[i]);
@@ -83,9 +85,11 @@ Creatures = {
     }
     this.creatures = creatures;
     this.aliveCreatures = [];
+
+    CreatureFactory.spawnSavedCreatures();
   },
 
-  spawnCreature(health, damage, speed, type) {
+  spawnCreature(health, damage, speed, type, level) {
     var creature;
     if (this.discardedSprites.length > 0) {
       creature = this.discardedSprites.pop();
@@ -110,6 +114,7 @@ Creatures = {
         creature.immuneToBurns = true;
         break;
     }
+    creature.level = level;
     creature.textureSet = this.golemTextures;
     creature.deadTexture = this.golemTextures.dead;
     creature.currentDirection = Creatures.directions.down;
@@ -162,13 +167,23 @@ Creatures = {
       this.creatureCount[CreatureFactory.creatures[i].type] = 0;
     }
 
+    this.model.persistentData.savedCreatures = [];
+
     for (var i=0; i < this.creatures.length; i++) {
       if (this.creatures[i].visible) {
         this.updateCreature(this.creatures[i], timeDiff);
+      }
+    }
+    for (var i=0; i < this.creatures.length; i++) {
+      if (this.creatures[i].visible) {
         if (!this.creatures[i].dead) {
           this.aliveZombies.push(this.creatures[i]);
           aliveCreatures++;
           this.creatureCount[this.creatures[i].creatureType]++;
+          this.model.persistentData.savedCreatures.push({
+            t:this.creatures[i].creatureType,
+            l:this.creatures[i].level
+          });
         }
       }
     }
@@ -367,6 +382,15 @@ Creatures = {
       if (Math.abs(this.aliveZombies[i].x - creature.x) < this.targetDistance) {
         if (Math.abs(this.aliveZombies[i].y - creature.y) < this.targetDistance) {
           this.healZombie(this.aliveZombies[i], healingDone);
+        }
+      }
+    }
+    for (var i=0; i < this.creatures.length; i++) {
+      if (!this.creatures[i].dead && this.creatures[i].visible) {
+        if (Math.abs(this.creatures[i].x - creature.x) < this.targetDistance) {
+          if (Math.abs(this.creatures[i].y - creature.y) < this.targetDistance) {
+            this.healZombie(this.creatures[i], healingDone);
+          }
         }
       }
     }

@@ -22,6 +22,7 @@ angular.module('zombieApp', [])
     zm.currentShopFilter = "blood";
     zm.currentConstructionFilter = "available";
     zm.graveyardTab = "minions";
+    zm.trophyTab = "all";
     zm.factoryTab = "parts"
     zm.factoryStats = {};
 
@@ -38,6 +39,7 @@ angular.module('zombieApp', [])
       zm.sidePanels.shop = false;
       zm.sidePanels.open = false;
       zm.sidePanels.factory = false;
+      zm.levelSelect.shown = false;
     }
 
     zm.openSidePanel = function(type) {
@@ -54,6 +56,7 @@ angular.module('zombieApp', [])
         case "graveyard":
           zm.sidePanels.graveyard = true;
           zm.graveyardTab = "minions";
+          zm.trophyTab = "all";
           break;
         case "runesmith":
           zm.sidePanels.runesmith = true;
@@ -80,6 +83,25 @@ angular.module('zombieApp', [])
       zm.graveyardTab = tab;
       if (tab == 'trophies') {
         zm.trophies = Trophies.getTrophyList();
+        zm.trophyTab = "all";
+      }
+    }
+
+    zm.trophyTabSelect = function(tab) {
+      zm.trophyTab = tab;
+      switch(tab) {
+        case "all":
+          zm.trophies = Trophies.getTrophyList();
+          break;
+        case "collected":
+          zm.trophies = Trophies.getTrophyList().filter(trophy => trophy.owned);
+          break;
+        case "uncollected":
+          zm.trophies = Trophies.getTrophyList().filter(trophy => !trophy.owned);
+          break;
+        case "totals":
+          zm.trophies = Trophies.getTrophyTotals();
+          break;
       }
     }
 
@@ -217,6 +239,57 @@ angular.module('zombieApp', [])
     }
     // ---- Factory Functions ---- //
 
+
+    // ---- Level Select Functions ---- //
+    zm.levelSelect = {
+      shown : false,
+      levelsPerPage : 50,
+      levels : [],
+      levelRanges : [],
+      start : 1,
+      showButton() {
+        return zm.model.persistentData.allTimeHighestLevel > 1;
+      },
+      show() {
+        if (!this.shown) {
+          zm.closeSidePanels();
+          this.shown = true;
+          this.level = zm.model.levelInfo(zm.model.level);
+          this.start = Math.floor((this.level.level - 1) / this.levelsPerPage) * this.levelsPerPage + 1;
+          this.populate();
+        } else {
+          this.shown = false;
+        }
+      },
+      populate() {
+        this.levels = [];
+        this.levelRanges = [];
+        if (this.start > this.levelsPerPage) {
+          this.levelRanges.push(this.start - this.levelsPerPage);
+        }
+        this.levelRanges.push(this.start);
+        if (this.start + this.levelsPerPage < zm.model.persistentData.allTimeHighestLevel) {
+          this.levelRanges.push(this.start +  this.levelsPerPage);
+        }
+        
+        for (var i = this.start; i < this.start + this.levelsPerPage; i++) {
+          this.levels.push(zm.model.levelInfo(i));
+        }
+      },
+      selectRange(range) {
+        this.start = range;
+        this.populate();
+      },
+      select(level) {
+        this.level = level;
+      },
+      startLevel() {
+        zm.model.startLevel(this.level.level);
+        this.shown = false;
+      },
+    }
+    // ---- Level Select Functions ---- //
+
     zm.addToHomeScreen = function() {
       if (zm.model.deferredPrompt) {
         deferredPrompt.prompt();
@@ -259,7 +332,7 @@ angular.module('zombieApp', [])
         case Upgrades.types.energyCap:
           return "+" + upgrade.effect + " max energy";
         case Upgrades.types.bloodCap:
-          return "+" + upgrade.effect + " max blood";
+          return "+" + formatWhole(upgrade.effect) + " max blood";
         case Upgrades.types.bloodStoragePC:
           return "+" + Math.round(upgrade.effect * 100) + "% max blood";
         case Upgrades.types.bloodGainPC:
@@ -293,15 +366,15 @@ angular.module('zombieApp', [])
         case Upgrades.types.boneCollectorCapacity:
           return "+" + upgrade.effect + " bone collector capacity";
         case Upgrades.types.zombieDmgPC:
-          return "+" + Math.round(upgrade.effect * 100) + "% zombie damage";
+          return "+" + formatWhole(Math.round(upgrade.effect * 100)) + "% zombie damage";
         case Upgrades.types.zombieHealthPC:
-          return "+" + Math.round(upgrade.effect * 100) + "% zombie health";
+          return "+" + formatWhole(Math.round(upgrade.effect * 100)) + "% zombie health";
         case Upgrades.types.bonesRate:
           return "+" + upgrade.effect + " bones per second";
         case Upgrades.types.brainsRate:
           return "+" + upgrade.effect + " brains per second";
         case Upgrades.types.plagueDamagePC:
-          return "+" + Math.round(upgrade.effect * 100) + "% plague damage";
+          return "+" + formatWhole(Math.round(upgrade.effect * 100)) + "% plague damage";
         case Upgrades.types.spitDistance:
           return "+" + upgrade.effect + " spit distance";
         case Upgrades.types.blastHealing:
@@ -569,6 +642,11 @@ angular.module('zombieApp', [])
       Upgrades.angularModel = zm;
     });
   }])
+  .directive('levelSelect',function(){
+    return {
+      templateUrl: "./templates/levelselect.html"
+    };
+  })
   .directive('levelStats',function(){
     return {
       templateUrl: "./templates/levelstats.html"

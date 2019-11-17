@@ -262,11 +262,7 @@ function update(timeDiff) {
   Humans.update(timeDiff);
   Zombies.update(timeDiff);
   Creatures.update(timeDiff);
-  Blood.update(timeDiff);
-  Bullets.update(timeDiff);
-  Exclamations.update(timeDiff);
-  Blasts.update(timeDiff);
-  Smoke.update(timeDiff);
+  Particles.update(timeDiff);
 }
 
 function setGameFieldSizeForLevel() {
@@ -311,6 +307,7 @@ function startGame() {
     .add('sprites/fenceposts.json')
     .add('sprites/trees.json')
     .add('sprites/fortress.json')
+    .add('sprites/tank.json')
     .load(function(){
 
     GameModel.app = app;

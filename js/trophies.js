@@ -22,7 +22,8 @@ Trophies = {
     },
     {
       type:Upgrades.types.plagueDamagePC,
-      value:0.05
+      value:0.05,
+      percentage:true
     },
     {
       type:Upgrades.types.bloodCap,
@@ -34,7 +35,8 @@ Trophies = {
     },
     {
       type:Upgrades.types.zombieHealthPC,
-      value:0.02
+      value:0.02,
+      percentage:true
     },
     {
       type:Upgrades.types.bonesRate,
@@ -42,9 +44,17 @@ Trophies = {
     },
     {
       type:Upgrades.types.zombieDmgPC,
-      value:0.02
+      value:0.02,
+      percentage:true
     }
   ],
+  isPercentage(type) {
+    for (var i = 0; i < this.trophyStats.length; i++) {
+      if (this.trophyStats[i].type == type) {
+        return this.trophyStats[i].percentage == true;
+      }
+    }
+  },
   doesLevelHaveTrophy(level) {
     if (GameModel.persistentData.vipEscaped) {
       if (GameModel.persistentData.vipEscaped.includes(level)) {
@@ -97,9 +107,32 @@ Trophies = {
     }
     var trophies = [];
     var maxTrophyToCreate = GameModel.persistentData.allTimeHighestLevel + 5;
-    // maxTrophyToCreate += 500;
+    for (var i = 0; i < GameModel.persistentData.trophies.length; i++) {
+      if (GameModel.persistentData.trophies[i] > maxTrophyToCreate) {
+        maxTrophyToCreate = GameModel.persistentData.trophies[i];
+      }
+    }
+
     for (var i=5; i <= maxTrophyToCreate; i += 5) {
       trophies.push(this.createTrophy(i, GameModel.persistentData.trophies.includes(i), GameModel.persistentData.vipEscaped.includes(i)));
+    }
+    return trophies;
+  },
+  getTrophyTotals() {
+    var trophiesCollected = this.getTrophyList().filter(trophy => trophy.owned);
+    var trophies = [];
+    for (var i = 0; i < trophiesCollected.length; i++) {
+      if (trophies.filter(trophy => trophy.type == trophiesCollected[i].type).length == 0) {
+        trophies.push(trophiesCollected[i]);
+      } else {
+        if (this.isPercentage(trophiesCollected[i].type)) {
+          trophies.filter(trophy => trophy.type == trophiesCollected[i].type)[0].effect = 
+            ((trophies.filter(trophy => trophy.type == trophiesCollected[i].type)[0].effect + 1) * (1 + trophiesCollected[i].effect)) - 1;
+        } else {
+          trophies.filter(trophy => trophy.type == trophiesCollected[i].type)[0].effect += trophiesCollected[i].effect;
+        }
+        
+      }
     }
     return trophies;
   },

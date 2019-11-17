@@ -102,13 +102,13 @@ div.shop div.upgrade div.progress > div {
   z-index: 50;
 }
 
-div.start-game, div.end-level {
+div.start-game, div.end-level, div.level-select {
   position: absolute;
   top: 50%;
   left:50%;
   transform:translate(-50%,-50%);
   padding:15px;
-  background-color: rgba(10,60,10,0.9);
+  background-color: rgba(0,0,0,0.5);
   text-align: center;
 }
 
@@ -150,10 +150,10 @@ div.shop > p {
 }
 
 div.start-game button, 
-div.end-level button {
+div.end-level button,
+div.level-select div.start button {
   padding: 8px 10px;
   font-size: 1.2em;
-  
 }
 div.shop button {
   position: relative;
@@ -449,16 +449,25 @@ div.generator-progress.active > span.percent {
   div.start-game button, div.end-level button, div.shop button {
     padding: 6px 6px;
   }
+  div.level-select {
+    width:60%;
+  }
 }
 @media screen and (max-width: 1509px) {
   div.buttons.open {
     right: 325px;
+  }
+  div.level-select {
+    width:70%;
   }
 }
 
 @media screen and (max-width: 1040px) {
   div.start-game, div.end-level {
     width: 90%;
+  }
+  div.level-select {
+    width:80%;
   }
 }
 @media screen and (max-width: 579px) {
@@ -578,4 +587,64 @@ div.resources label {
 div.resources label > span.value {
   float:right;
   margin-left: 0.5em;
+}
+
+div.level-select > div.levels > button {
+  display:block;
+  float:left;
+  width:calc(10% - 4px);
+  border:1px solid #aaa;
+  padding:5px 0;
+  text-align: center;
+  margin:2px;
+  cursor: pointer;
+  position: relative;
+}
+
+div.level-select > div.levels > button.boss {
+  color:#fd5252;
+  font-weight: bold;
+}
+
+div.level-select > div.levels > button.completed {
+  color:mediumseagreen;
+}
+
+div.level-select > div.levels > button.active {
+  background: #000;
+  color: #ff3;
+}
+
+div.level-select > div.levels > button.completed:after {
+  content:"\2714";
+  position: absolute;
+  top: 2%;
+  right: 25%;
+  transform: translateX(100%);
+}
+
+div.level-select > div.levels > button.trophy:after {
+  content:"?";
+  position: absolute;
+  top: 2%;
+  right: 20%;
+  transform: translateX(100%);
+}
+
+div.level-select div.ranges button {
+  padding: 8px 10px;
+  margin: 5px;
+}
+
+div.level-select div.start label {
+  display:block;
+  margin-bottom:1em;
+}
+
+div.level-select div.start, div.level-select div.ranges {
+  padding: 1em;
+}
+
+div.level-select > label {
+  font-size: 1.2em;
 }

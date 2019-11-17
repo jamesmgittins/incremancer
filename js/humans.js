@@ -50,16 +50,32 @@ Humans = {
     human.health -= damage;
     Blood.newSplatter(human.x, human.y);
     human.timeToScan = 0;
-    human.speedMod = Math.max(Math.min(1, human.health / human.maxHealth), 0.25);
+    if (!human.tank) {
+      human.speedMod = Math.max(Math.min(1, human.health / human.maxHealth), 0.25);
+    }
     if (human.health <= 0 && !human.dead) {
       Bones.newBones(human.x, human.y);
       human.dead = true;
       GameModel.addBrains(1);
-      human.textures = human.deadTexture;
+      
+
+      if (human.tank) {
+        Blasts.newDroneBlast(human.x, human.y - 5);
+        Fragments.newFragmentExplosion(human.x, human.y - 5, 0x7B650E);
+        human.visible = false;
+      } else {
+        human.textures = human.deadTexture;
+      }
 
       if (human.vip) {
         this.vipText.visible = false;
         Trophies.trophyAquired(GameModel.level);
+      }
+    }
+    if (!Army.assaultStarted) {
+      if (Math.random() > 0.9 && GameModel.isBossStage(GameModel.level)) {
+        Army.assaultStarted = true;
+        GameModel.sendMessage("The assault has begun!");
       }
     }
   },
@@ -95,6 +111,9 @@ Humans = {
   },
 
   getMaxHumans() {
+    if (GameModel.isBossStage(GameModel.level)) {
+      return 0;
+    }
     return this.getMaxNpcs() - (Police.police.length + Army.armymen.length);
   },
 
@@ -220,6 +239,7 @@ Humans = {
 
     Police.populate();
     Army.populate();
+    Tanks.populate();
 
     this.getAttackDamage();
     var maxHumans = this.getMaxHumans();
@@ -305,12 +325,14 @@ Humans = {
 
   updateHumanSpeed(human, timeDiff) {
 
-    if (this.frozen) {
-      human.gotoAndStop(0);
-      return;
-    } else {
-      if (!human.playing) {
-        human.play();
+    if (!human.tank) {
+      if (this.frozen) {
+        human.gotoAndStop(0);
+        return;
+      } else {
+        if (!human.playing) {
+          human.play();
+        }
       }
     }
 
@@ -335,13 +357,16 @@ Humans = {
     human.position.x += human.xSpeed * timeDiff;
     human.position.y += human.ySpeed * timeDiff;
     human.zIndex = human.position.y;
-    if (Math.abs(human.xSpeed) > 1)
+    if (Math.abs(human.xSpeed) > 1 && !human.tank)
       human.scale.x = human.xSpeed > 0 ? this.scaling : -this.scaling;
   },
 
   drawTargets : false,
 
   update(timeDiff) {
+    if (GameModel.currentState != GameModel.states.playingLevel) {
+      return;
+    }
     var aliveHumans = [];
     var aliveZombies = Zombies.aliveZombies;
     for (var i=0; i < this.humans.length; i++) {
@@ -353,6 +378,7 @@ Humans = {
     GameModel.stats.human.count = this.aliveHumans.length;
     Police.update(timeDiff, aliveZombies);
     Army.update(timeDiff, aliveZombies);
+    Tanks.update(timeDiff, aliveZombies);
 
     if (this.vipText && this.vipText.visible) {
       this.vipText.x = this.vipText.human.x;
@@ -367,7 +393,7 @@ Humans = {
       return;
   
     if (human.alpha > 0.5 && human.alpha - this.fadeSpeed * timeDiff <= 0.5) {
-      if (Math.random() < GameModel.riseFromTheDeadChance) {
+      if (!human.tank && Math.random() < GameModel.riseFromTheDeadChance) {
         Zombies.createZombie(human.x, human.y, human.isDog);
         human.visible = false;
         characterContainer.removeChild(human);
@@ -628,6 +654,7 @@ Police = {
   },
 
   getMaxPolice() {
+
     var maxPolice = Math.min(Math.round(this.policePerLevel * GameModel.level), 100);
 
     if (GameModel.level < 3)
@@ -1031,6 +1058,7 @@ Army = {
   shotsPerBurst : 3,
   droneStrikeTimer : 0,
   droneStrikeTime : 35,
+  assaultStarted : false,
 
   states : {
     shooting : "shooting",
@@ -1045,6 +1073,7 @@ Army = {
   },
 
   getMaxArmy() {
+
     var maxArmy = Math.min(Math.round(this.armyPerLevel * GameModel.level), 100);
 
     if (GameModel.level < 11)
@@ -1052,6 +1081,10 @@ Army = {
 
     if (this.isExtraArmy()) {
       return Math.max(maxArmy * 2, 150);
+    }
+
+    if (GameModel.isBossStage(GameModel.level)) {
+      return Math.max(maxArmy , 75);
     }
 
     return maxArmy;
@@ -1066,6 +1099,8 @@ Army = {
   },
 
   populate() {
+    this.assaultStarted = false;
+
     if (this.textures.length == 0) {
       for (var i=0; i < 3; i++) {
         var animated = [];
@@ -1077,6 +1112,11 @@ Army = {
           dead : [PIXI.Texture.from('army' + (i + 1) + '_dead.png')]
         })
       }
+    }
+
+    if (this.droneStrike && this.droneStrike.laser) {
+      foregroundContainer.removeChild(this.droneStrike.text)
+      foregroundContainer.removeChild(this.droneStrike.laser);
     }
 
     if (this.armymen.length > 0) {
@@ -1101,7 +1141,7 @@ Army = {
       if (GameModel.level > 35 && Math.random() < 0.3) {
         textureId = 1;
       }
-      if (GameModel.level > 45 && Math.random() < 0.3) {
+      if ((GameModel.level > 45 && Math.random()) < 0.3 || (GameModel.isBossStage(GameModel.level) && Math.random() < 0.5)) {
         textureId = 2;
       }
       if (this.discardedArmymen.length > 0) {
@@ -1229,6 +1269,9 @@ Army = {
       var zombies = Humans.scanForZombies(armyman, aliveZombies);
       if (zombies > 3 && this.droneActive && this.droneStrikeTimer < 0) {
         this.callDroneStrike(armyman, aliveZombies);
+      }
+      if (this.assaultStarted && armyman.rocketlauncher && Math.random() > 0.98) {
+        armyman.zombieTarget = Graveyard.target;
       }
     }
 
@@ -1420,5 +1463,253 @@ Army = {
       }
     }
   }
+}
+
+
+Tanks = {
+  map:Map,
+
+  speed : 20,
+  tanks : [],
+  attackSpeed : 5,
+  scaling : 3,
+
+  moveTargetDistance : 20,
+
+  shootDistance:250,
+
+  states : {
+    shooting : 1,
+    attacking : 2,
+    patrolling : 3,
+  },
+
+  directions : {
+    horizontal : 1,
+    vertical : 2
+  },
+
+  getMaxTanks() {
+
+    if (GameModel.isBossStage(GameModel.level)) {
+      return Math.min(Math.round(GameModel.level / 30), 20);
+    }
+    return 0;
+  },
+
+  getMaxHealth() {
+    return Math.round(Humans.getMaxHealth(GameModel.level) * 10);
+  },
+
+  getAttackDamage() {
+    this.attackDamage = Math.round(this.getMaxHealth() / 10);
+  },
+
+
+  populate() {
+
+    if (!this.textures) {
+      this.textures = {
+        vertical : [],
+        horizontal : [],
+        turret : []
+      }
+      for (var i=0; i < 2; i++) {
+        this.textures.horizontal.push(PIXI.Texture.from('tank' + i  + '.png'));
+      }
+      for (var i=2; i < 4; i++) {
+        this.textures.vertical.push(PIXI.Texture.from('tank' + i  + '.png'));
+      }
+      this.textures.turret = PIXI.Texture.from("tank4.png");
+    }
+
+
+    if (this.tanks.length > 0) {
+      for (var i=0; i < this.tanks.length; i++) {
+        characterContainer.removeChild(this.tanks[i]);
+      }
+      this.tanks = [];
+    }
+
+    var maxTanks = this.getMaxTanks();
+    var maxHealth = this.getMaxHealth();
+    this.getAttackDamage();
+  
+    for (var i=0; i < maxTanks; i++) {
+      var tank = new PIXI.Container();
+
+      tank.tank = true;
+      
+      tank.tankSprite = new PIXI.AnimatedSprite(this.textures.horizontal);
+      tank.turretSprite = new PIXI.Sprite(this.textures.turret);
+
+      tank.addChild(tank.tankSprite);
+      tank.addChild(tank.turretSprite);
+
+      tank.tankSprite.animationSpeed = 0.2;
+      tank.tankSprite.anchor = {x:0.5, y:1};
+      tank.turretSprite.anchor = {x:7.5 / 16, y:7.5 / 16};
+      tank.tankSprite.x = 0;
+      tank.tankSprite.y = 0;
+      tank.tankSprite.play();
+      tank.turretSprite.x = 0;
+      tank.turretSprite.y = -7;
+
+      tank.currentDirection = this.directions.horizontal;
+
+      tank.currentPoi = this.map.getRandomBuilding();
+      tank.position = this.map.randomPositionInBuilding(tank.currentPoi);
+      tank.zIndex = tank.position.y;
+      tank.xSpeed = 0;
+      tank.ySpeed = 0;
+      tank.speedMod = 1;
+      tank.dead = false;
+      tank.infected = false;
+      tank.burning = false;
+      tank.burnDamage = 0;
+      tank.lastKnownBuilding = false;
+      tank.plagueDamage = 0;
+      tank.plagueTickTimer = Math.random() * Humans.plagueTickTimer;
+      tank.maxSpeed = this.speed;
+      tank.visionDistance = 250;
+      tank.visible = true;
+      tank.maxHealth = tank.health = maxHealth;
+      tank.timeToScan = Math.random() * Humans.scanTime;
+      tank.target = false;
+      tank.zombieTarget = false;
+      tank.state = this.states.patrolling;
+      tank.attackTimer = this.attackSpeed;
+      tank.scale = {x:this.scaling, y:this.scaling};
+      this.tanks.push(tank);
+      characterContainer.addChild(tank);
+    }
+  },
+
+  update(timeDiff, aliveZombies) {
+    var count = 0;
+    this.aliveZombies = aliveZombies;
+    for (var i=0; i < this.tanks.length; i++) {
+      this.updateTank(this.tanks[i], timeDiff, aliveZombies);
+      if (!this.tanks[i].dead) {
+        Humans.aliveHumans.push(this.tanks[i]);
+        count++;
+      } 
+    }
+    GameModel.stats.army.count = count;
+  },
+
+
+  updateTank(tank, timeDiff, aliveZombies) {
+    
+    if (tank.dead)
+      return Humans.updateDeadHumanFading(tank, timeDiff);
+
+    tank.attackTimer -= timeDiff;
+    tank.timeToScan -= timeDiff;
+
+    if (tank.burning)
+      Humans.updateBurns(tank, timeDiff);
+
+    if ((!tank.zombieTarget || tank.zombieTarget.dead) && tank.timeToScan < 0) {
+      Humans.scanForZombies(tank, aliveZombies);
+      if (Army.assaultStarted && Math.random() > 0.9) {
+        tank.zombieTarget = Graveyard.target;
+      }
+    }
+
+    this.decideStateOnZombieDistance(tank);
+
+    switch (tank.state) {
+
+      case this.states.patrolling:
+
+        if (!tank.target) {
+          tank.target = this.map.randomPositionInBuilding(false);
+        }
+
+        if (fastDistance(tank.position.x, tank.position.y, tank.target.x, tank.target.y) < this.moveTargetDistance) {
+          tank.target = false;
+          tank.zombieTarget = false;
+        } else {
+          Humans.updateHumanSpeed(tank, timeDiff);
+        }
+        break;
+      case this.states.attacking:
+          if (tank.zombieTarget && !tank.zombieTarget.dead) {
+            Humans.updateHumanSpeed(tank, timeDiff);
+          } else {
+            this.changeState(tank, this.states.patrolling);
+          }
+          break;
+      case this.states.shooting:
+        if (tank.zombieTarget && !tank.zombieTarget.dead) {
+          if (tank.attackTimer < 0) {
+            tank.attackTimer = this.attackSpeed;
+            Bullets.newBullet(tank, tank.zombieTarget, this.attackDamage, false, true);
+          }
+        } else {
+          this.changeState(tank, this.states.patrolling);
+        }
+
+        break;
+    }
+
+    this.updateTankSprites(tank, timeDiff);
+  },
+
+  updateTankSprites(tank, timeDiff) {
+    if (Math.abs(tank.xSpeed) > Math.abs(tank.ySpeed)) {
+      if (tank.currentDirection != this.directions.horizontal) {
+        tank.currentDirection = this.directions.horizontal;
+        tank.tankSprite.textures = this.textures.horizontal;
+        tank.tankSprite.play();
+        tank.turretSprite.y = -7;
+      }
+    } else {
+      if (tank.currentDirection != this.directions.vertical) {
+        tank.currentDirection = this.directions.vertical;
+        tank.tankSprite.textures = this.textures.vertical;
+        tank.tankSprite.play();
+        tank.turretSprite.y = -8;
+      }
+    }
+    if (tank.zombieTarget) {
+      var targetAngle = Math.atan2(tank.zombieTarget.x - tank.x, tank.y - tank.zombieTarget.y) + (Math.PI / 2);
+      if (tank.turretSprite.rotation > targetAngle) {
+        tank.turretSprite.rotation -= timeDiff * 2;
+      } else {
+        tank.turretSprite.rotation += timeDiff * 2;
+      }
+    }
+  },
+
+  decideStateOnZombieDistance(tank) {
+    if (tank.zombieTarget && !tank.zombieTarget.dead) {
+      tank.target = tank.zombieTarget;
+      var distanceToTarget = fastDistance(tank.position.x, tank.position.y, tank.zombieTarget.x, tank.zombieTarget.y);
+
+      if (distanceToTarget > this.shootDistance) {
+        this.changeState(tank, this.states.attacking);
+        return;
+      }
+      
+      this.changeState(tank, this.states.shooting);
+    }
+  },
+
+  changeState(tank, state) {
+    switch(state) {
+      case this.states.patrolling:
+          tank.tankSprite.play();
+        break;
+      case this.states.attcking:
+          tank.tankSprite.play();
+        break;
+      case this.states.shooting:
+          tank.tankSprite.gotoAndStop(0);
+        break;
+    }
+    tank.state = state;
+  },
 
 }

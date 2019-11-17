@@ -1,3 +1,23 @@
+Particles = {
+  initialize() {
+    Blood.initialize();
+    Bullets.initialize();
+    Exclamations.initialize();
+    Blasts.initialize();
+    Smoke.initialize();
+    Fragments.initialize();
+  },
+  update(timeDiff) {
+    Blood.update(timeDiff);
+    Bullets.update(timeDiff);
+    Exclamations.update(timeDiff);
+    Blasts.update(timeDiff);
+    Smoke.update(timeDiff);
+    Fragments.update(timeDiff);
+  }
+}
+
+
 Blood = {
   maxParts : 1000,
   partCounter : 0,
@@ -417,6 +437,9 @@ Bullets = {
         Humans.damageHuman(sprite.target, sprite.damage);
       } else {
         if (sprite.rocket) {
+          if (sprite.target.graveyard) {
+            Graveyard.damageGraveyard(sprite.damage);
+          }
           Army.droneExplosion(sprite.target.x, sprite.target.y, false, sprite.damage);
         } else {
           Zombies.damageZombie(sprite.target, sprite.damage, sprite.source);
@@ -472,7 +495,7 @@ Bullets = {
     }
 
     var xVector = target.x - sprite.x;
-    var yVector = target.y - sprite.y;
+    var yVector = (target.y - 8) - sprite.y;
     var ax = Math.abs(xVector);
     var ay = Math.abs(yVector);
     var ratio = 1 / Math.max(ax, ay);
@@ -664,6 +687,102 @@ Smoke = {
     this.tint = 0x00FF00;
     for (var i = 0; i < 5; i++) {
       this.newSmoke(x, y, 6);
+    }
+  }
+};
+
+Fragments = {
+  maxParts : 200,
+  partCounter : 0,
+  partsPerSplatter : 15,
+  container : null,
+  sprites : [],
+  gravity : 100,
+  spraySpeed : 50,
+  fadeSpeed : 0.7,
+	getTexture() {
+		var blast = document.createElement('canvas');
+		blast.width = 5;
+		blast.height = 1;
+		var blastCtx = blast.getContext('2d');
+
+		// draw shape
+		blastCtx.fillStyle = "#FFFFFF";
+		blastCtx.fillRect(0, 0, 5, 1);
+		return PIXI.Texture.from(blast);
+	},
+	initialize() {
+    this.viewableArea = viewableArea;
+    if (!this.container) {
+      this.container = new PIXI.Container();
+      backgroundSpriteContainer.addChild(this.container);
+
+      this.texture = this.getTexture("#ff0000");
+    }
+
+    if (this.sprites.length < this.maxParts) {
+      for (var i = 0; i < this.maxParts; i++) {
+        var sprite = new PIXI.Sprite(this.texture);
+        this.sprites.push(sprite);
+        sprite.visible = false;
+        sprite.scale = {x:2,y:2};
+        this.container.addChild(sprite);
+      }
+    }
+	},
+	update(timeDiff) {
+    this.visibleParts = 0;
+		for (var i = 0; i < this.sprites.length; i++) {
+      if (this.sprites[i].visible) {
+        this.updatePart(this.sprites[i], timeDiff);
+        this.visibleParts++;
+      }
+		}
+  },
+  updatePart(sprite, timeDiff) {
+    if (sprite.hitFloor) {
+      sprite.alpha -= this.fadeSpeed * timeDiff;
+      if (sprite.alpha <= 0) {
+        sprite.visible = false;
+      }
+    } else {
+      sprite.ySpeed += this.gravity * timeDiff;
+      sprite.x += sprite.xSpeed * timeDiff;
+      sprite.y += sprite.ySpeed * timeDiff;
+      if (sprite.y >= sprite.floor) {
+        sprite.hitFloor = true;
+      }
+      sprite.rotation += sprite.rotSpeed * timeDiff;
+    }
+    
+  },
+  newPart(x, y, tint) {
+
+    if (this.viewableArea.hideParticle(x,y)) {
+      return;
+    }
+    var sprite = this.sprites[this.partCounter++];
+    if (this.partCounter >= this.maxParts) {
+      this.partCounter = 0;
+    }
+    sprite.texture = this.texture;
+    sprite.tint = tint;
+    sprite.x = x;
+    sprite.y = y - (8 + Math.random() * 10);
+    sprite.floor = y;
+    sprite.hitFloor = false;
+    sprite.visible = true;
+    sprite.rotation = Math.random() * 5
+    sprite.rotSpeed =  -2 + Math.random() * 4;
+    sprite.alpha = 1;
+    sprite.scale = {x:2,y:2};
+    var xSpeed = Math.random() * this.spraySpeed;
+    sprite.xSpeed = Math.random() > 0.5 ? -1 * xSpeed : xSpeed;
+    sprite.ySpeed = -1 * (10 + (Math.random() * this.spraySpeed));
+  },
+  newFragmentExplosion(x, y, tint) {
+    for (var i=0; i < this.partsPerSplatter; i++) {
+      this.newPart(x, y, tint);
     }
   }
 };

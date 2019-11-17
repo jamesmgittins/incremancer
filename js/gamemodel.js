@@ -25,6 +25,7 @@ GameModel = {
   zombieCages : 0,
   zombiesInCages : 0,
   plagueDamagePCMod : 1,
+  graveyardHealthMod : 1,
   burningSpeedMod : 1,
   startingResources : 0,
   brainRecoverChance:0,
@@ -58,6 +59,7 @@ GameModel = {
   },
   autoconstruction : false,
   autoconstructionUnlocked : false,
+  levelResourcesAdded : false,
 
   gameSpeed : 1,
   
@@ -69,7 +71,8 @@ GameModel = {
     playingLevel : "playingLevel",
     levelCompleted : "levelCompleted",
     startGame : "startGame",
-    prestiged : "prestiged"
+    prestiged : "prestiged",
+    failed : "failed"
   },
 
   baseStats : {
@@ -129,6 +132,7 @@ GameModel = {
     this.creatureLimit = 1;
     this.runicSyphon.percentage = 0;
     this.autoconstructionUnlocked = false;
+    this.graveyardHealthMod = 1;
   },
 
   addEnergy(value) {
@@ -218,13 +222,19 @@ GameModel = {
       if (this.getHumanCount() <= 0) {
 
         if (this.endLevelTimer < 0) {
+          if (this.isBossStage(this.level) && Trophies.doesLevelHaveTrophy(this.level)) {
+            Trophies.trophyAquired(this.level);
+          }
+          this.prestigePointsEarned = this.prestigePointsForLevel(this.level);
           this.currentState = this.states.levelCompleted;
+          this.levelResourcesAdded = false;
           this.calculateEndLevelBones();
           this.calculateEndLevelZombieCages();
-          if (this.level == this.persistentData.levelUnlocked) {
-            this.persistentData.levelUnlocked = this.level + 1;
-            this.addPrestigePoints(this.level);
+          if (!this.persistentData.levelsCompleted.includes(this.level)) {
+            this.addPrestigePoints(this.prestigePointsForLevel(this.level));
+            this.persistentData.levelsCompleted.push(this.level);
           }
+          this.persistentData.levelUnlocked = this.level + 1;
           if (!this.persistentData.allTimeHighestLevel || this.level > this.persistentData.allTimeHighestLevel) {
             this.persistentData.allTimeHighestLevel = this.level;
             if (window.kongregate) {
@@ -243,6 +253,12 @@ GameModel = {
       this.startTimer -= timeDiff;
       if (this.startTimer < 0 && this.persistentData.autoStart) {
         this.nextLevel();
+      }
+    }
+    if (this.currentState == this.states.failed) {
+      this.startTimer -= timeDiff;
+      if (this.startTimer < 0 && this.persistentData.autoStart) {
+        this.startLevel(this.level - 1);
       }
     }
     this.updateStats();
@@ -303,6 +319,11 @@ GameModel = {
     }
   },
 
+  startLevel(level) {
+    this.level = level;
+    this.startGame();
+  },
+
   startGame() {
     this.currentState = this.states.playingLevel;
     this.setupLevel();
@@ -322,11 +343,7 @@ GameModel = {
   setupLevel() {
     this.endLevelTimer = this.endLevelDelay;
     setGameFieldSizeForLevel();
-    Blood.initialize();
-    Bullets.initialize();
-    Exclamations.initialize();
-    Blasts.initialize();
-    Smoke.initialize();
+    Particles.initialize();
     Humans.populate();
     Zombies.populate();
     Graveyard.initialize();
@@ -377,14 +394,13 @@ GameModel = {
   },
 
   updatePlayingLevel() {
-    this.persistentData.levelStarted = this.level;
     this.saveData();
   },
 
   addStartLevelResources() {
     this.energy = this.energyMax;
 
-    if (this.currentState == this.states.playingLevel && this.persistentData.levelStarted != this.level && this.startingResources > 0) {
+    if (!this.levelResourcesAdded) {
       this.persistentData.blood += this.startingResources * 500;
       if (this.persistentData.blood > this.bloodMax)
         this.persistentData.blood = this.bloodMax;
@@ -395,6 +411,8 @@ GameModel = {
 
       this.persistentData.bones += this.startingResources * 200;
       this.persistentData.bonesTotal += this.startingResources * 200;
+
+      this.levelResourcesAdded = true;
     }
   },
 
@@ -410,7 +428,6 @@ GameModel = {
   persistentData : {
     autoStart : false,
     levelUnlocked : 1,
-    levelStarted : 0,
     allTimeHighestLevel : 0,
     blood : 0,
     brains : 0,
@@ -443,7 +460,6 @@ GameModel = {
   prestige() {
     if (this.persistentData.prestigePointsEarned > 0) {
       this.persistentData.levelUnlocked = 1;
-      this.persistentData.levelStarted = 0;
       this.persistentData.blood = 0;
       this.persistentData.brains = 0;
       this.persistentData.bones = 0;
@@ -462,8 +478,10 @@ GameModel = {
       this.persistentData.vipEscaped = [];
       this.persistentData.creatureLevels = [];
       this.persistentData.creatureAutobuild = [];
+      this.persistentData.levelsCompleted = [];
       this.zombiesInCages = 0;
       this.autoconstruction = false;
+      this.levelResourcesAdded = false;
       BoneCollectors.update(0.1);
       PartFactory.generatorsApplied = [];
       CreatureFactory.updateAutoBuild();
@@ -530,6 +548,12 @@ GameModel = {
     }
     if (!this.persistentData.creatureAutobuild) {
       this.persistentData.creatureAutobuild = [];
+    }
+    if (!this.persistentData.savedCreatures) {
+      this.persistentData.savedCreatures = [];
+    }
+    if (!this.persistentData.levelsCompleted) {
+      this.persistentData.levelsCompleted = [];
     }
     CreatureFactory.updateAutoBuild();
   },
@@ -606,6 +630,41 @@ GameModel = {
       } else if (i.msRequestFullscreen) {
         i.msRequestFullscreen();
       }
+    }
+  },
+
+  prestigePointsForLevel(level) {
+    if (this.persistentData.levelsCompleted.includes(level)) {
+      return 0;
+    } else {
+      return level;
+    }
+  },
+
+  bossCompleted(level) {
+    var bossLevel = Math.floor((level - 1) / 50) * 50;
+
+    if (bossLevel < 50)
+      return true;
+
+    return this.persistentData.levelsCompleted.includes(bossLevel);
+  },
+
+  levelLocked(level) {
+    return level > this.persistentData.allTimeHighestLevel + 1 || !this.bossCompleted(level);
+  },
+
+  isBossStage(level) {
+    return level > 0 && level % 50 == 0;
+  },
+
+  levelInfo(level) {
+    return {
+      level : level,
+      bossStage : this.isBossStage(level),
+      completed : this.persistentData.levelsCompleted.includes(level),
+      locked : this.levelLocked(level),
+      trophy : Trophies.doesLevelHaveTrophy(level)
     }
   }
 

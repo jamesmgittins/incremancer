@@ -36,7 +36,8 @@ Upgrades = {
     zombieHealthPC : "zombieHealthPC",
     startingPC : "startingPC",
     energyCost : "energyCost",
-    autoconstruction : "autoconstruction"
+    autoconstruction : "autoconstruction",
+    graveyardHealth : "graveyardHealth"
   },
 
   costs : {
@@ -192,6 +193,9 @@ Upgrades = {
       case this.types.autoconstruction:
         GameModel.autoconstructionUnlocked = true;
         return;
+      case this.types.graveyardHealth:
+        GameModel.graveyardHealthMod *= Math.pow(1 + upgrade.effect, upgrade.rank);
+        return;
     }
   },
 
@@ -339,6 +343,8 @@ Upgrades = {
         return "Syphon amount: " + Math.round(GameModel.runicSyphon.percentage * 100) + "%";
       case this.types.autoconstruction:
         return this.currentRank(upgrade) > 0 ? "You have unlocked automatic construction" : "You have yet to unlock automatic construction"
+      case this.types.graveyardHealth:
+          return "Graveyard health: " + Math.round(GameModel.graveyardHealthMod * 100) + "%";
     }
   },
 
@@ -580,12 +586,13 @@ Upgrades = {
     } else if(GameModel.autoconstruction) {
       var upgrades = this.getAvailableConstructions();
       if (!upgrades || upgrades.length == 0) {
+        GameModel.autoconstruction = false;
         return;
       }
       var cheapestUpgrade = false;
       var lowestCost = 0;
       for (var i = 0; i < upgrades.length; i++) {
-        var cost = (upgrades[i].costs.energy || 0) + (upgrades[i].costs.blood || 0) + (upgrades[i].costs.brains || 0) + (upgrades[i].costs.bones || 0) + (upgrades[i].costs.parts || 0);
+        var cost = (upgrades[i].costs.energy || 0) + (upgrades[i].costs.blood || 0) + (upgrades[i].costs.brains || 0) + (upgrades[i].costs.bones || 0) + ((upgrades[i].costs.parts || 0) * 100);
         if (cost < lowestCost || !cheapestUpgrade) {
           lowestCost = cost;
           cheapestUpgrade = upgrades[i];
@@ -903,7 +910,8 @@ Upgrades.prestigeUpgrades = [
   // new Upgrades.Upgrade(106, "Zombie Health", Upgrades.types.zombieHealthPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% zombie health for each rank"),
   // new Upgrades.Upgrade(107, "Zombie Damage", Upgrades.types.zombieDmgPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% zombie damage for each rank")
   new Upgrades.Upgrade(111, "Parts Rate", Upgrades.types.partsGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% creature parts income rate for each rank."),
-  new Upgrades.Upgrade(112, "Auto Construction", Upgrades.types.autoconstruction, Upgrades.costs.prestigePoints, 250, 1, 1, 1, "Unlock the ability to automatically start construction of the cheapest available building option.")
+  new Upgrades.Upgrade(112, "Auto Construction", Upgrades.types.autoconstruction, Upgrades.costs.prestigePoints, 250, 1, 1, 1, "Unlock the ability to automatically start construction of the cheapest available building option."),
+  new Upgrades.Upgrade(113, "Graveyard Health", Upgrades.types.graveyardHealth, Upgrades.costs.prestigePoints, 10, 1.25, 0.1, 0, "Additional 10% graveyard health during boss levels with each rank."),
 ];
 
 Upgrades.upgrades = [
@@ -924,7 +932,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(8, "Gigazombies?", Upgrades.types.unlockSpell, Upgrades.costs.blood, 50000, 1, 5, 1, "Learn the Gigazombies spell which will turn some of your zombies into hulking monstrosities with increased health and damage.", "New spell learned, Gigazombies!", 209),
   new Upgrades.Upgrade(13, "Blazing Speed", Upgrades.types.burningSpeedPC, Upgrades.costs.blood, 30000, 1.25, 0.05, 10, "The humans are using torches to set your zombies on fire. Perhaps we can turn the tables on them? Each rank increases the movement and attack speed of burning zombies by 5%", false, 207),
   new Upgrades.Upgrade(14, "Spit it Out", Upgrades.types.spitDistance, Upgrades.costs.blood, 500000, 1.6, 5, 10, "The first rank gives your zombies the ability to spit plague at enemies beyond normal attack range range. Spit attacks do 50% zombie damage and infect the victim with plague. Subsequent ranks will increase the range of spit attacks.", false, 218),
-  new Upgrades.Upgrade(15, "Runic Syphon", Upgrades.types.runicSyphon, Upgrades.costs.blood, 34000, 1.9, 0.01, 10, "Infuse your runes for free! Each rank gives your Runesmith the ability to infuse 1% of your resource income, without using it", false, 210),
+  new Upgrades.Upgrade(15, "Runic Syphon", Upgrades.types.runicSyphon, Upgrades.costs.blood, 34000, 1.9, 0.01, 10, "Infuse your runes for free! Each rank gives your Runesmith the ability to infuse 1% of your resource income, without consuming it", false, 210),
 
   // brain upgrades
   new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 20, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),

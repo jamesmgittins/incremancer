@@ -8,13 +8,13 @@
     <button ng-click="zm.factory.changeFactoryTab('creatures');" class="blood {{zm.factoryTab == 'creatures' ? 'active' : ''}}" ng-if="zm.model.constructions.monsterFactory">Creatures</button>
     <button ng-click="zm.factory.changeFactoryTab('level');" class="blood {{zm.factoryTab == 'level' ? 'active' : ''}}" ng-if="zm.model.constructions.monsterFactory">Upgrade</button>
   </div>
-  <p ng-if="zm.factoryTab == 'parts'">You currently have {{zm.factoryStats.machines}} machines, producing an average of {{zm.factoryStats.partsPerSec|whole}} creature parts per second.</p>
+  <p ng-if="zm.factoryTab == 'parts'">You currently have {{zm.factoryStats.machines}} machines, producing an average of {{zm.factoryStats.partsPerSec * zm.model.gameSpeed|whole}} creature parts per second.</p>
   <div class="upgrades" ng-if="zm.factoryTab == 'parts'">
     <div ng-repeat="generator in zm.upgrades" class="upgrade {{generator.costType}}">
       <h4>{{generator.name}} ({{zm.currentRank(generator)}})</h4>
       <h4 class="cost">{{zm.factory.generatorPrice(generator)|whole}} {{generator.costType}}</h4>
       <div class="generator-progress clear {{zm.currentRank(generator) > 0 ? 'active' : ''}}">
-        <span class="percent" ng-style="{'animation-duration':generator.time + 's'}"></span>
+        <span class="percent" ng-style="{'animation-duration':(generator.time / zm.model.gameSpeed) + 's'}"></span>
       </div>
       <button ng-click="zm.factory.buyGenerator(generator);" ng-disabled="zm.upgradeTooExpensive(generator);">{{zm.upgradeButtonText(generator)}}
         <span class="percent" ng-style="{'width':zm.upgradePercent(generator) + '%'}"></span>
@@ -42,7 +42,7 @@
       </div>
     </div>
   </div>
-  <p ng-if="zm.factoryTab == 'level'">Each time you level up a creature its health and damage will increase by 60%, but the cost will increase by 100%. Make sure you can afford it because there's no going back.</p>
+  <p ng-if="zm.factoryTab == 'level'">Each time you level up a creature its health and damage will increase by 75%, but the cost will increase by 100%. Make sure you can afford it because there's no going back.</p>
   <div class="upgrades" ng-if="zm.factoryTab == 'level'">
     <div ng-repeat="creature in zm.upgrades" class="upgrade parts">
       <h4>{{creature.name}} Level:{{creature.level}}</h4>

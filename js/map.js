@@ -268,6 +268,11 @@ Map = {
     var maxRoomSize = Math.max(Math.min(50, Math.round(spaceToCreate / 3)), 10);
     var minRoomSize = 5;
 
+    if (GameModel.isBossStage(GameModel.level)) {
+      spaceToCreate = 0;
+      minBuildings = 0;
+    }
+
     while(spaceToCreate > 0 || minBuildings > 0) {
       minBuildings--;
       var personSize = Math.round(minRoomSize + (Math.random() * (maxRoomSize - minRoomSize)));
@@ -311,6 +316,23 @@ Map = {
   },
 
   randomPositionInBuilding(building) {
+    if (!building) {
+      var xMod = Math.random() > 0.5 ? -1 : 1;
+      var yMod = Math.random() > 0.5 ? -1 : 1;
+      var x25 = gameFieldSize.x / 4;
+      var y25 = gameFieldSize.y / 4;
+
+      if (Math.random() > 0.5) {
+        return {
+          x: Math.random() * gameFieldSize.x,
+          y: (gameFieldSize.y / 2) + (yMod * y25) + (Math.random() * yMod * y25)
+        }
+      }
+      return {
+        x: (gameFieldSize.x / 2) + (xMod * x25) + (Math.random() * xMod * x25), 
+        y: Math.random() * gameFieldSize.y,
+      }
+    }
     var wallBuffer = 5;
     return {x:building.x + wallBuffer + (Math.random() * (building.width - wallBuffer * 2)), y: building.y + wallBuffer + (Math.random() * (building.height - wallBuffer * 2))};
   },

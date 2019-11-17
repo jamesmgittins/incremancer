@@ -155,13 +155,17 @@ Zombies = {
   },
 
   spawnAllZombies(x,y) {
-    var numZombies = Math.floor(this.model.energy / this.model.zombieCost);
+    var numZombies = Math.min(Math.floor(this.model.energy / this.model.zombieCost), 100);
     for (var i = 0; i < numZombies; i++) {
       this.spawnZombie(x + 4 * (Math.random() -1 ), y + 4 * (Math.random() -1 ));
     }
   },
 
   damageZombie(zombie, damage, human) {
+    if (zombie.graveyard) {
+      Graveyard.damageGraveyard(damage);
+      return;
+    }
     if (this.graveyard.isWithinFence(zombie)) {
       damage *= 0.5;
       Exclamations.newShield(zombie);
@@ -272,7 +276,7 @@ Zombies = {
       this.zombieCursor.visible = true;
       if (KeysPressed.shift) {
         this.zombieCursorText.visible = true;
-        var numZombies = Math.floor(this.model.energy / this.model.zombieCost);
+        var numZombies = Math.min(Math.floor(this.model.energy / this.model.zombieCost), 100);
         if (this.zombieCursorText.text != numZombies) {
           this.zombieCursorText.text = numZombies;
         }

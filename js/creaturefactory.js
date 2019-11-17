@@ -1,11 +1,16 @@
 CreatureFactory = {
 
+  spawnedSavedCreatures : false,
+
   types : {
     earthGolem:1,
     airGolem:2,
     fireGolem:3,
     waterGolem:4
   },
+
+  creatureScaling : 1.75,
+  creatureCostScaling : 2,
 
   creaturesInProgress : 0,
 
@@ -32,11 +37,11 @@ CreatureFactory = {
   },
 
   purchasePrice(creature) {
-    return creature.baseCost * Math.pow(2, creature.level - 1);
+    return creature.baseCost * Math.pow(this.creatureCostScaling, creature.level - 1);
   },
 
   levelPrice(creature) {
-    return creature.baseCost * Math.pow(2, creature.level) * 5;
+    return creature.baseCost * Math.pow(this.creatureCostScaling, creature.level) * 5;
   },
 
   levelCreature(creature) {
@@ -86,24 +91,36 @@ CreatureFactory = {
   },
 
   spawnCreature(creature) {
-    var health = creature.baseHealth * Math.pow(1.6, creature.level - 1);
-    var damage = creature.baseDamage * Math.pow(1.6, creature.level - 1);
-    Creatures.spawnCreature(health, damage, creature.speed, creature.type);
+    var health = creature.baseHealth * Math.pow(this.creatureScaling, creature.level - 1);
+    var damage = creature.baseDamage * Math.pow(this.creatureScaling, creature.level - 1);
+    Creatures.spawnCreature(health, damage, creature.speed, creature.type, creature.level);
+  },
+
+  spawnSavedCreatures() {
+    if (!this.spawnedSavedCreatures) {
+      for (var i=0; i < GameModel.persistentData.savedCreatures.length; i++) {
+        var savedCreature = GameModel.persistentData.savedCreatures[i];
+        var creature = this.creatures.filter(c => c.type == savedCreature.t)[0];
+        creature.level = savedCreature.l;
+        this.spawnCreature(creature);
+      }
+      this.spawnedSavedCreatures = true;
+    }
   },
 
   creatureStats(creature) {
     return {
       thisLevel : {
         level : creature.level,
-        health : creature.baseHealth * Math.pow(1.6, creature.level - 1),
-        damage : creature.baseDamage * Math.pow(1.6, creature.level - 1),
-        cost : creature.baseCost * Math.pow(2, creature.level - 1)
+        health : creature.baseHealth * Math.pow(this.creatureScaling, creature.level - 1),
+        damage : creature.baseDamage * Math.pow(this.creatureScaling, creature.level - 1),
+        cost : creature.baseCost * Math.pow(this.creatureCostScaling, creature.level - 1)
       },
       nextLevel : {
         level : creature.level + 1,
-        health : creature.baseHealth * Math.pow(1.6, creature.level),
-        damage : creature.baseDamage * Math.pow(1.6, creature.level),
-        cost : creature.baseCost * Math.pow(2, creature.level)
+        health : creature.baseHealth * Math.pow(this.creatureScaling, creature.level),
+        damage : creature.baseDamage * Math.pow(this.creatureScaling, creature.level),
+        cost : creature.baseCost * Math.pow(this.creatureCostScaling, creature.level)
       }
     }
   },

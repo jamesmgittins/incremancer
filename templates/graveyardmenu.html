@@ -43,9 +43,15 @@
     </div>
   </div>
   <p ng-if="zm.graveyardTab == 'trophies'">Earn bonuses by collecting the severed heads of VIPs from certain towns. These trophies persist through prestige resets, while escaped VIPs will return to town.</p>
+  <div class="tabs" ng-if="zm.graveyardTab == 'trophies'">
+    <button ng-click="zm.trophyTabSelect('all')" class="{{zm.trophyTab == 'all' ? 'active' : ''}}">All</button>
+    <button ng-click="zm.trophyTabSelect('collected')" class="{{zm.trophyTab == 'collected' ? 'active' : ''}}">Collected</button>
+    <button ng-click="zm.trophyTabSelect('uncollected')" class="{{zm.trophyTab == 'uncollected' ? 'active' : ''}}">Uncollected</button>
+    <button ng-click="zm.trophyTabSelect('totals')" class="{{zm.trophyTab == 'totals' ? 'active' : ''}}">Stat Totals</button>
+  </div>
   <div class="upgrades" ng-if="zm.graveyardTab == 'trophies'">
     <div ng-repeat="trophy in zm.trophies" class="upgrade bones {{trophy.owned ? 'owned' : 'uncollected'}}">
-      <label>Level: {{trophy.level}}<span ng-if="trophy.escaped" class="escaped">VIP Escaped</span></label>
+      <label ng-if="zm.trophyTab != 'totals'">Level: {{trophy.level}}<span ng-if="trophy.escaped" class="escaped">VIP Escaped</span></label>
       <label>{{zm.upgradeSubtitle(trophy)}}</label>
     </div>
   </div>
