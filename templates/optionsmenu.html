@@ -30,7 +30,7 @@
       <p>You can add this game to your smartphones home screen without having to install anything.</p>
       <button ng-click="zm.addToHomeScreen();">Add to Home Screen</button>
     </div>
-    <div class="upgrade">
+    <div class="upgrade" ng-if="!zm.model.kongregate">
       <h4>Toggle Full Screen</h4>
       <p>Toggle full screen mode. Can be helpful on smaller screen devices.</p>
       <button ng-click="zm.model.toggleFullscreen();">Toggle Full Screen</button>
@@ -40,7 +40,7 @@
       <p>If you're unable to zoom with other methods this will add some buttons to the screen for zooming the map.</p>
       <button ng-click="zm.toggleZoomButtons();">{{zm.model.persistentData.zoomButtons ? "On" : "Off"}}</button>
     </div>
-    <div class="upgrade" ng-if="!zm.model.kongregate">
+    <div class="upgrade">
       <h4>Show Framerate Counter</h4>
       <p>Used for performance testing</p>
       <button ng-click="zm.toggleShowFps();">{{zm.model.persistentData.showfps ? "On" : "Off"}}</button>
@@ -54,6 +54,7 @@
         </a>
         <button onclick="document.getElementById('import-file').click();">Import Save</button>
         <input type="file" id="import-file" name="import-file" enctype="multipart/form-data" hidden onchange="GameModel.importFile();"/>
+        <button ng-click="zm.model.saveToPlayFab()" ng-if="zm.model.playFabId" class="mt-5">Save to Cloud</button>
       </div>
     <div class="upgrade">
       <h4>Reset Game</h4>

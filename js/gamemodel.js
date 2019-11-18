@@ -1,6 +1,8 @@
 GameModel = {
   storageName: "ZombieData",
   kongregate: false,
+  playFabId : false,
+  titleId : "772D8",
   hidden: false,
   energy:0,
   energyMax:10,
@@ -218,6 +220,10 @@ GameModel = {
         this.saveData();
         this.lastSave = updateTime;
       }
+
+      if (this.lastPlayFabSave + 600000 < updateTime) {
+        this.saveToPlayFab();
+      }
   
       if (this.getHumanCount() <= 0) {
 
@@ -417,15 +423,14 @@ GameModel = {
   },
 
   onReady() {
-    if (!GameModel.persistentData.constructions) {
-      GameModel.persistentData.constructions = [];
-    }
     Upgrades.upgradeIdCheck();
   },
 
   lastSave:0,
+  lastPlayFabSave : Date.now(),
 
   persistentData : {
+    saveCreated : Date.now(),
     autoStart : false,
     levelUnlocked : 1,
     allTimeHighestLevel : 0,
@@ -531,14 +536,15 @@ GameModel = {
   resetData() {
     try {
       localStorage.removeItem(this.storageName);
+      this.saveToPlayFab(true);
     } catch (e) {
       console.log(e);
     }
-    this.resetToBaseStats();
-    this.setupLevel();
-    window.location.reload();
   },
   updatePersistentData() {
+    if (!this.persistentData.constructions) {
+      this.persistentData.constructions = [];
+    }
     if (!this.persistentData.generators) {
       this.persistentData.generators = [];
     }
@@ -556,6 +562,9 @@ GameModel = {
     }
     if (!this.persistentData.levelsCompleted) {
       this.persistentData.levelsCompleted = [];
+    }
+    if (!this.persistentData.saveCreated) {
+      this.persistentData.saveCreated = Date.now();
     }
     CreatureFactory.updateAutoBuild();
   },
@@ -597,6 +606,7 @@ GameModel = {
         if (savegame.dateOfSave) {
           GameModel.persistentData = savegame;
           GameModel.updatePersistentData();
+          GameModel.saveToPlayFab();
           GameModel.level = GameModel.persistentData.levelUnlocked;
           GameModel.setupLevel();
         } else {
@@ -667,6 +677,113 @@ GameModel = {
       completed : this.persistentData.levelsCompleted.includes(level),
       locked : this.levelLocked(level),
       trophy : Trophies.doesLevelHaveTrophy(level)
+    }
+  },
+
+  loginInUsingPlayFab() {
+
+    if (window.kongregate) {
+
+      try {
+        // Setting up playfab title ID
+        PlayFab.settings.titleId = this.titleId;
+
+        // forming request
+        var request = {
+          TitleId: PlayFab.settings.titleId,
+          AuthTicket: window.kongregate.services.getGameAuthToken(),
+          KongregateId : window.kongregate.services.getUserId(),
+          CreateAccount: true
+        };
+
+        var model = this;
+
+        // Invoke LoginWithKongregate API call and visualize both results (success or failue)
+        PlayFabClientSDK.LoginWithKongregate(request,
+          function(result){
+            if (result.data.PlayFabId) {
+              model.playFabId = result.data.PlayFabId;
+              model.loadFromPlayFab();
+            }
+          },
+          function(err){
+            console.log(err);
+          }
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  },
+
+  saveToPlayFab(remove = false) {
+    this.lastPlayFabSave = Date.now();
+    if (this.playFabId) {
+      var request = {
+        TitleId : this.titleId,
+        PlayFabId : this.playFabId,
+        Data : {
+          save : remove ? false : LZString.compressToEncodedURIComponent(JSON.stringify(this.persistentData))
+        }
+      }
+      try {
+        PlayFab.ClientApi.UpdateUserData(request,
+          function(result){
+            if (remove) {
+              GameModel.resetToBaseStats();
+              GameModel.setupLevel();
+              window.location.reload();
+            } else {
+              GameModel.messageQueue.push("Game Saved to Cloud");
+            }
+          },
+          function(err){
+            console.log(err);
+          }
+        );
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      if (remove) {
+        this.resetToBaseStats();
+        this.setupLevel();
+        window.location.reload();
+      }
+    }
+  },
+
+
+  loadFromPlayFab() {
+    if (this.playFabId) {
+      var request = {
+        TitleId : this.titleId,
+        PlayFabId : this.playFabId,
+        Keys : ["save"]
+      }
+      try {
+        var model = this;
+        PlayFab.ClientApi.GetUserData(request,
+          function(result){
+            if (result.data.Data.save) {
+              var savegame = JSON.parse(LZString.decompressFromEncodedURIComponent(result.data.Data.save.Value));
+              // playfab save is older so overwrite
+              if (savegame.saveCreated < model.persistentData.saveCreated) {
+                model.persistentData = savegame;
+                model.level = model.persistentData.levelUnlocked;
+                model.updatePersistentData();
+                model.calcOfflineProgress();
+                model.setupLevel();
+              }
+            }
+          },
+          function(err){
+            console.log(err);
+          }
+        );
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
 

@@ -362,6 +362,7 @@ window.onload = function() {
         kongregateAPI.loadAPI(function(){
           window.kongregate = kongregateAPI.getAPI();
           GameModel.kongregate = true;
+          GameModel.loginInUsingPlayFab();
         });
       }
     }

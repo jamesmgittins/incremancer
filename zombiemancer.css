@@ -648,3 +648,7 @@ div.level-select div.start, div.level-select div.ranges {
 div.level-select > label {
   font-size: 1.2em;
 }
+
+.mt-5 {
+  margin-top:5px;
+}

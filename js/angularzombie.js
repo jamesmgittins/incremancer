@@ -123,7 +123,7 @@ angular.module('zombieApp', [])
     }
 
     zm.resetGame = function() {
-      if (confirm("Are you sure you want to reset everything?")) {
+      if (confirm("Are you sure you want to reset everything? If you have a cloud save it will also be deleted. Make sure you export your save game first.")) {
         zm.model.resetData();
       }
     }
