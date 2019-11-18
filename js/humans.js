@@ -334,6 +334,10 @@ Humans = {
           human.play();
         }
       }
+    } else {
+      if (this.frozen) {
+        return;
+      }
     }
 
     if (human.dogStun && human.dogStun > 0) {
