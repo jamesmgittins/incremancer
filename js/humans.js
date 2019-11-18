@@ -1586,16 +1586,13 @@ Tanks = {
   },
 
   update(timeDiff, aliveZombies) {
-    var count = 0;
     this.aliveZombies = aliveZombies;
     for (var i=0; i < this.tanks.length; i++) {
       this.updateTank(this.tanks[i], timeDiff, aliveZombies);
       if (!this.tanks[i].dead) {
         Humans.aliveHumans.push(this.tanks[i]);
-        count++;
       } 
     }
-    GameModel.stats.army.count = count;
   },
 
 
