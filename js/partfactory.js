@@ -133,7 +133,7 @@ PartFactory = {
       this.generatorsApplied.push({
         id:generator.id,
         produces:generator.produces,
-        total: generator.produces,
+        total: generator.produces * rank,
         rank:rank,
         time:generator.time,
         timeLeft:generator.time

@@ -157,15 +157,16 @@ Upgrades = {
         return;
       case this.types.runicSyphon:
         GameModel.runicSyphon.percentage += upgrade.effect * upgrade.rank;
+        return;
         // prestige items
       case this.types.bonesGainPC:
-        GameModel.bonesPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        GameModel.bonesPCMod *= Math.pow(1 + upgrade.effect, upgrade.rank);
         return;
       case this.types.partsGainPC:
-        GameModel.partsPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        GameModel.partsPCMod *= Math.pow(1 + upgrade.effect, upgrade.rank);
         return;
       case this.types.bloodGainPC:
-        GameModel.bloodPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        GameModel.bloodPCMod *= Math.pow(1 + upgrade.effect, upgrade.rank);
         return;
       case this.types.bloodStoragePC:
         GameModel.bloodStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
