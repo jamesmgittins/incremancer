@@ -172,6 +172,7 @@ div.shop div.shop-title button {
 
 button.info {
   float: right;
+  margin-left: 3px;
 }
 
 div.shop div.upgrade, div.shop div.bone-collectors {

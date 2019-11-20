@@ -432,16 +432,23 @@ angular.module('zombieApp', [])
         if (zm.sidePanels.factory) {
           var amount = PartFactory.upgradeMaxAffordable(upgrade);
           var price = PartFactory.upgradeMaxPrice(upgrade, amount);
-          return 'Purchase ' + amount + ' (' + formatWhole(price) + ' ' + upgrade.costType + ')';
+          return 'Purchase ' + amount + ' (' + formatWhole(price) + ' ' + zm.costTranslate(upgrade.costType) + ')';
         } else {
           var amount = Upgrades.upgradeMaxAffordable(upgrade);
           var price = Upgrades.upgradeMaxPrice(upgrade, amount);
-          return 'Purchase ' + amount + ' (' + formatWhole(price) + ' ' + upgrade.costType + ')';
+          return 'Purchase ' + amount + ' (' + formatWhole(price) + ' ' + zm.costTranslate(upgrade.costType) + ')';
         }
         
       }
-      return 'Purchase (' + formatWhole(zm.upgradePrice(upgrade)) + ' ' + upgrade.costType + ')';
+      return 'Purchase (' + formatWhole(zm.upgradePrice(upgrade)) + ' ' + zm.costTranslate(upgrade.costType) + ')';
     }
+
+    zm.costTranslate = function(costType) {
+      if (costType == Upgrades.costs.prestigePoints) {
+        return "points";
+      }
+      return costType
+    },
 
     zm.buyUpgrade = function(upgrade) {
       if (zm.keysPressed.shift) {
@@ -499,7 +506,7 @@ angular.module('zombieApp', [])
     zm.isShowPrestige = function() {
       if (typeof zm.model.persistentData.prestigePointsEarned  === 'undefined')
         return false;
-      return zm.model.persistentData.prestigePointsEarned > 10 || zm.model.persistentData.prestigePointsToSpend > 0 || zm.model.persistentData.upgrades.filter(upgrade => upgrade.costType == Upgrades.costs.prestigePoints).length > 0
+      return zm.model.persistentData.allTimeHighestLevel > 5;
     }
 
     zm.doPrestige = function() {

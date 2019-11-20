@@ -37,6 +37,7 @@ Upgrades = {
     startingPC : "startingPC",
     energyCost : "energyCost",
     autoconstruction : "autoconstruction",
+    autoshop : "autoshop",
     graveyardHealth : "graveyardHealth"
   },
 
@@ -72,14 +73,20 @@ Upgrades = {
     GameModel.resetToBaseStats();
     Spells.lockAllSpells();
     for (var i = 0; i < GameModel.persistentData.upgrades.length; i++) {
-      this.applyUpgrade(GameModel.persistentData.upgrades[i]);
+      var upgrade = Upgrades.upgrades.filter(up => up.id == GameModel.persistentData.upgrades[i].id)[0];
+      if (!upgrade) {
+        upgrade = Upgrades.prestigeUpgrades.filter(up => up.id == GameModel.persistentData.upgrades[i].id)[0];
+      }
+      if (upgrade) {
+        this.applyUpgrade(upgrade, GameModel.persistentData.upgrades[i].rank);
+      }
     }
     for (var i = 0; i < GameModel.persistentData.constructions.length; i++) {
       this.applyConstructionUpgrade(GameModel.persistentData.constructions[i]);
     }
     var trophies = Trophies.getAquiredTrophyList();
     for (var i = 0; i < trophies.length; i++) {
-      this.applyUpgrade(trophies[i]);
+      this.applyUpgrade(trophies[i], trophies[i].rank);
     }
     GameModel.bloodMax *= GameModel.bloodStorePCMod;
     GameModel.brainsMax *= GameModel.brainsStorePCMod;
@@ -87,115 +94,118 @@ Upgrades = {
     GameModel.zombieHealth *= GameModel.zombieHealthPCMod;
   },
 
-  applyUpgrade(upgrade) {
+  applyUpgrade(upgrade, rank) {
     switch (upgrade.type) {
       case this.types.energyRate:
-        GameModel.energyRate += upgrade.effect * upgrade.rank;
+        GameModel.energyRate += upgrade.effect * rank;
         return;
       case this.types.brainsRate:
-        GameModel.brainsRate += upgrade.effect * upgrade.rank;
+        GameModel.brainsRate += upgrade.effect * rank;
         return;
       case this.types.bonesRate:
-        GameModel.bonesRate += upgrade.effect * upgrade.rank;
+        GameModel.bonesRate += upgrade.effect * rank;
         return;
       case this.types.energyCap:
-        GameModel.energyMax += upgrade.effect * upgrade.rank;
+        GameModel.energyMax += upgrade.effect * rank;
         return;
       case this.types.bloodCap:
-        GameModel.bloodMax += upgrade.effect * upgrade.rank;
+        GameModel.bloodMax += upgrade.effect * rank;
         return;
       case this.types.brainsCap:
-        GameModel.brainsMax += upgrade.effect * upgrade.rank;
+        GameModel.brainsMax += upgrade.effect * rank;
         return;
       case this.types.damage:
-        GameModel.zombieDamage += upgrade.effect * upgrade.rank;
+        GameModel.zombieDamage += upgrade.effect * rank;
         return;
       case this.types.speed:
-        GameModel.zombieSpeed += upgrade.effect * upgrade.rank;
+        GameModel.zombieSpeed += upgrade.effect * rank;
         return;
       case this.types.health:
-        GameModel.zombieHealth += upgrade.effect * upgrade.rank;
+        GameModel.zombieHealth += upgrade.effect * rank;
         return;
       case this.types.brainRecoverChance:
-        GameModel.brainRecoverChance += upgrade.effect * upgrade.rank;
+        GameModel.brainRecoverChance += upgrade.effect * rank;
         return;
       case this.types.riseFromTheDeadChance:
-        GameModel.riseFromTheDeadChance += upgrade.effect * upgrade.rank;
+        GameModel.riseFromTheDeadChance += upgrade.effect * rank;
         return;
       case this.types.infectedBite:
-        GameModel.infectedBiteChance += upgrade.effect * upgrade.rank;
+        GameModel.infectedBiteChance += upgrade.effect * rank;
         return;
       case this.types.infectedBlast:
-        GameModel.infectedBlastChance += upgrade.effect * upgrade.rank;
+        GameModel.infectedBlastChance += upgrade.effect * rank;
         return;
       case this.types.plagueDamagePC:
-        GameModel.plagueDamagePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        GameModel.plagueDamagePCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.burningSpeedPC:
-        GameModel.burningSpeedMod += upgrade.effect * upgrade.rank;
+        GameModel.burningSpeedMod += upgrade.effect * rank;
         return;
       case this.types.construction:
         GameModel.construction = 1;
         return;
       case this.types.boneCollectorCapacity:
-        GameModel.boneCollectorCapacity += upgrade.effect * upgrade.rank;
+        GameModel.boneCollectorCapacity += upgrade.effect * rank;
         return;
       case this.types.unlockSpell:
         Spells.unlockSpell(upgrade.effect);
         return;
       case this.types.spitDistance:
-        GameModel.spitDistance = 30 + upgrade.effect * upgrade.rank;
+        GameModel.spitDistance = 30 + upgrade.effect * rank;
         return
       case this.types.blastHealing:
-        GameModel.blastHealing += upgrade.effect * upgrade.rank;
+        GameModel.blastHealing += upgrade.effect * rank;
         return;
       case this.types.plagueArmor:
-        GameModel.plagueDmgReduction -= upgrade.effect * upgrade.rank;
+        GameModel.plagueDmgReduction -= upgrade.effect * rank;
         return;
       case this.types.monsterLimit:
-        GameModel.creatureLimit += upgrade.effect * upgrade.rank;
+        GameModel.creatureLimit += upgrade.effect * rank;
         return;
       case this.types.runicSyphon:
-        GameModel.runicSyphon.percentage += upgrade.effect * upgrade.rank;
+        GameModel.runicSyphon.percentage += upgrade.effect * rank;
         return;
         // prestige items
       case this.types.bonesGainPC:
-        GameModel.bonesPCMod *= Math.pow(1 + upgrade.effect, upgrade.rank);
+        GameModel.bonesPCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.partsGainPC:
-        GameModel.partsPCMod *= Math.pow(1 + upgrade.effect, upgrade.rank);
+        GameModel.partsPCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.bloodGainPC:
-        GameModel.bloodPCMod *= Math.pow(1 + upgrade.effect, upgrade.rank);
+        GameModel.bloodPCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.bloodStoragePC:
-        GameModel.bloodStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        GameModel.bloodStorePCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.brainsGainPC:
-        GameModel.brainsPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        GameModel.brainsPCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.brainsStoragePC:
-        GameModel.brainsStorePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        GameModel.brainsStorePCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.zombieDmgPC:
         // GameModel.zombieDamagePCMod += upgrade.effect * upgrade.rank;
-        GameModel.zombieDamagePCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        GameModel.zombieDamagePCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.zombieHealthPC:
         // GameModel.zombieHealthPCMod += upgrade.effect * upgrade.rank;
-        GameModel.zombieHealthPCMod *= Math.pow(1 + upgrade.effect,upgrade.rank);
+        GameModel.zombieHealthPCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.startingPC:
-        GameModel.startingResources += upgrade.effect * upgrade.rank;
+        GameModel.startingResources += upgrade.effect * rank;
         return;
       case this.types.energyCost:
-        GameModel.zombieCost -= upgrade.effect * upgrade.rank;
+        GameModel.zombieCost -= upgrade.effect * rank;
         return;
       case this.types.autoconstruction:
         GameModel.autoconstructionUnlocked = true;
         return;
+      case this.types.autoshop:
+        GameModel.autoUpgrades = true;
+        return;
       case this.types.graveyardHealth:
-        GameModel.graveyardHealthMod *= Math.pow(1 + upgrade.effect, upgrade.rank);
+        GameModel.graveyardHealthMod *= Math.pow(1 + upgrade.effect, rank);
         return;
     }
   },
@@ -344,15 +354,17 @@ Upgrades = {
         return "Syphon amount: " + Math.round(GameModel.runicSyphon.percentage * 100) + "%";
       case this.types.autoconstruction:
         return this.currentRank(upgrade) > 0 ? "You have unlocked automatic construction" : "You have yet to unlock automatic construction"
+      case this.types.autoshop:
+        return this.currentRank(upgrade) > 0 ? "You have unlocked automatic shop purchases" : "You have yet to unlock automatic shop purchases"
       case this.types.graveyardHealth:
-          return "Graveyard health: " + Math.round(GameModel.graveyardHealthMod * 100) + "%";
+        return "Graveyard health: " + Math.round(GameModel.graveyardHealthMod * 100) + "%";
     }
   },
 
   currentRank(upgrade) {
     for (var i = 0; i < GameModel.persistentData.upgrades.length; i++) {
       var ownedUpgrade = GameModel.persistentData.upgrades[i];
-      if (upgrade.name == ownedUpgrade.name || upgrade.id == ownedUpgrade.id) {
+      if (upgrade.id == ownedUpgrade.id) {
         return ownedUpgrade.rank;
       }
     }
@@ -405,6 +417,10 @@ Upgrades = {
   },
 
   canAffordUpgrade(upgrade) {
+    if (upgrade.cap > 0 && this.currentRank(upgrade) >= upgrade.cap) {
+      upgrade.auto = false;
+      return false;
+    }
     switch(upgrade.costType) {
       case this.costs.energy:
         return GameModel.energy >= this.upgradePrice(upgrade);
@@ -438,6 +454,7 @@ Upgrades = {
 
   purchaseUpgrade(upgrade, save = true) {
     if (this.canAffordUpgrade(upgrade)) {
+      var prestige = false;
       switch(upgrade.costType) {
         case this.costs.energy:
           GameModel.energy -= this.upgradePrice(upgrade);
@@ -452,6 +469,7 @@ Upgrades = {
           GameModel.persistentData.bones -= this.upgradePrice(upgrade);
           break;
         case this.costs.prestigePoints:
+          prestige = true;
           GameModel.persistentData.prestigePointsToSpend -= this.upgradePrice(upgrade);
           break;
         case this.costs.parts:
@@ -460,23 +478,29 @@ Upgrades = {
       }
       var ownedUpgrade;
       for (var i = 0; i < GameModel.persistentData.upgrades.length; i++) {
-        if (upgrade.name == GameModel.persistentData.upgrades[i].name || upgrade.id == GameModel.persistentData.upgrades[i].id) {
-          ownedUpgrade = GameModel.persistentData.upgrades[i];
-          ownedUpgrade.effect = upgrade.effect;
-          ownedUpgrade.rank++;
-          ownedUpgrade.id = upgrade.id;
-          ownedUpgrade.costType = upgrade.costType;
+        if (upgrade.id == GameModel.persistentData.upgrades[i].id) {
+          ownedUpgrade = true;
+          GameModel.persistentData.upgrades[i] = {
+            id : upgrade.id,
+            rank : GameModel.persistentData.upgrades[i].rank + 1
+          };
+          if (prestige) {
+            GameModel.persistentData.upgrades[i].costType = this.costs.prestigePoints;
+          }
+          break;
         }
       }
-      if (!ownedUpgrade)
-        GameModel.persistentData.upgrades.push({
+      if (!ownedUpgrade) {
+        var persistUpgrade = {
           id:upgrade.id,
-          name:upgrade.name,
-          costType:upgrade.costType,
-          rank:1,
-          type:upgrade.type,
-          effect:upgrade.effect
-        });
+          rank:1
+        };
+        if (prestige) {
+          persistUpgrade.costType = this.costs.prestigePoints;
+        }
+        GameModel.persistentData.upgrades.push(persistUpgrade);
+      }
+        
       
       if (save)
         GameModel.saveData();
@@ -563,6 +587,16 @@ Upgrades = {
     GameModel.sendMessage("Construction of " + upgrade.name + " complete!");
     if (upgrade.completeMessage) {
       GameModel.sendMessage(upgrade.completeMessage);
+    }
+  },
+
+  updateAutoUpgrades() {
+    if (GameModel.autoUpgrades) {
+      for (var i = 0; i < this.upgrades.length; i++) {
+        if (this.upgrades[i].auto) {
+          this.purchaseUpgrade(this.upgrades[i], false);
+        }
+      }
     }
   },
 
@@ -912,6 +946,7 @@ Upgrades.prestigeUpgrades = [
   // new Upgrades.Upgrade(107, "Zombie Damage", Upgrades.types.zombieDmgPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% zombie damage for each rank")
   new Upgrades.Upgrade(111, "Parts Rate", Upgrades.types.partsGainPC, Upgrades.costs.prestigePoints, 10, 1.25, 0.2, 0, "Additional 20% creature parts income rate for each rank."),
   new Upgrades.Upgrade(112, "Auto Construction", Upgrades.types.autoconstruction, Upgrades.costs.prestigePoints, 250, 1, 1, 1, "Unlock the ability to automatically start construction of the cheapest available building option."),
+  new Upgrades.Upgrade(114, "Auto Shop", Upgrades.types.autoshop, Upgrades.costs.prestigePoints, 250, 1, 1, 1, "Unlock the ability to automatically purchase items from the shop."),
   new Upgrades.Upgrade(113, "Graveyard Health", Upgrades.types.graveyardHealth, Upgrades.costs.prestigePoints, 10, 1.25, 0.1, 0, "Additional 10% graveyard health during boss levels with each rank."),
 ];
 

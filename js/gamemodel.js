@@ -59,6 +59,7 @@ GameModel = {
     healthRegen : 0,
     damageReflection : 0
   },
+  autoUpgrades : false,
   autoconstruction : false,
   autoconstructionUnlocked : false,
   levelResourcesAdded : false,
@@ -134,6 +135,7 @@ GameModel = {
     this.creatureLimit = 1;
     this.runicSyphon.percentage = 0;
     this.autoconstructionUnlocked = false;
+    this.autoUpgrades = false;
     this.graveyardHealthMod = 1;
   },
 
@@ -221,7 +223,7 @@ GameModel = {
         this.lastSave = updateTime;
       }
 
-      if (this.lastPlayFabSave + 600000 < updateTime) {
+      if (this.lastPlayFabSave + 1200000 < updateTime) {
         this.saveToPlayFab();
       }
   
@@ -253,6 +255,7 @@ GameModel = {
         } 
       }
       Upgrades.updateConstruction(timeDiff);
+      Upgrades.updateAutoUpgrades();
       CreatureFactory.update(timeDiff);
     }
     if (this.currentState == this.states.levelCompleted) {
@@ -427,7 +430,7 @@ GameModel = {
   },
 
   lastSave:0,
-  lastPlayFabSave : Date.now(),
+  lastPlayFabSave : Date.now() - 15000,
 
   persistentData : {
     saveCreated : Date.now(),
@@ -497,6 +500,9 @@ GameModel = {
       this.currentState = this.states.prestiged;
       this.setupLevel();
       this.saveData();
+      for (var i = 0; i < Upgrades.upgrades.length; i++) {
+        Upgrades.upgrades[i].auto = false;
+      }
     }
   },
 
@@ -608,6 +614,7 @@ GameModel = {
           GameModel.updatePersistentData();
           GameModel.saveToPlayFab();
           GameModel.level = GameModel.persistentData.levelUnlocked;
+          CreatureFactory.spawnedSavedCreatures = false;
           GameModel.setupLevel();
         } else {
           alert("Error loading save game");
@@ -754,7 +761,7 @@ GameModel = {
   },
 
 
-  loadFromPlayFab() {
+  loadFromPlayFab(force = false) {
     if (this.playFabId) {
       var request = {
         TitleId : this.titleId,
@@ -768,12 +775,13 @@ GameModel = {
             if (result.data.Data.save) {
               var savegame = JSON.parse(LZString.decompressFromEncodedURIComponent(result.data.Data.save.Value));
               // playfab save is older so overwrite
-              if (savegame.saveCreated < model.persistentData.saveCreated) {
+              if (force || savegame.saveCreated < model.persistentData.saveCreated || (savegame.saveCreated == model.persistentData.saveCreated && savegame.dateOfSave > model.persistentData.dateOfSave)) {
                 model.persistentData = savegame;
                 model.level = model.persistentData.levelUnlocked;
                 model.updatePersistentData();
                 model.calcOfflineProgress();
                 model.setupLevel();
+                GameModel.messageQueue.push("Game Loaded from Cloud");
               }
             }
           },
@@ -785,6 +793,10 @@ GameModel = {
         console.log(e);
       }
     }
+  },
+
+  allowPlayFabAction() {
+    return this.lastPlayFabSave + 15000 < Date.now();
   }
 
 };

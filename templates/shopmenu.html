@@ -18,7 +18,8 @@
       <button ng-click="zm.buyUpgrade(upgrade);" ng-disabled="zm.upgradeTooExpensive(upgrade);">{{zm.upgradeButtonText(upgrade)}}
         <span class="percent" ng-style="{'width':zm.upgradePercent(upgrade) + '%'}"></span>
       </button>
-      <button ng-click="upgrade.selected = !upgrade.selected" class="info  {{upgrade.selected ? 'active' : ''}}">Info</button>
+      <button ng-click="upgrade.selected = !upgrade.selected" class="info  {{upgrade.selected ? 'active' : ''}}">i</button>
+      <button ng-click="upgrade.auto = !upgrade.auto" class="info {{upgrade.auto ? 'active' : ''}}" ng-if="zm.currentShopFilter != 'completed' && zm.model.autoUpgrades">{{upgrade.auto ? 'On' : 'Auto'}}</button>
       <p ng-show="upgrade.selected">{{upgrade.description}}</p>
       <p ng-show="upgrade.selected">Current Rank: {{zm.currentRank(upgrade)}}{{upgrade.cap != 0 ? ' / ' + upgrade.cap : ''}} - {{zm.upgradeStatInfo(upgrade)}}</p>
     </div>
