@@ -1145,7 +1145,7 @@ Army = {
       if (GameModel.level > 35 && Math.random() < 0.3) {
         textureId = 1;
       }
-      if ((GameModel.level > 45 && Math.random()) < 0.3 || (GameModel.isBossStage(GameModel.level) && Math.random() < 0.5)) {
+      if ((GameModel.level > 45 && Math.random() < 0.3) || (GameModel.isBossStage(GameModel.level) && Math.random() < 0.5)) {
         textureId = 2;
       }
       if (this.discardedArmymen.length > 0) {
