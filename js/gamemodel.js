@@ -139,6 +139,7 @@ GameModel = {
     this.autoUpgrades = false;
     this.graveyardHealthMod = 1;
     this.bulletproofChance = 0;
+    this.gigazombies = false;
   },
 
   addEnergy(value) {
@@ -499,7 +500,8 @@ GameModel = {
       this.zombiesInCages = 0;
       this.autoconstruction = false;
       this.levelResourcesAdded = false;
-      this.gigazombiesOn = false;
+      this.persistentData.gigazombiesOn = false;
+      this.gigazombies = false;
       BoneCollectors.update(0.1);
       PartFactory.generatorsApplied = [];
       CreatureFactory.updateAutoBuild();
