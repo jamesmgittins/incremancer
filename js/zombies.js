@@ -120,6 +120,7 @@ Zombies = {
       zombie.scalemod *= 1.5;
     }
     if (zombie.scalemod > 2) {
+      zombie.mod = 20;
       zombie.scalemod = 2;
     }
     zombie.isDog = isDog;
