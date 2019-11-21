@@ -384,7 +384,11 @@ angular.module('zombieApp', [])
         case Upgrades.types.monsterLimit:
           return "+" + upgrade.effect + " creature limit";
         case Upgrades.types.runicSyphon:
-          return "+" + upgrade.effect * 100 + "% runic syphon";
+          return "+" + Math.round(upgrade.effect * 100) + "% runic syphon";
+        case Upgrades.types.gigazombies:
+          return "Unlock more gigazombies";
+        case Upgrades.types.bulletproof:
+          return "+" + Math.round(upgrade.effect * 100) + "% earth golem bullet reflect";
       }
       return "";
     }

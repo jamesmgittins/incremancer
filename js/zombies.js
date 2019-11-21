@@ -90,7 +90,7 @@ Zombies = {
     }
   },
 
-  createZombie(x, y, isDog = false) {
+  createZombie(x, y, isDog = false, gigazombie = false) {
     var textureId = Math.floor(Math.random() * this.textures.length);
     var zombie;
     if (this.discardedZombies.length > 0) {
@@ -108,6 +108,20 @@ Zombies = {
       }
       
     }
+    zombie.zombie = true;
+    zombie.mod = 1;
+    zombie.scalemod = 1;
+    if (this.super) {
+      zombie.mod = 10;
+      zombie.scalemod = 1.5;
+    }
+    if (gigazombie) {
+      zombie.mod *= 10;
+      zombie.scalemod *= 1.5;
+    }
+    if (zombie.scalemod > 2) {
+      zombie.scalemod = 2;
+    }
     zombie.isDog = isDog;
     zombie.deadTexture = zombie.isDog ? this.deadDogTexture : this.textures[textureId].dead;
     zombie.super = this.super;
@@ -123,11 +137,11 @@ Zombies = {
     zombie.target = false;
     zombie.zIndex = zombie.position.y;
     zombie.visible = true;
-    zombie.maxHealth = zombie.health = zombie.super ? this.model.zombieHealth * 10 : this.model.zombieHealth;
+    zombie.maxHealth = zombie.health = this.model.zombieHealth * zombie.mod;
     zombie.regenTimer = 5;
     zombie.state = this.states.lookingForTarget;
     var dogScale = isDog ? 0.7 : 1;
-    zombie.scaling = zombie.super ? 1.5 * this.scaling * dogScale : this.scaling * dogScale;
+    zombie.scaling = zombie.scalemod * this.scaling * dogScale;
     zombie.scale = {
       x: Math.random() > 0.5 ? zombie.scaling : -1 * zombie.scaling,
       y: zombie.scaling
@@ -151,7 +165,7 @@ Zombies = {
       return;
 
     this.model.energy -= this.model.zombieCost;
-    this.createZombie(x,y);
+    this.createZombie(x, y, false, this.model.persistentData.gigazombiesOn);
   },
 
   spawnAllZombies(x,y) {
@@ -260,6 +274,7 @@ Zombies = {
     var aliveZombies = [];
     var zombiePartition = [];
     this.aliveHumans = Humans.aliveHumans;
+    this.graveyardAttackers = Humans.graveyardAttackers;
     for (var i=0; i < this.zombies.length; i++) {
       if (this.zombies[i].visible) {
         this.updateZombie(this.zombies[i], timeDiff);
@@ -419,7 +434,7 @@ Zombies = {
   },
 
   calculateDamage(zombie) {
-    var damage = zombie.super ? this.model.zombieDamage * 10 : this.model.zombieDamage;
+    var damage = this.model.zombieDamage * zombie.mod;
     if (this.model.runeEffects.critChance > 0 && Math.random() < this.model.runeEffects.critChance) {
       damage *= this.model.runeEffects.critDamage;
     }
@@ -459,14 +474,32 @@ Zombies = {
       return;
 
     zombie.scanTime = this.scanTime * Math.random();
-    var distanceToTarget = 10000;
-    for (var i = 0; i < this.aliveHumans.length; i++) {
-      if (Math.abs(this.aliveHumans[i].x - zombie.x) < distanceToTarget) {
-        if (Math.abs(this.aliveHumans[i].y - zombie.y) < distanceToTarget) {
-          var distanceToHuman = this.fastDistance(zombie.x, zombie.y, this.aliveHumans[i].x, this.aliveHumans[i].y);
-          if (distanceToHuman < distanceToTarget) {
-            zombie.target = this.aliveHumans[i];
-            distanceToTarget = distanceToHuman;
+    var distanceToTarget = 300;
+
+    if (this.model.isBossStage(this.model.level) && Math.random() > 0.3) {
+      for (var i = 0; i < this.graveyardAttackers.length; i++) {
+        if (Math.abs(this.graveyardAttackers[i].x - zombie.x) < distanceToTarget) {
+          if (Math.abs(this.graveyardAttackers[i].y - zombie.y) < distanceToTarget) {
+            var distanceToHuman = this.fastDistance(zombie.x, zombie.y, this.graveyardAttackers[i].x, this.graveyardAttackers[i].y);
+            if (distanceToHuman < distanceToTarget) {
+              zombie.target = this.graveyardAttackers[i];
+              distanceToTarget = distanceToHuman;
+            }
+          }
+        }
+      }
+    }
+
+    if (distanceToTarget == 300) {
+      distanceToTarget = 10000;
+      for (var i = 0; i < this.aliveHumans.length; i++) {
+        if (Math.abs(this.aliveHumans[i].x - zombie.x) < distanceToTarget) {
+          if (Math.abs(this.aliveHumans[i].y - zombie.y) < distanceToTarget) {
+            var distanceToHuman = this.fastDistance(zombie.x, zombie.y, this.aliveHumans[i].x, this.aliveHumans[i].y);
+            if (distanceToHuman < distanceToTarget) {
+              zombie.target = this.aliveHumans[i];
+              distanceToTarget = distanceToHuman;
+            }
           }
         }
       }
@@ -568,7 +601,7 @@ Zombies = {
     zombie.position = newPosition;
     zombie.zIndex = zombie.position.y;
     zombie.scale.x = zombie.xSpeed > 0 ? zombie.scaling : -zombie.scaling;
-    
+
   },
 
   spaceNeeded : 3,

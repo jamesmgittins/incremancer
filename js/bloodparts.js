@@ -436,13 +436,21 @@ Bullets = {
         Humans.burnHuman(sprite.target, sprite.damage);
         Humans.damageHuman(sprite.target, sprite.damage);
       } else {
-        if (sprite.rocket) {
-          if (sprite.target.graveyard) {
-            Graveyard.damageGraveyard(sprite.damage);
-          }
-          Army.droneExplosion(sprite.target.x, sprite.target.y, false, sprite.damage);
+        if (!sprite.rocket && sprite.target.bulletReflect && Math.random() < sprite.target.bulletReflect) {
+          this.newBullet(sprite.target, sprite.source, sprite.damage, false, false, false);
         } else {
-          Zombies.damageZombie(sprite.target, sprite.damage, sprite.source);
+          if (sprite.rocket) {
+            if (sprite.target.graveyard) {
+              Graveyard.damageGraveyard(sprite.damage);
+            }
+            Army.droneExplosion(sprite.target.x, sprite.target.y, false, sprite.damage);
+          } else {
+            if (sprite.target.zombie) {
+              Zombies.damageZombie(sprite.target, sprite.damage, sprite.source);
+            } else {
+              Humans.damageHuman(sprite.target, sprite.damage);
+            }
+          }
         }
       }
       
@@ -753,8 +761,7 @@ Fragments = {
         sprite.hitFloor = true;
       }
       sprite.rotation += sprite.rotSpeed * timeDiff;
-    }
-    
+    }    
   },
   newPart(x, y, tint) {
 

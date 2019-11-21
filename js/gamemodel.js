@@ -48,6 +48,7 @@ GameModel = {
     bones: 0,
     brains: 0
   },
+  gigazombies : false,
   endLevelTimer : 3,
   endLevelDelay : 3,
   messageQueue : [],
@@ -63,7 +64,7 @@ GameModel = {
   autoconstruction : false,
   autoconstructionUnlocked : false,
   levelResourcesAdded : false,
-
+  bulletproofChance : 0,
   gameSpeed : 1,
   
   level:1,
@@ -137,6 +138,7 @@ GameModel = {
     this.autoconstructionUnlocked = false;
     this.autoUpgrades = false;
     this.graveyardHealthMod = 1;
+    this.bulletproofChance = 0;
   },
 
   addEnergy(value) {
@@ -195,6 +197,11 @@ GameModel = {
 
   getEnergyRate() {
     return (this.energySpellMultiplier * this.energyRate) - (this.persistentData.boneCollectors + this.persistentData.harpies);
+  },
+
+  toggleGigazombies() {
+    this.persistentData.gigazombiesOn = !this.persistentData.gigazombiesOn;
+    Upgrades.applyUpgrades();
   },
 
   update(timeDiff, updateTime) {
@@ -492,6 +499,7 @@ GameModel = {
       this.zombiesInCages = 0;
       this.autoconstruction = false;
       this.levelResourcesAdded = false;
+      this.gigazombiesOn = false;
       BoneCollectors.update(0.1);
       PartFactory.generatorsApplied = [];
       CreatureFactory.updateAutoBuild();
@@ -725,6 +733,7 @@ GameModel = {
 
   saveToPlayFab(remove = false) {
     this.lastPlayFabSave = Date.now();
+    console.log("saved to playfab");
     if (this.playFabId) {
       var request = {
         TitleId : this.titleId,

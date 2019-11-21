@@ -12,6 +12,7 @@ Humans = {
   humans : [],
   discardedHumans : [],
   aliveHumans : [],
+  graveyardAttackers : [],
   humansPerLevel : 50, // 50
   maxHumans : 1000, // 1000
   scaling: 2,
@@ -48,17 +49,18 @@ Humans = {
   damageHuman(human, damage) {
     GameModel.addBlood(Math.round(damage / 3));
     human.health -= damage;
-    Blood.newSplatter(human.x, human.y);
     human.timeToScan = 0;
     if (!human.tank) {
+      Blood.newSplatter(human.x, human.y);
       human.speedMod = Math.max(Math.min(1, human.health / human.maxHealth), 0.25);
+    } else {
+      Fragments.newPart(human.x, human.y - 18, 0x7B650E);
     }
     if (human.health <= 0 && !human.dead) {
       Bones.newBones(human.x, human.y);
       human.dead = true;
       GameModel.addBrains(1);
       
-
       if (human.tank) {
         Blasts.newDroneBlast(human.x, human.y - 5);
         Fragments.newFragmentExplosion(human.x, human.y - 5, 0x7B650E);
@@ -373,6 +375,7 @@ Humans = {
     }
     var aliveHumans = [];
     var aliveZombies = Zombies.aliveZombies;
+    this.graveyardAttackers.length = 0;
     for (var i=0; i < this.humans.length; i++) {
       this.updateHuman(this.humans[i], timeDiff, aliveZombies);
       if (!this.humans[i].dead)
@@ -1183,6 +1186,7 @@ Army = {
       armyman.zombieTarget = false;
       armyman.state = this.states.standing;
       armyman.attackTimer = this.attackSpeed;
+      armyman.attackingGraveyard = false;
       armyman.scale = {x:Math.random() > 0.5 ? this.scaling : -1 * this.scaling, y:this.scaling};
       this.armymen.push(armyman);
       characterContainer.addChild(armyman);
@@ -1203,6 +1207,9 @@ Army = {
       this.updateArmy(this.armymen[i], timeDiff, aliveZombies);
       if (!this.armymen[i].dead) {
         Humans.aliveHumans.push(this.armymen[i]);
+        if (this.armymen[i].attackingGraveyard) {
+          Humans.graveyardAttackers.push(this.armymen[i]);
+        }
         count++;
       } 
     }
@@ -1276,6 +1283,7 @@ Army = {
       }
       if (this.assaultStarted && armyman.rocketlauncher && Math.random() > 0.98) {
         armyman.zombieTarget = Graveyard.target;
+        armyman.attackingGraveyard = true;
       }
     }
 
@@ -1581,6 +1589,7 @@ Tanks = {
       tank.timeToScan = Math.random() * Humans.scanTime;
       tank.target = false;
       tank.zombieTarget = false;
+      tank.attackingGraveyard = false;
       tank.state = this.states.patrolling;
       tank.attackTimer = this.attackSpeed;
       tank.scale = {x:this.scaling, y:this.scaling};
@@ -1595,6 +1604,9 @@ Tanks = {
       this.updateTank(this.tanks[i], timeDiff, aliveZombies);
       if (!this.tanks[i].dead) {
         Humans.aliveHumans.push(this.tanks[i]);
+        if (this.tanks[i].attackingGraveyard) {
+          Humans.graveyardAttackers.push(this.tanks[i]);
+        }
       } 
     }
   },
@@ -1615,6 +1627,7 @@ Tanks = {
       Humans.scanForZombies(tank, aliveZombies);
       if (Army.assaultStarted && Math.random() > 0.9) {
         tank.zombieTarget = Graveyard.target;
+        tank.attackingGraveyard = true;
       }
     }
 

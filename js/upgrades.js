@@ -25,6 +25,8 @@ Upgrades = {
     plagueArmor:"plagueArmor",
     monsterLimit:"monsterLimit",
     runicSyphon:"runicSyphon",
+    gigazombies:"gigazombies",
+    bulletproof:"bulletproof",
     // prestige items
     bloodGainPC : "bloodGainPC",
     bloodStoragePC : "bloodStoragePC",
@@ -92,6 +94,9 @@ Upgrades = {
     GameModel.brainsMax *= GameModel.brainsStorePCMod;
     GameModel.zombieDamage *= GameModel.zombieDamagePCMod;
     GameModel.zombieHealth *= GameModel.zombieHealthPCMod;
+    if (GameModel.persistentData.gigazombiesOn) {
+      GameModel.zombieCost *= 5;
+    }
   },
 
   applyUpgrade(upgrade, rank) {
@@ -164,6 +169,12 @@ Upgrades = {
         return;
       case this.types.runicSyphon:
         GameModel.runicSyphon.percentage += upgrade.effect * rank;
+        return;
+      case this.types.gigazombies:
+        GameModel.gigazombies = true;
+        return;
+      case this.types.bulletproof:
+        GameModel.bulletproofChance += upgrade.effect * rank;
         return;
         // prestige items
       case this.types.bonesGainPC:
@@ -314,6 +325,8 @@ Upgrades = {
         return Math.round(GameModel.infectedBiteChance * 100) + "% chance for zombies to infect their targets";
       case this.types.infectedBlast:
         return Math.round(GameModel.infectedBlastChance * 100) + "% chance for zombies to explode on death";
+      case this.types.bulletproof:
+        return Math.round(GameModel.bulletproofChance * 100) + "% chance for earth golems to reflect bullets";
       case this.types.construction:
         return GameModel.construction > 0 ? "You have unlocked Unholy Construction" : "You have yet to unlock Unholy Construction";
       case this.types.boneCollectorCapacity:
@@ -358,6 +371,8 @@ Upgrades = {
         return this.currentRank(upgrade) > 0 ? "You have unlocked automatic shop purchases" : "You have yet to unlock automatic shop purchases"
       case this.types.graveyardHealth:
         return "Graveyard health: " + Math.round(GameModel.graveyardHealthMod * 100) + "%";
+      case this.types.gigazombies:
+        return this.currentRank(upgrade) > 0 ? "You have unlocked more gigazombies" : "You have yet to unlock more gigazombies"
     }
   },
 
@@ -969,6 +984,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(13, "Blazing Speed", Upgrades.types.burningSpeedPC, Upgrades.costs.blood, 30000, 1.25, 0.05, 10, "The humans are using torches to set your zombies on fire. Perhaps we can turn the tables on them? Each rank increases the movement and attack speed of burning zombies by 5%", false, 207),
   new Upgrades.Upgrade(14, "Spit it Out", Upgrades.types.spitDistance, Upgrades.costs.blood, 500000, 1.6, 5, 10, "The first rank gives your zombies the ability to spit plague at enemies beyond normal attack range range. Spit attacks do 50% zombie damage and infect the victim with plague. Subsequent ranks will increase the range of spit attacks.", false, 218),
   new Upgrades.Upgrade(15, "Runic Syphon", Upgrades.types.runicSyphon, Upgrades.costs.blood, 34000, 1.9, 0.01, 10, "Infuse your runes for free! Each rank gives your Runesmith the ability to infuse 1% of your resource income, without consuming it", false, 210),
+  new Upgrades.Upgrade(18, "More Gigazombies", Upgrades.types.gigazombies, Upgrades.costs.blood, 100000000, 1.27, 1, 1, "We need more gigazombies! This will unlock the ability for all zombies to be gigazombies. They gain health and damage but the energy cost also increases. This can be toggled in the graveyard.", false, 220),
 
   // brain upgrades
   new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 20, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),
@@ -989,6 +1005,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(44, "Brain Cage", Upgrades.types.brainsCap, Upgrades.costs.bones, 650, 1.07, 500, 0, "There's nothing I love more than a mind enslaved. Now we can put these brains where they belong. In cages! Each rank increases brain storage by 500."),
   new Upgrades.Upgrade(45, "Earth Freeze", Upgrades.types.unlockSpell, Upgrades.costs.bones, 5000, 1, 4, 1, "Learn the Earth Freeze spell which can freeze all humans in place for a short time.", "New spell learned, Earth Freeze!", 209),
   new Upgrades.Upgrade(46, "Plague Armor", Upgrades.types.plagueArmor, Upgrades.costs.bones, 15000, 1.6, 0.02, 10, "The best defense is a good offense? True in the case of Plague Armor which reduces the damage done by infected humans by 2% per rank.", false, 218),
+  new Upgrades.Upgrade(47, "Bulletproof", Upgrades.types.bulletproof, Upgrades.costs.bones, 60000, 1.6, 0.05, 5, "Craft your earth golems from much harder stone. Each rank gives them 5% chance to reflect bullets back to their source.", false, 220),
 
   // parts upgrades
   new Upgrades.Upgrade(60, "Extra Limbs", Upgrades.types.zombieDmgPC, Upgrades.costs.parts, 900, 1.3, 0.02, 0, "Your zombies gain +2% damage with each rank of Extra Limbs.", false, 220),

@@ -98,9 +98,11 @@ Creatures = {
       creature = new PIXI.AnimatedSprite(this.golemTextures.down);
     }
     creature.immuneToBurns = false;
+    creature.bulletReflect = 0;
     switch(type) {
       case this.creatureTypes.earthGolem:
         creature.tint = 0xA87f32;
+        creature.bulletReflect = this.model.bulletproofChance;
         break;
       case this.creatureTypes.airGolem:
         creature.tint = 0x9CA5B8;
@@ -114,6 +116,7 @@ Creatures = {
         creature.immuneToBurns = true;
         break;
     }
+    creature.zombie = true;
     creature.level = level;
     creature.textureSet = this.golemTextures;
     creature.deadTexture = this.golemTextures.dead;
@@ -161,6 +164,7 @@ Creatures = {
   update(timeDiff) {
     var aliveCreatures = 0;
     this.aliveHumans = Humans.aliveHumans;
+    this.graveyardAttackers = Humans.graveyardAttackers;
     this.aliveZombies = Zombies.aliveZombies;
     this.creatureCount = [];
     for (var i = 0; i < CreatureFactory.creatures.length; i++) {
