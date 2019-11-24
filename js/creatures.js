@@ -90,6 +90,11 @@ Creatures = {
   },
 
   spawnCreature(health, damage, speed, type, level) {
+
+    if (this.model.creatureCount >= this.model.creatureLimit) {
+      return;
+    }
+
     var creature;
     if (this.discardedSprites.length > 0) {
       creature = this.discardedSprites.pop();
@@ -159,6 +164,7 @@ Creatures = {
     this.creatures.push(creature);
     characterContainer.addChild(creature);
     Smoke.newZombieSpawnCloud(creature.x, creature.y - 2);
+    this.model.creatureCount++;
   },
 
   update(timeDiff) {

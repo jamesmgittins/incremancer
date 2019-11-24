@@ -12,10 +12,7 @@ CreatureFactory = {
   creatureScaling : 1.75,
   creatureCostScaling : 2,
 
-  creaturesInProgress : 0,
-
   update(timeDiff) {
-    this.creaturesInProgress = 0;
     var creatureCount = Creatures.creatureCount;
     for (var i = 0; i < this.creatures.length; i++) {
       if (this.creatures[i].building) {
@@ -23,8 +20,6 @@ CreatureFactory = {
         if (this.creatures[i].timeLeft < 0) {
           this.spawnCreature(this.creatures[i]);
           this.creatures[i].building = false;
-        } else {
-          this.creaturesInProgress++;
         }
       } else {
         if (typeof creatureCount[this.creatures[i].type] !== 'undefined' && creatureCount[this.creatures[i].type] < this.creatures[i].autobuild) {
@@ -56,6 +51,16 @@ CreatureFactory = {
     return this.purchasePrice(creature) < GameModel.persistentData.parts;
   },
 
+  creaturesBuildingCount() {
+    var count = 0;
+    for (var i = 0; i < CreatureFactory.creatures.length; i++) {
+      if (CreatureFactory.creatures[i].building) {
+        count++;
+      }
+    }
+    return count;
+  },
+
   startBuilding(creature) {
     if (creature.building) {
       return;
@@ -63,7 +68,7 @@ CreatureFactory = {
     if (!this.canAffordCreature(creature)) {
       return;
     }
-    if (this.creaturesInProgress + GameModel.creatureCount >= GameModel.creatureLimit) {
+    if (this.creaturesBuildingCount() + GameModel.creatureCount >= GameModel.creatureLimit) {
       return;
     }
     creature.building = true;
@@ -98,11 +103,15 @@ CreatureFactory = {
 
   spawnSavedCreatures() {
     if (!this.spawnedSavedCreatures) {
+      var creaturesSpawned = 0;
       for (var i=0; i < GameModel.persistentData.savedCreatures.length; i++) {
-        var savedCreature = GameModel.persistentData.savedCreatures[i];
-        var creature = this.creatures.filter(c => c.type == savedCreature.t)[0];
-        creature.level = savedCreature.l;
-        this.spawnCreature(creature);
+        creaturesSpawned++
+        if (creaturesSpawned <= GameModel.creatureLimit) {
+          var savedCreature = GameModel.persistentData.savedCreatures[i];
+          var creature = this.creatures.filter(c => c.type == savedCreature.t)[0];
+          creature.level = savedCreature.l;
+          this.spawnCreature(creature);
+        }
       }
       this.spawnedSavedCreatures = true;
     }

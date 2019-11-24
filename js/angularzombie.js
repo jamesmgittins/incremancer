@@ -220,7 +220,7 @@ angular.module('zombieApp', [])
           return false;
         if (creature.building)
           return false;
-        return CreatureFactory.creaturesInProgress + zm.model.creatureCount < zm.model.creatureLimit;
+        return CreatureFactory.creaturesBuildingCount() + zm.model.creatureCount < zm.model.creatureLimit;
       },
       canLevelCreature(creature) {
         return this.creatureLevelPrice(creature) < zm.model.persistentData.parts;
