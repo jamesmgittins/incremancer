@@ -319,7 +319,7 @@ angular.module('zombieApp', [])
     }
 
     zm.cancelConstruction = function() {
-      if(confirm("Are you sure you want to cancel construction?")) {
+      if(confirm("Are you sure you want to cancel construction? Used materials will not be refunded.")) {
         Upgrades.cancelConstruction();
         zm.upgrades = Upgrades.getAvailableConstructions();
       }
