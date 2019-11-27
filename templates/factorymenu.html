@@ -22,7 +22,7 @@
       <button ng-click="generator.selected = !generator.selected" class="info  {{generator.selected ? 'active' : ''}}">i</button>
       <div class="clear"></div>
       <p ng-show="generator.selected">{{generator.description}}</p>
-      <p ng-show="generator.selected">Owned: {{zm.currentRank(generator)}} - Producing {{zm.currentRank(generator) * generator.produces}} parts every {{generator.time}} seconds</p>
+      <p ng-show="generator.selected">Owned: {{zm.currentRank(generator)}} - Producing {{zm.currentRank(generator) * generator.produces|decimal}} parts every {{generator.time}} seconds</p>
     </div>
   </div>
   <p ng-if="zm.factoryTab == 'creatures'">You currently have {{zm.model.creatureCount}} creatures, and a maximum of {{zm.model.creatureLimit}}.</p>

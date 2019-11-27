@@ -502,10 +502,10 @@ BoneCollectors = {
 };
 
 Harpies = {
+  model:GameModel,
   sprites:[],
   bombSprites : [],
   discardedBombSprites : [],
-  maxSpeed:75,
   bombHeight:100,
   textures:false,
   scaling:2.5,
@@ -524,8 +524,8 @@ Harpies = {
       }
       this.bombTexture = PIXI.Texture.from("harpybomb.png")
     }
-    if (typeof GameModel.persistentData.harpies === 'undefined') {
-      GameModel.persistentData.harpies = 0;
+    if (typeof this.model.persistentData.harpies === 'undefined') {
+      this.model.persistentData.harpies = 0;
     }
 
     for (var i = 0; i < this.sprites.length; i++) {
@@ -540,7 +540,7 @@ Harpies = {
   },
 
   addAndRemoveHarpies() {
-    if (this.sprites.length > GameModel.persistentData.harpies) {
+    if (this.sprites.length > this.model.persistentData.harpies) {
       var harpy = this.sprites.pop();
       harpy.target = false;
       if (harpy.bomb) {
@@ -549,7 +549,7 @@ Harpies = {
       }
       foregroundContainer.removeChild(harpy);
     }
-    if (this.sprites.length < GameModel.persistentData.harpies) {
+    if (this.sprites.length < this.model.persistentData.harpies) {
       var sprite = new PIXI.AnimatedSprite(this.textures);
       sprite.animationSpeed = 0.2;
       sprite.anchor = {x:0.5,y:1};
@@ -586,7 +586,10 @@ Harpies = {
       if (bomb.y >= bomb.floor - 2) {
         bomb.visible = false;
         this.discardedBombSprites.push(bomb);
-        Zombies.causePlagueExplosion(bomb, GameModel.zombieHealth * 0.2, false);
+        if (bomb.fire) {
+          Humans.burnHuman(bomb.target, this.model.zombieHealth * 0.1);
+        }
+        Zombies.causePlagueExplosion(bomb, this.model.zombieHealth * 0.2, false);
       }
     } else {
       bomb.x = bomb.harpy.x;
@@ -599,7 +602,13 @@ Harpies = {
       case this.states.bombing:
 
         if (!harpy.target || harpy.target.graveyard || harpy.target.dead) {
-          harpy.target = getRandomElementFromArray(Humans.aliveHumans, Math.random());
+          if (this.model.tankBuster && this.model.isBossStage(this.model.level) && Tanks.aliveTanks.length > 0) {
+            harpy.target = getRandomElementFromArray(Tanks.aliveTanks, Math.random());
+            harpy.bomb.fire = true;
+          } else {
+            harpy.target = getRandomElementFromArray(Humans.aliveHumans, Math.random());
+            harpy.bomb.fire = false;
+          }
         }
 
         if (!harpy.target) {
@@ -609,12 +618,19 @@ Harpies = {
           
 
         if (this.fastDistance(harpy.x, harpy.y, harpy.target.x, harpy.target.y - this.bombHeight) < 10) {
+          harpy.bombs--;
           harpy.bomb.dropped = true;
           harpy.bomb.floor = harpy.target.y;
+          harpy.bomb.target = harpy.target;
           harpy.bomb = false;
-          harpy.state = this.states.returning;
-          harpy.target = false;
           harpy.speedFactor = 0;
+          harpy.target = false;
+          if (harpy.bombs <= 0) {
+            harpy.state = this.states.returning;
+          } else {
+            this.getBomb(harpy);
+          }
+          
         } else {
           this.updateHarpySpeed(harpy, timeDiff);
         }
@@ -627,6 +643,7 @@ Harpies = {
         }
 
         if (this.fastDistance(harpy.x, harpy.y, harpy.target.x, harpy.target.y - this.bombHeight) < 10) {
+          harpy.bombs = this.model.harpyBombs;
           this.getBomb(harpy);
           harpy.state = this.states.bombing;
           harpy.speedFactor = 0;
@@ -670,8 +687,8 @@ Harpies = {
     var ratio = 1 / Math.max(ax, ay);
     ratio = ratio * (1.29289 - (ax + ay) * ratio * 0.29289);
     
-    harpy.xSpeed = xVector * ratio * this.maxSpeed * harpy.speedFactor;
-    harpy.ySpeed = yVector * ratio * this.maxSpeed * harpy.speedFactor;
+    harpy.xSpeed = xVector * ratio * this.model.harpySpeed * harpy.speedFactor;
+    harpy.ySpeed = yVector * ratio * this.model.harpySpeed * harpy.speedFactor;
 
     harpy.position.x += harpy.xSpeed * timeDiff;
     harpy.position.y += harpy.ySpeed * timeDiff;

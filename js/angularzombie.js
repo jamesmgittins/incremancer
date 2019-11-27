@@ -389,6 +389,12 @@ angular.module('zombieApp', [])
           return "Unlock more gigazombies";
         case Upgrades.types.bulletproof:
           return "+" + Math.round(upgrade.effect * 100) + "% earth golem bullet reflect";
+        case Upgrades.types.harpySpeed:
+          return "+" + upgrade.effect + " harpy speed";
+        case Upgrades.types.harpyBombs:
+          return "+" + upgrade.effect + " harpy bombs";
+        case Upgrades.types.tankBuster:
+          return "Anti tank harpies";
       }
       return "";
     }

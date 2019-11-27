@@ -1483,6 +1483,7 @@ Tanks = {
 
   speed : 20,
   tanks : [],
+  aliveTanks : [],
   attackSpeed : 5,
   scaling : 3,
 
@@ -1541,6 +1542,7 @@ Tanks = {
         characterContainer.removeChild(this.tanks[i]);
       }
       this.tanks = [];
+      this.aliveTanks = [];
     }
 
     var maxTanks = this.getMaxTanks();
@@ -1600,10 +1602,12 @@ Tanks = {
 
   update(timeDiff, aliveZombies) {
     this.aliveZombies = aliveZombies;
+    this.aliveTanks = [];
     for (var i=0; i < this.tanks.length; i++) {
       this.updateTank(this.tanks[i], timeDiff, aliveZombies);
       if (!this.tanks[i].dead) {
         Humans.aliveHumans.push(this.tanks[i]);
+        this.aliveTanks.push(this.tanks[i]);
         if (this.tanks[i].attackingGraveyard) {
           Humans.graveyardAttackers.push(this.tanks[i]);
         }

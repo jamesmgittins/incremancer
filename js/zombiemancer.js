@@ -119,7 +119,7 @@ function zoom(change, coords) {
       Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 1.1
     }
   } else {
-    if (gcWidth > Math.min(canvasSize.y, canvasSize.x) * 0.8) {
+    if (Math.max(gcWidth, gcHeight) > Math.min(canvasSize.y, canvasSize.x) * 0.8) {
       gc.scale.x = gc.scale.y = gc.scale.x * 0.9;
       Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 0.9;
     }
@@ -267,10 +267,13 @@ function update(timeDiff) {
 
 function setGameFieldSizeForLevel() {
   var size = Math.min(500 + (GameModel.level * 50), 1500);
+  var shift = Math.random() * size / 3;
+
   gameFieldSize = {
-    x:size,
-    y:size
+    x:size + shift,
+    y:size - shift
   };
+  
   if (grass) {
     grass.width = gameFieldSize.x;
     grass.height = gameFieldSize.y;
@@ -312,6 +315,8 @@ function startGame() {
 
     GameModel.app = app;
 
+    setGameFieldSizeForLevel();
+
     grass = new PIXI.TilingSprite(PIXI.Texture.from('sprites/grass.png'));
     grass.width = gameFieldSize.x;
     grass.height = gameFieldSize.y;
@@ -319,7 +324,6 @@ function startGame() {
 
     GameModel.setupLevel();
     
-    setGameFieldSizeForLevel();
 
     setTimeout(function(){
       centerGameContainer(true);

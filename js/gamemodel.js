@@ -42,6 +42,9 @@ GameModel = {
   zombieCount:0,
   creatureCount:0,
   creatureLimit:1,
+  harpySpeed:75,
+  tankBuster : false,
+  harpyBombs: 1,
   runicSyphon : {
     percentage: 0,
     blood: 0,
@@ -140,6 +143,9 @@ GameModel = {
     this.graveyardHealthMod = 1;
     this.bulletproofChance = 0;
     this.gigazombies = false;
+    this.harpySpeed = 75;
+    this.tankBuster = false;
+    this.harpyBombs = 1;
   },
 
   addEnergy(value) {
@@ -502,6 +508,14 @@ GameModel = {
       this.levelResourcesAdded = false;
       this.persistentData.gigazombiesOn = false;
       this.gigazombies = false;
+      this.runeEffects = {
+        attackSpeed : 1,
+        critChance : 0,
+        critDamage : 0,
+        damageReduction : 1,
+        healthRegen : 0,
+        damageReflection : 0
+      };
       BoneCollectors.update(0.1);
       PartFactory.generatorsApplied = [];
       CreatureFactory.updateAutoBuild();

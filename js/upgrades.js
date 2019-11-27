@@ -27,6 +27,9 @@ Upgrades = {
     runicSyphon:"runicSyphon",
     gigazombies:"gigazombies",
     bulletproof:"bulletproof",
+    harpySpeed:"harpySpeed",
+    tankBuster:"tankBuster",
+    harpyBombs:"harpyBombs",
     // prestige items
     bloodGainPC : "bloodGainPC",
     bloodStoragePC : "bloodStoragePC",
@@ -175,6 +178,15 @@ Upgrades = {
         return;
       case this.types.bulletproof:
         GameModel.bulletproofChance += upgrade.effect * rank;
+        return;
+      case this.types.harpySpeed:
+        GameModel.harpySpeed += upgrade.effect * rank;
+        return;
+      case this.types.tankBuster:
+        GameModel.tankBuster = true;
+        return;
+      case this.types.harpyBombs:
+        GameModel.harpyBombs += upgrade.effect * rank;
         return;
         // prestige items
       case this.types.bonesGainPC:
@@ -366,13 +378,19 @@ Upgrades = {
       case this.types.runicSyphon:
         return "Syphon amount: " + Math.round(GameModel.runicSyphon.percentage * 100) + "%";
       case this.types.autoconstruction:
-        return this.currentRank(upgrade) > 0 ? "You have unlocked automatic construction" : "You have yet to unlock automatic construction"
+        return this.currentRank(upgrade) > 0 ? "You have unlocked automatic construction" : "You have yet to unlock automatic construction";
       case this.types.autoshop:
-        return this.currentRank(upgrade) > 0 ? "You have unlocked automatic shop purchases" : "You have yet to unlock automatic shop purchases"
+        return this.currentRank(upgrade) > 0 ? "You have unlocked automatic shop purchases" : "You have yet to unlock automatic shop purchases";
       case this.types.graveyardHealth:
         return "Graveyard health: " + Math.round(GameModel.graveyardHealthMod * 100) + "%";
       case this.types.gigazombies:
-        return this.currentRank(upgrade) > 0 ? "You have unlocked more gigazombies" : "You have yet to unlock more gigazombies"
+        return this.currentRank(upgrade) > 0 ? "You have unlocked more gigazombies" : "You have yet to unlock more gigazombies";
+      case this.types.harpySpeed:
+        return "Harpy speed: " + formatWhole(GameModel.harpySpeed);
+      case this.types.harpyBombs:
+        return "Harpy bombs: " + formatWhole(GameModel.harpyBombs);
+      case this.types.tankBuster:
+        return this.currentRank(upgrade) > 0 ? "You have unlocked tank buster" : "You have yet to unlock tank buster";
     }
   },
 
@@ -891,7 +909,8 @@ Upgrades = {
     zombieCage : "zombieCage",
     partFactory : "partFactory",
     monsterFactory : "monsterFactory",
-    pit : "pit"
+    pit : "pit",
+    harpy : "harpy"
   },
 
   Upgrade : function(id, name, type, costType, basePrice, multiplier, effect, cap, description, purchaseMessage, requires) {
@@ -924,6 +943,10 @@ Upgrades = {
   }
 };
 
+var million = 1000000;
+var billion = 1000 * million;
+var trillion = 1000 * billion;
+
 Upgrades.constructionUpgrades = [
   new Upgrades.Construction(201, "Cursed Graveyard", Upgrades.constructionTypes.graveyard, {blood:1800}, 30, 1, 1, 1, false, "Construct a Cursed Graveyard in the town that will automatically spawn zombies when your energy is at its maximum!", "Graveyard menu now available!"),
   new Upgrades.Construction(205, "Crypt", Upgrades.constructionTypes.crypt, {blood:21000, bones:2220}, 60, 1, 1, 1, 201, "Construct a Crypt in your graveyard. This will give you a nice dark and quiet place to think. The additional space will also allow you to store 50% more blood and brains!"),
@@ -942,10 +965,11 @@ Upgrades.constructionUpgrades = [
   new Upgrades.Construction(215, "Third Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:1800, blood:2700}, 30, 1, 10, 1, 206, "Build an additional cage to contain surplus zombies once a town is defeated."),
   new Upgrades.Construction(216, "Fourth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:2400, blood:3600}, 30, 1, 10, 1, 207, "Build an additional cage to contain surplus zombies once a town is defeated."),
   new Upgrades.Construction(217, "Fifth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:3000, blood:4500}, 30, 1, 15, 1, 211, "Build an additional cage to contain surplus zombies once a town is defeated."),
-  new Upgrades.Construction(218, "Plague Laboratory", Upgrades.constructionTypes.plagueLaboratory, {brains:25000, blood:1000000}, 50, 1, 1, 1, 211, "Expand the plague workshop into a well equipped laboratory in order to unlock additional plague upgrades."),
+  new Upgrades.Construction(218, "Plague Laboratory", Upgrades.constructionTypes.plagueLaboratory, {brains:25000, blood:million}, 50, 1, 1, 1, 211, "Expand the plague workshop into a well equipped laboratory in order to unlock additional plague upgrades."),
   new Upgrades.Construction(219, "Part Factory", Upgrades.constructionTypes.partFactory, {brains:35000, blood:15000000}, 50, 1, 1, 1, 218, "Build a factory to create parts that can be used to construct more powerful beings for your army.", "Factory menu now available!"),
-  new Upgrades.Construction(220, "Creature Factory", Upgrades.constructionTypes.monsterFactory, {brains:45000, blood:40000000}, 50, 1, 1, 1, 219, "Build a factory to turn creature parts into living entities of destruction", "Creatures now available in factory menu!"),
-  new Upgrades.Construction(221, "Bottomless Pit", Upgrades.constructionTypes.pit, {bones:75000, parts:5000000}, 50, 1, 1, 5, 219, "A bottomless pit with walls made from creature parts. Drastically increases your capacity to store blood and brains."),
+  new Upgrades.Construction(220, "Creature Factory", Upgrades.constructionTypes.monsterFactory, {brains:45000, blood:40 * million}, 50, 1, 1, 1, 219, "Build a factory to turn creature parts into living entities of destruction", "Creatures now available in factory menu!"),
+  new Upgrades.Construction(221, "Bottomless Pit", Upgrades.constructionTypes.pit, {bones:75000, parts:5 * million}, 50, 1, 1, 5, 219, "A bottomless pit with walls made from creature parts. Drastically increases your capacity to store blood and brains."),
+  new Upgrades.Construction(222, "Harpy Outfitter", Upgrades.constructionTypes.harpy, {bones:75000, brains:75000, blood:80 * million}, 50, 1, 1, 1, 220, "Build an outfitter to upgrade the abilities of your harpies.", "Harpy upgrades now available in the shop!"),
 ];
 
 Upgrades.prestigeUpgrades = [
@@ -982,9 +1006,10 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(7, "Detonate", Upgrades.types.unlockSpell, Upgrades.costs.blood, 25000, 1, 3, 1, "Learn the Detonate spell which can explode all of your zombies into a cloud of plague. Not exactly sure how useful that will be.", "New spell learned, Detonate!", 209),
   new Upgrades.Upgrade(8, "Gigazombies?", Upgrades.types.unlockSpell, Upgrades.costs.blood, 50000, 1, 5, 1, "Learn the Gigazombies spell which will turn some of your zombies into hulking monstrosities with increased health and damage.", "New spell learned, Gigazombies!", 209),
   new Upgrades.Upgrade(13, "Blazing Speed", Upgrades.types.burningSpeedPC, Upgrades.costs.blood, 30000, 1.25, 0.05, 10, "The humans are using torches to set your zombies on fire. Perhaps we can turn the tables on them? Each rank increases the movement and attack speed of burning zombies by 5%", false, 207),
-  new Upgrades.Upgrade(14, "Spit it Out", Upgrades.types.spitDistance, Upgrades.costs.blood, 500000, 1.6, 5, 10, "The first rank gives your zombies the ability to spit plague at enemies beyond normal attack range range. Spit attacks do 50% zombie damage and infect the victim with plague. Subsequent ranks will increase the range of spit attacks.", false, 218),
+  new Upgrades.Upgrade(14, "Spit it Out", Upgrades.types.spitDistance, Upgrades.costs.blood, 500000, 1.6, 5, 10, "The first rank gives your zombies the ability to spit plague at enemies beyond normal attack range. Spit attacks do 50% zombie damage and infect the victim with plague. Subsequent ranks will increase the range of spit attacks.", false, 218),
   new Upgrades.Upgrade(15, "Runic Syphon", Upgrades.types.runicSyphon, Upgrades.costs.blood, 34000, 1.9, 0.01, 10, "Infuse your runes for free! Each rank gives your Runesmith the ability to infuse 1% of your resource income, without consuming it", false, 210),
   new Upgrades.Upgrade(18, "More Gigazombies", Upgrades.types.gigazombies, Upgrades.costs.blood, 100000000, 1.27, 1, 1, "We need more gigazombies! This will unlock the ability for all zombies to be gigazombies. They gain health and damage but the energy cost also increases. This can be toggled in the graveyard.", false, 220),
+  new Upgrades.Upgrade(19, "Faster Harpies", Upgrades.types.harpySpeed, Upgrades.costs.blood, 100 * million, 1.07, 2, 20, "These harpies are way too slow! We have to make them faster. Each rank increases harpy speed by 2", false, 222),
 
   // brain upgrades
   new Upgrades.Upgrade(20, "Energy Rush", Upgrades.types.energyRate, Upgrades.costs.brains, 20, 1.8, 0.5, 20, "Melting brains down in your cauldron to make smoothies can be beneficial for your health. It also increases your energy rate by 0.5 per second for each rank."),
@@ -996,6 +1021,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(26, "Energy Charge", Upgrades.types.unlockSpell, Upgrades.costs.brains, 2000, 1, 2, 1, "Learn the Energy Charge spell which can drastically increase your energy rate for a short time.", "New spell learned, Energy Charge!", 209),
   new Upgrades.Upgrade(27, "What Doesn't Kill You", Upgrades.types.blastHealing, Upgrades.costs.brains, 10000, 1.3, 0.1, 20, "Plague explosions from zombies and harpies will also heal nearby zombies for 10% of the explosion damage with each rank.", false, 218),
   new Upgrades.Upgrade(28, "One is Never Enough", Upgrades.types.monsterLimit, Upgrades.costs.brains, 20000, 1.2, 1, 15, "We're definitely going to need more than one golem to finish the job. Each rank increases your creature limit by 1", false, 220),
+  new Upgrades.Upgrade(29, "Tank Buster", Upgrades.types.tankBuster, Upgrades.costs.brains, 400000, 1.2, 1, 1, "Teach your harpies some new tricks. Once bought this upgrade will make your harpies drop fire bombs on tanks during boss stages.", false, 222),
   
   // bone upgrades
   new Upgrades.Upgrade(40, "Bone Throne", Upgrades.types.energyCap, Upgrades.costs.bones, 50, 1.55, 10, 15, "Sitting atop your throne of bones you can finally think clearly. Each rank increases maximum energy by 10."),
@@ -1006,6 +1032,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(45, "Earth Freeze", Upgrades.types.unlockSpell, Upgrades.costs.bones, 5000, 1, 4, 1, "Learn the Earth Freeze spell which can freeze all humans in place for a short time.", "New spell learned, Earth Freeze!", 209),
   new Upgrades.Upgrade(46, "Plague Armor", Upgrades.types.plagueArmor, Upgrades.costs.bones, 15000, 1.6, 0.02, 10, "The best defense is a good offense? True in the case of Plague Armor which reduces the damage done by infected humans by 2% per rank.", false, 218),
   new Upgrades.Upgrade(47, "Bulletproof", Upgrades.types.bulletproof, Upgrades.costs.bones, 60000, 1.6, 0.05, 5, "Craft your earth golems from much harder stone. Each rank gives them 5% chance to reflect bullets back to their source.", false, 220),
+  new Upgrades.Upgrade(48, "Bombs Away", Upgrades.types.harpyBombs, Upgrades.costs.bones, 500000, 1.6, 1, 3, "Upgrade your harpies so they can carry more than just one bomb at a time.", false, 222),
 
   // parts upgrades
   new Upgrades.Upgrade(60, "Extra Limbs", Upgrades.types.zombieDmgPC, Upgrades.costs.parts, 900, 1.3, 0.02, 0, "Your zombies gain +2% damage with each rank of Extra Limbs.", false, 220),
