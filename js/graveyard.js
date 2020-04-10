@@ -365,6 +365,9 @@ BoneCollectors = {
     if (this.sprites.length > GameModel.persistentData.boneCollectors) {
       var boneCollector = this.sprites.pop();
       if (boneCollector.boneList) {
+        if(boneCollector.target && boneCollector.target.collector) {
+          boneCollector.target.collector = false;
+        }
         for (var i = 0; i < boneCollector.boneList.length; i++){
           boneCollector.boneList[i].collector = false;
         }
