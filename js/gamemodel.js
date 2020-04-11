@@ -171,7 +171,7 @@ GameModel = {
 
   addBrains(value) {
     if (isNaN(this.persistentData.brains)) {
-      this.persistentData.blood = 0;  
+      this.persistentData.brains = 0;  
     }
     if (isNaN(value))
       return;
@@ -186,7 +186,7 @@ GameModel = {
 
   addBones(value) {
     if (isNaN(this.persistentData.bones)) {
-      this.persistentData.blood = 0;  
+      this.persistentData.bones = 0;  
     }
     if (isNaN(value))
       return;
