@@ -228,8 +228,6 @@ GameModel = {
     this.addEnergy(this.getEnergyRate() * timeDiff);
 
     if (this.currentState == this.states.playingLevel) {
-      this.addBones(this.bonesRate * timeDiff);
-      this.addBrains(this.brainsRate * timeDiff);
       Upgrades.updateRunicSyphon(this.runicSyphon);
       
       if (this.lastSave + 30000 < updateTime) {
