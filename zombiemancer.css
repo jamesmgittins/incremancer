@@ -108,8 +108,11 @@ div.start-game, div.end-level, div.level-select {
   left:50%;
   transform:translate(-50%,-50%);
   padding:15px;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgb(10,40,45);
   text-align: center;
+  border-radius: 5px;
+  box-shadow: inset 0 0 15px rgb(5,20,20);
+  max-height: 90%;
 }
 
 div.start-game ul > li {
@@ -160,12 +163,12 @@ div.shop button {
   font-size: 1em;
   padding: 8px 8px;
 }
-div.shop div.shop-title h2 {
+div.shop-title h2 {
   float:left;
   margin: 4px 0 8px;
   font-size: 1.2em;
 }
-div.shop div.shop-title button {
+div.shop-title button {
   float: right;
   padding: 6px 8px;
 }
@@ -470,6 +473,10 @@ div.generator-progress.active > span.percent {
   div.level-select {
     width:80%;
   }
+  .inventory .item {
+    width:3.5em !important;
+    height:3.5em !important;
+  }
 }
 @media screen and (max-width: 579px) {
   div.shop {
@@ -498,6 +505,7 @@ div.message {
   transform: translateX(-50%);
   font-size: 1.5em;
   padding:0 15px;
+  z-index: 150;
 }
 
 div.message > p {
@@ -520,6 +528,29 @@ div.message > p::after {
 @keyframes width-animation {
   0% {width:100%;}
   100% {width:0%;}
+}
+
+#prestige-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left:0;
+  top:0;
+}
+
+.levelup {
+  background: linear-gradient(270deg, rgba(0,0,0,0) 25%, #ffee10 50%, rgba(0,0,0,0) 75%);
+  background-size: 400% 400%;
+
+  -webkit-animation: levelup-animation 2s ease;
+  -moz-animation: levelup-animation 2s ease;
+  animation: levelup-animation 2s ease;
+}
+
+@keyframes levelup-animation {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
 }
 
 ::-webkit-scrollbar {
@@ -588,6 +619,200 @@ div.resources label {
 div.resources label > span.value {
   float:right;
   margin-left: 0.5em;
+}
+
+div.spells > div.skeleton {
+  position: absolute;
+  height:5em;
+  width: 100%;
+  left:0;
+  top:100%;
+  cursor: pointer;
+  background: rgba(0,0,0,0.5);
+  background-image: url("images/skeleton.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center 5px;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+div.skeleton > .bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+div.skeleton:hover {
+  color: #ff3;
+  box-shadow: 0 0 5px #ffee10;
+  text-shadow: 0 0 5px #ffee10;
+}
+
+div.skeleton > div.xp {
+  position: absolute;
+  right: 0;
+  background-color: #000;
+  height:100%;
+  width: 5px;
+}
+div.skeleton > div.xp > span {
+  background-color: #fb2;
+  position: absolute;
+  bottom: 0;
+  left: 1px;
+  width: 3px;
+}
+
+div.skeleton > div.lvl {
+  width: calc(100% - 5px);
+  text-align: center;
+  bottom: 0;
+  position: absolute;
+  background: rgba(0,0,0,0.8);
+}
+
+div.skeleton > div.lvl.dead {
+  color:#fd5252;
+}
+.inventory {
+  margin: 1em 0;
+  height:400px;
+  overflow: visible;
+}
+.inventory .equipped, .inventory .items {
+  float:left;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.inventory .equipped {
+  width: 40%;
+}
+.inventory .items {
+  width:60%;
+}
+
+.inventory .item {
+  width:4em;
+  height:4em;
+  border:1px solid white;
+  margin: 0.5em;
+  position: relative;
+  display: inline-block;
+}
+
+.inventory .item .icon {
+  position: absolute;
+  height:100%;
+  width: 100%;
+  top:0;
+  left:0;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.inventory .items .item, .inventory .equipped .item.trash {
+  cursor: pointer;
+}
+
+.inventory .equipped .item.item.sword {
+  clear: both;
+}
+
+.inventory .item.empty {
+  background-color: #555;
+}
+.inventory .item.common {
+  background-color: mediumseagreen;
+}
+.inventory .item.rare {
+  background-color: dodgerblue;
+}
+.inventory .item.epic {
+  background-color:#fb2;
+}
+.inventory .item.legendary {
+  background: linear-gradient(270deg, #6b1610, #fc3503, #6b1610);
+  background-size: 190% 200%;
+
+  -webkit-animation: levelup-animation 4s linear infinite;
+  -moz-animation: levelup-animation 4s linear infinite;
+  animation: levelup-animation 4s linear infinite;
+}
+.inventory .item.helmet .icon {
+  background: url("images/helmet.png");
+}
+.inventory .item.chest .icon {
+  background: url("images/chest.png");
+}
+.inventory .item.legs .icon {
+  background: url("images/legs.png");
+}
+.inventory .item.gloves .icon {
+  background: url("images/gloves.png");
+}
+.inventory .item.boots .icon {
+  background: url("images/boots.png");
+}
+.inventory .item.sword .icon {
+  background: url("images/sword.png");
+}
+.inventory .item.shield .icon {
+  background: url("images/shield.png");
+}
+.inventory .item.trash .icon {
+  background: url("images/trash-can.png");
+}
+.inventory .item .icon {
+  background-size: contain !important;
+}
+.inventory .equipped.helmet .item.helmet.over, .inventory .equipped.chest .item.chest.over, .inventory .equipped.legs .item.legs.over, .inventory .equipped.gloves .item.gloves.over,
+.inventory .equipped.boots .item.boots.over, .inventory .equipped.sword .item.sword.over, .inventory .equipped.shield .item.shield.over, .inventory .equipped .item.trash.over {
+  color: #ff3;
+  box-shadow: 0 0 40px #ffee10;
+}
+.inventory .equipped.helmet .item:not(.helmet):not(.trash), .inventory .equipped.chest .item:not(.chest):not(.trash), .inventory .equipped.legs .item:not(.legs):not(.trash), .inventory .equipped.gloves .item:not(.gloves):not(.trash),
+.inventory .equipped.boots .item:not(.boots):not(.trash), .inventory .equipped.sword .item:not(.sword):not(.trash), .inventory .equipped.shield .item:not(.shield):not(.trash)  {
+  opacity: 0.2;
+}
+
+.inventory .item .level {
+  float:right;
+  color:#333;
+  position: relative;
+  font-weight: bold;
+  margin-right: 0.2em;
+  font-size: 1em;
+}
+.inventory .item .tooltip {
+  display: none;
+}
+#champ-hold:not(.no-tooltip) .inventory .item:hover .tooltip {
+  position: fixed;
+  display: inline-block;
+  background-color: rgb(12,55,55);
+  border-radius: 5px;
+  width: 250px;
+  padding:0.5em;
+  z-index: 150;
+}
+.inventory .item .tooltip span.name {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.3em;
+}
+.inventory .item .tooltip span.desc, .inventory .item .tooltip span.stat, .inventory .item .tooltip span.effect {
+  display:block;
+  line-height: 1.5em;
+}
+.inventory .item .tooltip span.effect {
+  font-style: italic;
+  color: #ffee10;
 }
 
 div.level-select > div.levels > button {

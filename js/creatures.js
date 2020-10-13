@@ -1,5 +1,5 @@
 Creatures = {
-  map : Map,
+  map : ZmMap,
   model : GameModel,
   creatures : [],
   creatureCount : [],
@@ -125,7 +125,7 @@ Creatures = {
     creature.level = level;
     creature.textureSet = this.golemTextures;
     creature.deadTexture = this.golemTextures.dead;
-    creature.currentDirection = Creatures.directions.down;
+    creature.currentDirection = this.directions.down;
     creature.creatureType = type;
     creature.dead = false;
     creature.burnDamage = 0;

@@ -1,6 +1,6 @@
 Humans = {
 
-  map : Map,
+  map : ZmMap,
   maxWalkSpeed : 15,
   maxRunSpeed : 35,
   minSecondsTostand : 1,
@@ -35,11 +35,11 @@ Humans = {
   graveYardPosition : {},
 
   states : {
-    standing:"standing",
-    walking:"walking",
-    attacking:"attacking",
-    fleeing:"fleeing",
-    escaping:"escaping"
+    standing:1,
+    walking:2,
+    attacking:3,
+    fleeing:4,
+    escaping:5
   },
 
   randomSecondsToStand() {
@@ -60,6 +60,8 @@ Humans = {
       Bones.newBones(human.x, human.y);
       human.dead = true;
       GameModel.addBrains(1);
+      Skeleton.addXp(GameModel.level);
+      Skeleton.testForLoot();
       
       if (human.tank) {
         Blasts.newDroneBlast(human.x, human.y - 5);
@@ -621,7 +623,7 @@ Humans = {
 };
 
 Police = {
-  map:Map,
+  map:ZmMap,
   maxWalkSpeed : 15,
   maxRunSpeed : 40,
   police : [],
@@ -643,17 +645,17 @@ Police = {
   radioTime : 30,
 
   states : {
-    shooting : "shooting",
-    attacking : "attacking",
-    walking : "walking",
-    running : "running",
-    standing : "standing"
+    shooting : 1,
+    attacking : 2,
+    walking : 3,
+    running : 4,
+    standing : 5
   },
 
   dogStates : {
-    following : "following",
-    attacking : "attacking",
-    hunting : "hunting"
+    following : 1,
+    attacking : 2,
+    hunting : 3
   },
 
   isExtraPolice() {
@@ -1047,7 +1049,7 @@ Police = {
 }
 
 Army = {
-  map:Map,
+  map:ZmMap,
   maxWalkSpeed : 20,
   maxRunSpeed : 50,
   armymen : [],
@@ -1068,11 +1070,11 @@ Army = {
   assaultStarted : false,
 
   states : {
-    shooting : "shooting",
-    attacking : "attacking",
-    walking : "walking",
-    running : "running",
-    standing : "standing"
+    shooting : 1,
+    attacking : 2,
+    walking : 3,
+    running : 4,
+    standing : 5
   },
 
   isExtraArmy() {
@@ -1479,7 +1481,7 @@ Army = {
 
 
 Tanks = {
-  map:Map,
+  map:ZmMap,
 
   speed : 20,
   tanks : [],

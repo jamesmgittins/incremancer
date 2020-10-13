@@ -113,6 +113,19 @@ Spells = {
     spell.start();
     GameModel.sendMessage(spell.name);
   },
+  castSpellNoMana(spellId) {
+    var spellList = this.spells.filter(sp => sp.id == spellId);
+    if (spellList.length > 0) {
+      var spell = spellList[0];
+      if (spell.onCooldown || spell.active)
+        return false;
+      
+      spell.active = true;
+      spell.timer = spell.duration;
+      spell.start();
+      GameModel.sendMessage(spell.name);
+    }
+  },
   updateSpells(timeDiff) {
     for (var i = 0; i < this.spells.length; i++) {
       var spell = this.spells[i];

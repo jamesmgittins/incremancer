@@ -93,6 +93,7 @@ Upgrades = {
     for (var i = 0; i < trophies.length; i++) {
       this.applyUpgrade(trophies[i], trophies[i].rank);
     }
+    Skeleton.applyUpgrades();
     GameModel.bloodMax *= GameModel.bloodStorePCMod;
     GameModel.brainsMax *= GameModel.brainsStorePCMod;
     GameModel.zombieDamage *= GameModel.zombieDamagePCMod;
@@ -100,6 +101,7 @@ Upgrades = {
     if (GameModel.persistentData.gigazombiesOn) {
       GameModel.zombieCost *= 5;
     }
+    
   },
 
   applyUpgrade(upgrade, rank) {
@@ -966,10 +968,10 @@ Upgrades.constructionUpgrades = [
   new Upgrades.Construction(216, "Fourth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:2400, blood:3600}, 30, 1, 10, 1, 207, "Build an additional cage to contain surplus zombies once a town is defeated."),
   new Upgrades.Construction(217, "Fifth Zombie Cage", Upgrades.constructionTypes.zombieCage, {bones:3000, blood:4500}, 30, 1, 15, 1, 211, "Build an additional cage to contain surplus zombies once a town is defeated."),
   new Upgrades.Construction(218, "Plague Laboratory", Upgrades.constructionTypes.plagueLaboratory, {brains:25000, blood:million}, 50, 1, 1, 1, 211, "Expand the plague workshop into a well equipped laboratory in order to unlock additional plague upgrades."),
-  new Upgrades.Construction(219, "Part Factory", Upgrades.constructionTypes.partFactory, {brains:35000, blood:15000000}, 50, 1, 1, 1, 218, "Build a factory to create parts that can be used to construct more powerful beings for your army.", "Factory menu now available!"),
+  new Upgrades.Construction(219, "Part Factory", Upgrades.constructionTypes.partFactory, {brains:35000, blood:15 * million}, 50, 1, 1, 1, 218, "Build a factory to create parts that can be used to construct more powerful beings for your army.", "Factory menu now available!"),
   new Upgrades.Construction(220, "Creature Factory", Upgrades.constructionTypes.monsterFactory, {brains:45000, blood:40 * million}, 50, 1, 1, 1, 219, "Build a factory to turn creature parts into living entities of destruction", "Creatures now available in factory menu!"),
   new Upgrades.Construction(221, "Bottomless Pit", Upgrades.constructionTypes.pit, {bones:75000, parts:5 * million}, 50, 1, 1, 5, 219, "A bottomless pit with walls made from creature parts. Drastically increases your capacity to store blood and brains."),
-  new Upgrades.Construction(222, "Harpy Outfitter", Upgrades.constructionTypes.harpy, {bones:75000, brains:75000, blood:80 * million}, 50, 1, 1, 1, 220, "Build an outfitter to upgrade the abilities of your harpies.", "Harpy upgrades now available in the shop!"),
+  new Upgrades.Construction(222, "Harpy Outfitter", Upgrades.constructionTypes.harpy, {bones:75000, brains:75000, blood:80 * million}, 50, 1, 1, 1, 220, "Build an outfitter to upgrade the abilities of your harpies.", "Harpy upgrades now available in the shop!")
 ];
 
 Upgrades.prestigeUpgrades = [

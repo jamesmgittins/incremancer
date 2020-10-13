@@ -37,7 +37,7 @@
     </div>
     <div class="bone-collectors bones" ng-if="zm.model.constructions.aviary">
       <h4>Harpies <button ng-click="zm.hpinfo = ! zm.hpinfo" class="{{zm.hpinfo ? 'active' : ''}}">Info</button></h4>
-      <p ng-show="zm.hpinfo">Release harpies that drop barrels of plague infected zombie flesh on unsuspecting humans. Each harpy consumes 1 energy per second.</p>
+      <p ng-show="zm.hpinfo">Release harpies that drop barrels of plague infected zombie flesh on unsuspecting humans. Each harpy consumes 1 energy per second. Harpy bombs infect humans with plague and cause {{zm.model.zombieHealth * 0.2|whole}} damage. The damage scales with zombie health.</p>
       <h4>Energy rate {{zm.model.getEnergyRate()|decimal}} per second</h4>
       <button ng-click="zm.setHarpies(zm.model.persistentData.harpies - 1);">-</button><label>{{zm.model.persistentData.harpies|whole}} harpies</label><button ng-click="zm.setHarpies(zm.model.persistentData.harpies + 1);">+</button>
     </div>

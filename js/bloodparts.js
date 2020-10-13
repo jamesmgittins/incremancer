@@ -6,6 +6,7 @@ Particles = {
     Blasts.initialize();
     Smoke.initialize();
     Fragments.initialize();
+    PrestigePoints.initialize();
   },
   update(timeDiff) {
     Blood.update(timeDiff);
@@ -14,9 +15,87 @@ Particles = {
     Blasts.update(timeDiff);
     Smoke.update(timeDiff);
     Fragments.update(timeDiff);
+    PrestigePoints.update(timeDiff);
   }
 }
 
+PrestigePoints = {
+  maxParts : 5,
+  partCounter : 0,
+  container : null,
+  sprites : [],
+  speed : 20,
+  targetElement : null,
+  animElement : null,
+	initialize() {
+    if (!this.container) {
+      this.container = new PIXI.Container();
+      foregroundContainer.addChild(this.container);
+      this.texture = PIXI.Texture.from("pp.png");
+    }
+
+    this.targetElement = document.getElementById("prestige-button");
+    this.animElement = document.getElementById("prestige-bg");
+
+    if (this.sprites.length < this.maxParts) {
+      for (var i = 0; i < this.maxParts; i++) {
+        var sprite = new PIXI.Sprite(this.texture);
+        sprite.anchor = {x:0.5, y:0.5};
+        this.sprites.push(sprite);
+        sprite.visible = false;
+        this.container.addChild(sprite);
+      }
+    }
+	},
+	update(timeDiff) {
+    var target = {x:0, y:0};
+    if (this.targetElement != null) {
+      var rect  = this.targetElement.getBoundingClientRect();
+      target = {x : rect.x + rect.width / 2, y : rect.y + rect.height / 2};
+      target.x -= gameContainer.x;
+      target.y -= gameContainer.y;
+      target.x = target.x / gameContainer.scale.x;
+      target.y = target.y / gameContainer.scale.y;
+      
+    }
+		for (var i = 0; i < this.sprites.length; i++) {
+      if (this.sprites[i].visible) {
+        this.updatePart(this.sprites[i], timeDiff, target);
+      }
+		}
+  },
+  updatePart(sprite, timeDiff, target) {
+    var vector = ZmMap.normalizeVector({x : target.x - sprite.x, y: target.y - sprite.y});
+    var xDiff = (vector.x * 300) - sprite.xSpeed;
+    var yDiff = (vector.y * 300) - sprite.ySpeed;
+    sprite.xSpeed += xDiff * timeDiff;
+    sprite.ySpeed += yDiff * timeDiff;
+    sprite.x += sprite.xSpeed * timeDiff;
+    sprite.y += sprite.ySpeed * timeDiff;
+    if (fastDistance(sprite.x, sprite.y, target.x, target.y) < 30) {
+      sprite.visible = false;
+      if (this.animElement) {
+        var prestigeBg = this.animElement;
+        prestigeBg.classList.toggle("levelup");
+        setTimeout(function() {
+          prestigeBg.classList.toggle("levelup");
+        }, 3000);
+      }
+    }
+  },
+  newPart(x,y) {
+    var sprite = this.sprites[this.partCounter++];
+    if (this.partCounter >= this.maxParts) {
+      this.partCounter = 0;
+    }
+    sprite.x = x;
+    sprite.y = y - 10;
+    sprite.visible = true;
+    sprite.scale = {x:2,y:2};
+    sprite.xSpeed = 0;
+    sprite.ySpeed = -100;
+  }
+};
 
 Blood = {
   maxParts : 1000,

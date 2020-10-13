@@ -1,0 +1,53 @@
+<div class="level-select" ng-if="zm.skeletonMenu.isShown" id="champ-hold">
+  <div class="shop-title">
+    <h2>Skeleton Champion</h2>
+    <button ng-click="zm.skeletonMenu.show()">Close</button>
+    <div style="clear: both;"></div>
+  </div>
+  <div ng-if="zm.skeleton().skeletons == 0" class="ranges">
+    <p>The Skeleton Champion respects your strength and is willing to join you.</p>
+    <p><em>Give me those trophies of yours as tribute and I will fight for you to scour the humans from this world!</em></p>
+    <button ng-click="zm.skeletonMenu.acceptOffer()">Accept the offer</button>
+    <button ng-click="zm.skeletonMenu.show()">Reject the offer</button>
+  </div>
+  <div ng-if="zm.skeletonMenu.anotherOffer()" class="ranges">
+    <p>The Skeleton Champion has another offer for you.</p>
+    <p><em>Give me some more of those trophies and I'll work twice as hard, I promise!</em></p>
+    <button ng-click="zm.skeletonMenu.acceptOffer()">Accept the offer</button>
+    <button ng-click="zm.skeletonMenu.show()">Reject the offer</button>
+  </div>
+  <div ng-if="zm.skeleton().skeletons > 0">
+    <div class="inventory">
+      <div class="equipped">
+        <div class="row" ng-repeat="itemRow in zm.skeletonMenu.equipped track by $index">
+          <div class="item {{zm.skeletonMenu.itemClass(item)}} {{zm.skeletonMenu.itemType(item)}} droppable" ng-repeat="item in itemRow track by item.id" onmousemove="moveToolTip(event, this);" 
+            droppable-target="true" dropType="{{item.s}}" dropEndCall="zm.skeletonMenu.itemDropped" ng-click="item.s != -1 || zm.skeletonMenu.trashAll()">
+            <div class="icon"></div>
+              <div class="tooltip">
+                <span class="name">{{zm.skeletonMenu.itemName(item)}}</span>
+                <span class="desc">{{zm.skeletonMenu.itemSubName(item)}}</span>
+                <span class="stat" ng-repeat="stat in zm.skeletonMenu.itemStats(item)">{{stat}}</span>
+                <span class="effect" ng-repeat="stat in zm.skeletonMenu.itemEffects(item)">{{stat}}</span>
+              </div>
+            <div class="level" ng-if="item.l">{{item.l}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="items">
+        <div class="item {{zm.skeletonMenu.itemClass(item)}} {{zm.skeletonMenu.itemType(item)}}" ng-repeat="item in zm.skeletonMenu.inventoryItems() track by item.id" onmousemove="moveToolTip(event, this);" 
+          draggable-item="true" drag-object="item" ng-click="zm.skeletonMenu.equipItem(item)">
+          <div class="icon"></div>
+          <div class="level" ng-if="item.l">{{item.l}}</div>
+            <div class="tooltip">
+              <span class="name">{{zm.skeletonMenu.itemName(item)}}</span>
+              <span class="desc">{{zm.skeletonMenu.itemSubName(item)}}</span>
+              <span class="stat" ng-repeat="stat in zm.skeletonMenu.itemStats(item)">{{stat}}</span>
+              <span class="effect" ng-repeat="stat in zm.skeletonMenu.itemEffects(item)">{{stat}}</span>
+            </div>
+        </div>
+      </div>
+    </div>
+    <p>Level: {{zm.skeleton().level}} - {{zm.skeleton().xp|whole}} / {{zm.skeletonMenu.xpForNextLevel()|whole}} xp ({{zm.skeletonMenu.xpRate()}}% xp rate)<br/>Earn xp by killing humans while the Champion is alive, higher level humans reward more xp</p>
+    <p>Increases zombie health and damage by {{zm.skeleton().level}}%, all resource generation by {{zm.skeleton().level}}%,<br/>and receive {{zm.skeleton().level}} prestige points when the Skeleton Champion lands a killing blow. (20 second cooldown)</p>
+  </div>
+</div>

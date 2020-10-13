@@ -73,3 +73,11 @@ function getCostForUpgrades(basePrice, exponent, numberOwned, numberToBuy) {
     (Math.pow(exponent, numberOwned) * (Math.pow(exponent, numberToBuy) - 1)) / (exponent - 1)
   )
 }
+
+function moveToolTip(event, element) {
+  var menuRect = document.getElementById("champ-hold").getBoundingClientRect();
+  var x = event.clientX - menuRect.x;
+  var y = event.clientY - menuRect.y;
+  element.getElementsByClassName("tooltip")[0].style.top = (y + 20) + "px";
+  element.getElementsByClassName("tooltip")[0].style.left = (x + 20) + "px";
+}

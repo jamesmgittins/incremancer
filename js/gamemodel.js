@@ -171,7 +171,7 @@ GameModel = {
 
   addBrains(value) {
     if (isNaN(this.persistentData.brains)) {
-      this.persistentData.blood = 0;  
+      this.persistentData.brains = 0;  
     }
     if (isNaN(value))
       return;
@@ -186,7 +186,7 @@ GameModel = {
 
   addBones(value) {
     if (isNaN(this.persistentData.bones)) {
-      this.persistentData.blood = 0;  
+      this.persistentData.bones = 0;  
     }
     if (isNaN(value))
       return;
@@ -375,6 +375,7 @@ GameModel = {
     Upgrades.updateRuneEffects();
     PartFactory.applyGenerators();
     Creatures.populate();
+    Skeleton.populate();
     this.addStartLevelResources();
     this.populateStats();
   },
@@ -534,6 +535,7 @@ GameModel = {
     this.persistentData.dateOfSave = Date.now();
     try {
       localStorage.setItem(this.storageName, JSON.stringify(this.persistentData));
+      localStorage.setItem(Skeleton.storageName, JSON.stringify(Skeleton.persistent));
     } catch (e) {
       console.log(e);
     }
@@ -543,6 +545,9 @@ GameModel = {
       if (localStorage.getItem(this.storageName) !== null) {
         this.persistentData = JSON.parse(localStorage.getItem(this.storageName));
         this.level = this.persistentData.levelUnlocked;
+        if (localStorage.getItem(Skeleton.storageName) !== null) {
+          Skeleton.persistent = JSON.parse(localStorage.getItem(Skeleton.storageName));
+        }
         this.updatePersistentData();
         this.calcOfflineProgress();
       } 
@@ -566,6 +571,7 @@ GameModel = {
   resetData() {
     try {
       localStorage.removeItem(this.storageName);
+      localStorage.removeItem(Skeleton.storageName);
       this.saveToPlayFab(true);
     } catch (e) {
       console.log(e);
@@ -619,7 +625,9 @@ GameModel = {
   },
 
   downloadSaveGame() {
+    this.persistentData.skeleton = Skeleton.persistent;
     this.blob = new Blob([LZString.compressToEncodedURIComponent(JSON.stringify(this.persistentData))], {type: "octet/stream"});
+    delete this.persistentData.skeleton;
     this.encodedContent = window.URL.createObjectURL(this.blob);
     var datestamp = new Date().toISOString().replace(/:|T|Z|\./g,"");
     this.savefilename = "incremancer-" + datestamp + ".sav";
@@ -634,7 +642,11 @@ GameModel = {
       reader.onload = function(event) {
         var savegame = JSON.parse(LZString.decompressFromEncodedURIComponent(event.target.result));
         if (savegame.dateOfSave) {
-          GameModel.persistentData = savegame;
+          if (savegame.skeleton) {
+            Skeleton.persistent = savegame.skeleton;
+            delete savegame.skeleton;
+          }
+          GameModel.persistentData = savegame;          
           GameModel.updatePersistentData();
           GameModel.saveToPlayFab();
           GameModel.level = GameModel.persistentData.levelUnlocked;
@@ -751,13 +763,18 @@ GameModel = {
     this.lastPlayFabSave = Date.now();
     console.log("saved to playfab");
     if (this.playFabId) {
+      var trophies = this.persistentData.trophies;
+      delete this.persistentData.trophies;
       var request = {
         TitleId : this.titleId,
         PlayFabId : this.playFabId,
         Data : {
-          save : remove ? false : LZString.compressToEncodedURIComponent(JSON.stringify(this.persistentData))
+          save : remove ? false : LZString.compressToEncodedURIComponent(JSON.stringify(this.persistentData)),
+          trophies : remove ? false : LZString.compressToEncodedURIComponent(JSON.stringify(trophies)),
+          skeleton : remove ? false : LZString.compressToEncodedURIComponent(JSON.stringify(Skeleton.persistent))
         }
       }
+      this.persistentData.trophies = trophies;
       try {
         PlayFab.ClientApi.UpdateUserData(request,
           function(result){
@@ -791,7 +808,7 @@ GameModel = {
       var request = {
         TitleId : this.titleId,
         PlayFabId : this.playFabId,
-        Keys : ["save"]
+        Keys : ["save","trophies","skeleton"]
       }
       try {
         var model = this;
@@ -802,6 +819,12 @@ GameModel = {
               // playfab save is older so overwrite
               if (force || savegame.saveCreated < model.persistentData.saveCreated || (savegame.saveCreated == model.persistentData.saveCreated && savegame.dateOfSave > model.persistentData.dateOfSave)) {
                 model.persistentData = savegame;
+                if (result.data.Data.trophies) {
+                  model.persistentData.trophies = JSON.parse(LZString.decompressFromEncodedURIComponent(result.data.Data.trophies.Value));
+                }
+                if (result.data.Data.skeleton) {
+                  Skeleton.persistent = JSON.parse(LZString.decompressFromEncodedURIComponent(result.data.Data.skeleton.Value));
+                }
                 model.level = model.persistentData.levelUnlocked;
                 model.updatePersistentData();
                 model.calcOfflineProgress();

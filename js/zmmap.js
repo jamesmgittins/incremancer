@@ -1,4 +1,4 @@
-Map = {
+ZmMap = {
 
   buildings : [],
   buildingsByPopularity : [],
@@ -148,7 +148,7 @@ Map = {
         }
       },
       {
-        x: poi.x + poi.width / 2,
+        x: poi.x + poi.width,
         y: poi.y + poi.height / 2,
         east : true,
         inside : {

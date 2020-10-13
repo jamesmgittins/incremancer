@@ -1,5 +1,5 @@
 Zombies = {
-  map : Map,
+  map : ZmMap,
   model : GameModel,
   zombies : [],
   discardedZombies : [],
@@ -28,9 +28,9 @@ Zombies = {
   super : false,
 
   states : {
-    lookingForTarget:"lookingForTarget",
-    movingToTarget:"movingToTarget",
-    attackingTarget:"attackingTarget"
+    lookingForTarget:1,
+    movingToTarget:2,
+    attackingTarget:3
   },
 
   populate() {

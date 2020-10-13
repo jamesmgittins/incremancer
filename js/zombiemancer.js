@@ -262,6 +262,7 @@ function update(timeDiff) {
   Humans.update(timeDiff);
   Zombies.update(timeDiff);
   Creatures.update(timeDiff);
+  Skeleton.update(timeDiff);
   Particles.update(timeDiff);
 }
 
@@ -306,11 +307,12 @@ function startGame() {
     .add('sprites/golem.json')
     .add('sprites/bonecollector.json')
     .add('sprites/harpy.json')
-    .add('sprites/objects.json')
+    .add('sprites/objects2.json')
     .add('sprites/fenceposts.json')
     .add('sprites/trees.json')
     .add('sprites/fortress.json')
     .add('sprites/tank.json')
+    .add('sprites/skeleton.json')
     .load(function(){
 
     GameModel.app = app;

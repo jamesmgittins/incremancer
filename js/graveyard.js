@@ -146,12 +146,12 @@ Graveyard = {
     this.sprite.x = gameFieldSize.x / 2;
     this.sprite.y = gameFieldSize.y / 2;
 
-    Map.graveyardCollision = false;
+    ZmMap.graveyardCollision = false;
 
     if (fortTexture) {
       // var graveyyardCollisionWidth = 64;
       // var graveyardCollisionHeight = 16;
-      // Map.graveyardCollision = {
+      // ZmMap.graveyardCollision = {
       //   collisionX:gameFieldSize.x / 2 - graveyyardCollisionWidth / 2, 
       //   collisionY:(gameFieldSize.y / 2) + 2 - graveyardCollisionHeight, 
       //   collisionWidth:graveyyardCollisionWidth, 
@@ -606,7 +606,13 @@ Harpies = {
             harpy.target = getRandomElementFromArray(Tanks.aliveTanks, Math.random());
             harpy.bomb.fire = true;
           } else {
-            harpy.target = getRandomElementFromArray(Humans.aliveHumans, Math.random());
+            for (var i = 0; i < 8; i++) {
+              harpy.target = getRandomElementFromArray(Humans.aliveHumans, Math.random());
+              if (!harpy.target || (this.fastDistance(harpy.x, harpy.y, harpy.target.x, harpy.target.y - this.bombHeight) < 500)) {
+                break;
+              }
+            }
+            
             harpy.bomb.fire = false;
           }
         }

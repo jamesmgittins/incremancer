@@ -53,7 +53,7 @@
           <button>Download Save File</button>
         </a>
         <button onclick="document.getElementById('import-file').click();">Import Save</button>
-        <input type="file" id="import-file" name="import-file" enctype="multipart/form-data" hidden onchange="GameModel.importFile();"/>
+        <input type="file" id="import-file" name="import-file" enctype="multipart/form-data" accept=".sav" hidden onchange="GameModel.importFile();"/>
         <button ng-click="zm.model.loadFromPlayFab(true)" ng-if="zm.model.playFabId" class="mt-5" ng-disabled="!zm.model.allowPlayFabAction()">Load from Cloud</button>
         <button ng-click="zm.model.saveToPlayFab()" ng-if="zm.model.playFabId" class="mt-5" ng-disabled="!zm.model.allowPlayFabAction()">Save to Cloud</button>
       </div>
