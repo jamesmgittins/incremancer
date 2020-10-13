@@ -818,6 +818,7 @@ angular.module('zombieApp', [])
           }
         });
         itemClicked.q = true;
+        Upgrades.applyUpgrades();
         this.updateEquippedItems();
       },
       trashAll() {
