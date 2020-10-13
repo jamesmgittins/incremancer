@@ -790,16 +790,17 @@ div.skeleton > div.lvl.dead {
   font-size: 1em;
 }
 .inventory .item .tooltip {
-  display: none;
-}
-#champ-hold:not(.no-tooltip) .inventory .item:hover .tooltip {
   position: fixed;
-  display: inline-block;
+  display: none;
   background-color: rgb(12,55,55);
+  box-shadow:rgb(0, 0, 0) 5px 5px 15px;
   border-radius: 5px;
   width: 250px;
   padding:0.5em;
   z-index: 150;
+}
+#champ-hold:not(.no-tooltip) .inventory .item:hover .tooltip {
+  display: inline-block;
 }
 .inventory .item .tooltip span.name {
   font-weight: bold;
@@ -809,6 +810,12 @@ div.skeleton > div.lvl.dead {
 .inventory .item .tooltip span.desc, .inventory .item .tooltip span.stat, .inventory .item .tooltip span.effect {
   display:block;
   line-height: 1.5em;
+}
+.inventory .item .tooltip span.stat {
+  color:#3aca51;
+}
+.inventory .item .tooltip span.xp {
+  font-size: 0.8em;
 }
 .inventory .item .tooltip span.effect {
   font-style: italic;
