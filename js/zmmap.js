@@ -34,7 +34,7 @@ ZmMap = {
         return false;
     }
 
-    if (GameModel.level % 5 == 0 && position.y < this.roadSprite.y + (this.roadSprite.height / 2) && position.y + position.height > this.roadSprite.y - (this.roadSprite.height / 2)) {
+    if (GameModel.level % 5 == 0 && !GameModel.isBossStage(GameModel.level) && position.y < this.roadSprite.y + (this.roadSprite.height / 2) && position.y + position.height > this.roadSprite.y - (this.roadSprite.height / 2)) {
       return false;
     }
 
@@ -232,7 +232,7 @@ ZmMap = {
   },
 
   setGraveyardPosition() {
-    if (GameModel.level % 5 == 0) {
+    if (GameModel.level % 5 == 0 && !GameModel.isBossStage(GameModel.level)) {
       this.graveYardPosition = {
         x:(Math.random() * gameFieldSize.x * 0.8) - 50 + (gameFieldSize.x * 0.1),
         y:(Math.random() > 0.5 ? gameFieldSize.y * 0.25 : gameFieldSize.y * 0.75) - 50,
