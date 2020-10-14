@@ -857,7 +857,7 @@ div.level-select > div.levels > button.completed:after {
   transform: translateX(100%);
 }
 
-div.level-select > div.levels > button.boss:after {
+div.level-select > div.levels > button.boss:not(.completed):after {
   content:"\1F451";
   position: absolute;
   top: 0;

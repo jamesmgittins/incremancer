@@ -271,7 +271,7 @@ angular.module('zombieApp', [])
           this.levelRanges.push(this.start - this.levelsPerPage);
         }
         this.levelRanges.push(this.start);
-        if (this.start + this.levelsPerPage < zm.model.persistentData.allTimeHighestLevel) {
+        if (this.start + this.levelsPerPage <= zm.model.persistentData.allTimeHighestLevel + 1) {
           this.levelRanges.push(this.start +  this.levelsPerPage);
         }
         
