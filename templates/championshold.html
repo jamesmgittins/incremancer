@@ -28,7 +28,7 @@
                 <span class="desc" ng-if="item.id > 0">{{zm.skeletonMenu.itemSubName(item)}}</span>
                 <span class="stat" ng-if="item.id > 0" ng-repeat="stat in zm.skeletonMenu.itemStats(item)">{{stat}}</span>
                 <span class="effect" ng-if="item.id > 0" ng-repeat="stat in zm.skeletonMenu.itemEffects(item)">{{stat}}</span>
-                <span class="xp" ng-if="item.id > 0">Can be destroyed for {{item.l * 10|whole}} xp</span>
+                <span class="xp" ng-if="item.id > 0">Can be destroyed for {{item.l * item.r * 10|whole}} xp</span>
               </div>
             <div class="level" ng-if="item.l">{{item.l}}</div>
           </div>
@@ -44,7 +44,7 @@
               <span class="desc">{{zm.skeletonMenu.itemSubName(item)}}</span>
               <span class="stat" ng-repeat="stat in zm.skeletonMenu.itemStats(item)">{{stat}}</span>
               <span class="effect" ng-repeat="stat in zm.skeletonMenu.itemEffects(item)">{{stat}}</span>
-              <span class="xp">Can be destroyed for {{item.l * 10|whole}} xp</span>
+              <span class="xp">Can be destroyed for {{item.l * item.r * 10|whole}} xp</span>
             </div>
         </div>
       </div>

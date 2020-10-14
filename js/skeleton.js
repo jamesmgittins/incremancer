@@ -431,10 +431,10 @@ Skeleton = {
   },
 
   prefixes : {
-    commonQuality : ["Wooden", "Sturdy", "Rigid", "Iron", "Rusty", "Flimsy", "Battered", "Damaged", "Used", "Stained"],
-    rareQuality : ["Steel", "Shiny", "Polished", "Forged", "Plated", "Bronze", "Reinforced", "Veteran's"],
-    epicQuality : ["Antique", "Ancient", "Famous", "Bejeweled", "Notorious"],
-    legendaryQuality : ["Monstrous", "Diabolic", "Withering"]
+    commonQuality : ["Wooden", "Sturdy", "Rigid", "Iron", "Rusty", "Flimsy", "Battered", "Damaged", "Used", "Stained", "Training"],
+    rareQuality : ["Steel", "Shiny", "Polished", "Forged", "Plated", "Bronze", "Reinforced", "Veteran's", "Reliable"],
+    epicQuality : ["Antique", "Ancient", "Famous", "Bejeweled", "Notorious", "Historic", "Mythical", "Extraordinary"],
+    legendaryQuality : ["Monstrous", "Diabolical", "Withering", "Terrible", "Demoniacal"]
   },
 
   stats : {
@@ -630,7 +630,7 @@ Skeleton = {
   },
 
   destroyItem(item) {
-    this.addXp(item.l * 10);
+    this.addXp(item.l * item.r * 10);
     for( var i = 0; i < this.persistent.items.length; i++){
       if ( this.persistent.items[i].id === item.id) { 
         this.persistent.items.splice(i, 1);
@@ -644,7 +644,7 @@ Skeleton = {
   xpForItems() {
     var xp = 0;
     this.persistent.items.filter(i => !i.q).forEach(function(item){
-      xp += item.l * 10;
+      xp += item.l * item.r * 10;
     });
     return xp;
   }
