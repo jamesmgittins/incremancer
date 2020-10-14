@@ -74,6 +74,8 @@ PrestigePoints = {
     sprite.y += sprite.ySpeed * timeDiff;
     if (fastDistance(sprite.x, sprite.y, target.x, target.y) < 30) {
       sprite.visible = false;
+      sprite.x = 100;
+      sprite.y = 100;
       if (this.animElement) {
         var prestigeBg = this.animElement;
         prestigeBg.classList.toggle("levelup");

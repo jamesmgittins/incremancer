@@ -663,7 +663,7 @@ angular.module('zombieApp', [])
         this.isShown = false;
       },
       anotherOffer() {
-        return Skeleton.persistent.skeletons > 0 && GameModel.persistentData.trophies.length > Skeleton.persistent.xpRate * 20;
+        return Skeleton.persistent.skeletons > 0 && GameModel.persistentData.trophies.length >= Skeleton.persistent.xpRate * 20;
       },
       xpPercent() {
         return Math.round(Math.min(1, zm.skeleton().xp / Skeleton.xpForNextLevel()) * 100);

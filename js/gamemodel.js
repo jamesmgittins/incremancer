@@ -370,7 +370,7 @@ GameModel = {
     Humans.populate();
     Zombies.populate();
     Graveyard.initialize();
-    setTimeout(centerGameContainer);
+    setTimeout(centerGameContainer,10);
     Upgrades.applyUpgrades();
     Upgrades.updateRuneEffects();
     PartFactory.applyGenerators();
@@ -761,7 +761,6 @@ GameModel = {
 
   saveToPlayFab(remove = false) {
     this.lastPlayFabSave = Date.now();
-    console.log("saved to playfab");
     if (this.playFabId) {
       var trophies = this.persistentData.trophies;
       delete this.persistentData.trophies;
