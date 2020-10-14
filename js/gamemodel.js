@@ -382,21 +382,31 @@ GameModel = {
 
   populateStats() {
     this.stats = {
+      skeleton : {
+        show : Skeleton.persistent.skeletons > 0,
+        health : this.zombieHealth * 10,
+        damage : this.zombieDamage * 10,
+        speed: Skeleton.moveSpeed
+      },
       zombie : {
         health : this.zombieHealth,
-        damage : this.zombieDamage
+        damage : this.zombieDamage,
+        speed : this.zombieSpeed
       },
       human : {
         health : Humans.getMaxHealth(this.level),
-        damage : Humans.attackDamage
+        damage : Humans.attackDamage,
+        speed : Humans.maxRunSpeed
       },
       police : {
         health : Police.getMaxHealth(),
-        damage : Police.attackDamage
+        damage : Police.attackDamage,
+        speed : Police.maxRunSpeed
       },
       army : {
         health : Army.getMaxHealth(),
-        damage : Army.attackDamage
+        damage : Army.attackDamage,
+        speed : Army.maxRunSpeed
       }
     }
   },
@@ -405,7 +415,11 @@ GameModel = {
     if (this.stats) {
       this.stats.zombie.health = this.zombieHealth;
       this.stats.zombie.damage = this.zombieDamage;
+      this.stats.zombie.speed = this.zombieSpeed;
       this.stats.zombie.count = this.zombieCount;
+      this.stats.skeleton.health = this.zombieHealth * 10;
+      this.stats.skeleton.damage = this.zombieDamage * 10;
+      this.stats.skeleton.speed = Skeleton.moveSpeed;
     }
   },
 
@@ -466,6 +480,7 @@ GameModel = {
     harpies : 0,
     resolution : 1,
     zoomButtons : false,
+    particles : true,
     generators : [],
     creatureLevels : [],
     creatures : [],
@@ -601,6 +616,9 @@ GameModel = {
     }
     if (!this.persistentData.saveCreated) {
       this.persistentData.saveCreated = Date.now();
+    }
+    if (typeof this.persistentData.particles == 'undefined') {
+      this.persistentData.particles = true;
     }
     CreatureFactory.updateAutoBuild();
   },

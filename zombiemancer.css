@@ -767,6 +767,7 @@ div.skeleton > div.lvl.dead {
 }
 .inventory .item.trash .icon {
   background: url("images/trash-can.png");
+  background-position-y: -5px;
 }
 .inventory .item .icon {
   background-size: contain !important;
@@ -856,12 +857,22 @@ div.level-select > div.levels > button.completed:after {
   transform: translateX(100%);
 }
 
-div.level-select > div.levels > button.trophy:after {
-  content:"?";
+div.level-select > div.levels > button.boss:after {
+  content:"\1F451";
   position: absolute;
-  top: 2%;
-  right: 20%;
-  transform: translateX(100%);
+  top: 0;
+  right: 25%;
+  transform: translateX(90%);
+  font-size: 0.8em;
+}
+
+div.level-select > div.levels > button.trophy:not(.boss):after {
+  content:"\1F3C6";
+  position: absolute;
+  top: 10%;
+  right: 25%;
+  transform: translateX(90%);
+  font-size: 0.8em;
 }
 
 div.level-select div.ranges button {

@@ -294,7 +294,7 @@ function startGame() {
   setupContainers(app);
 
   app.loader
-    .add('sprites/grass.png')
+    .add('sprites/ground.json')
     .add('sprites/megagraveyard.png')
     .add('sprites/graveyard.json')
     .add('sprites/buildings.json')
@@ -309,7 +309,7 @@ function startGame() {
     .add('sprites/harpy.json')
     .add('sprites/objects2.json')
     .add('sprites/fenceposts.json')
-    .add('sprites/trees.json')
+    .add('sprites/trees2.json')
     .add('sprites/fortress.json')
     .add('sprites/tank.json')
     .add('sprites/skeleton.json')
@@ -319,7 +319,7 @@ function startGame() {
 
     setGameFieldSizeForLevel();
 
-    grass = new PIXI.TilingSprite(PIXI.Texture.from('sprites/grass.png'));
+    grass = new PIXI.TilingSprite(PIXI.Texture.from('grass.png'));
     grass.width = gameFieldSize.x;
     grass.height = gameFieldSize.y;
     backgroundContainer.addChild(grass);

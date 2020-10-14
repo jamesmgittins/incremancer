@@ -135,6 +135,8 @@ Graveyard = {
     } else {
       this.sprite = new PIXI.Sprite(PIXI.Texture.from(textureName));
     }
+
+    var graveyardPosition = ZmMap.graveYardLocation;
     
     this.sprite.width = 32;
     this.sprite.height = 32;
@@ -143,20 +145,12 @@ Graveyard = {
     this.sprite.visible = false;
     this.sprite.graveyard = true;
     backgroundContainer.addChild(this.sprite);
-    this.sprite.x = gameFieldSize.x / 2;
-    this.sprite.y = gameFieldSize.y / 2;
+    this.sprite.x = graveyardPosition.x;
+    this.sprite.y = graveyardPosition.y;
 
     ZmMap.graveyardCollision = false;
 
     if (fortTexture) {
-      // var graveyyardCollisionWidth = 64;
-      // var graveyardCollisionHeight = 16;
-      // ZmMap.graveyardCollision = {
-      //   collisionX:gameFieldSize.x / 2 - graveyyardCollisionWidth / 2, 
-      //   collisionY:(gameFieldSize.y / 2) + 2 - graveyardCollisionHeight, 
-      //   collisionWidth:graveyyardCollisionWidth, 
-      //   collisionHeight:graveyardCollisionHeight
-      // };
 
       if (this.fortSprite) {
         fortSprite.texture = PIXI.Texture.from(fortTexture);
@@ -166,8 +160,8 @@ Graveyard = {
       
       this.fortSprite.anchor = {x:0.5, y:1};
       this.fortSprite.scale = {x:2,y:2};
-      this.fortSprite.x = gameFieldSize.x / 2;
-      this.fortSprite.zIndex = this.fortSprite.y = (gameFieldSize.y / 2) + 2;
+      this.fortSprite.x = graveyardPosition.x;
+      this.fortSprite.zIndex = this.fortSprite.y = graveyardPosition.y + 2;
       this.fortSprite.visible = false;
       characterContainer.addChild(this.fortSprite);
     }
@@ -202,8 +196,10 @@ Graveyard = {
     }
     this.fence.cacheAsBitmap = true;
 
-    this.fence.x = gameFieldSize.x / 2;
-    this.fence.y = gameFieldSize.y / 2;
+    var graveyardPosition = ZmMap.graveYardLocation;
+
+    this.fence.x = graveyardPosition.x;
+    this.fence.y = graveyardPosition.y;
 
   },
 

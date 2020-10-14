@@ -516,6 +516,10 @@ angular.module('zombieApp', [])
       zm.model.persistentData.showfps = !zm.model.persistentData.showfps;
     }
 
+    zm.toggleParticles = function() {
+      zm.model.persistentData.particles = !zm.model.persistentData.particles;
+    }
+
     zm.isShowPrestige = function() {
       if (typeof zm.model.persistentData.prestigePointsEarned  === 'undefined')
         return false;

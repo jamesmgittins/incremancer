@@ -25,6 +25,11 @@
       <button ng-click="zm.toggleResolution(1);" class="{{zm.getResolution() == 1 ? 'active' : ''}}">100%</button>
       <button ng-click="zm.toggleResolution(2);" class="{{zm.getResolution() == 2 ? 'active' : ''}}">200%</button>
     </div>
+    <div class="upgrade">
+      <h4>Particle Effects</h4>
+      <p>Disable particles like blood and smoke to improve performance</p>
+      <button ng-click="zm.toggleParticles();">{{zm.model.persistentData.particles ? "On" : "Off"}}</button>
+    </div>
     <div class="upgrade" ng-if="zm.model.deferredPrompt">
       <h4>Add to Home Screen</h4>
       <p>You can add this game to your smartphones home screen without having to install anything.</p>

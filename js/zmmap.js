@@ -3,6 +3,8 @@ ZmMap = {
   buildings : [],
   buildingsByPopularity : [],
   buildingTextures : false,
+  roadSprite : false,
+  roadTexture : false,
   entranceWidth : 16,
   entranceDepth : 16,
   cornerDistance : 14,
@@ -30,6 +32,10 @@ ZmMap = {
     for (var i=0; i < this.buildings.length; i++) {
       if (!this.roomNoOverlap(position, this.buildings[i]))
         return false;
+    }
+
+    if (GameModel.level % 5 == 0 && position.y < this.roadSprite.y + (this.roadSprite.height / 2) && position.y + position.height > this.roadSprite.y - (this.roadSprite.height / 2)) {
+      return false;
     }
 
     return true;
@@ -175,13 +181,16 @@ ZmMap = {
     }
     poi.entrance = closestEntrance;
 
+    if (GameModel.level % 5 == 0) {
+      if (poi.y < gameFieldSize.y / 2) {
+        poi.entrance = possibleEntrances.filter(e => e.south)[0];
+      } else {
+        poi.entrance = possibleEntrances.filter(e => e.north)[0];
+      }
+    }
+
     poi.walls = [];
     var wallTexture = getRandomElementFromArray(this.buildingTextures.walls, Math.random());
-
-    // this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.north, poi.x - 4, poi.y - 4, poi.width + 8);
-    // this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.south, poi.x - 4, poi.y + poi.height, poi.width + 8);
-    // this.makeVerticalWall(poi.walls, wallTexture, poi.entrance.west, poi.x - 4, poi.y - 4, poi.height + 8);
-    // this.makeVerticalWall(poi.walls, wallTexture, poi.entrance.east, poi.x + poi.width, poi.y - 4, poi.height + 8);
 
     this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.north, -4, -4, poi.width + 8);
     this.makeHorizontalWall(poi.walls, wallTexture, poi.entrance.south, -4, poi.height, poi.width + 8);
@@ -189,7 +198,6 @@ ZmMap = {
     this.makeVerticalWall(poi.walls, wallTexture, poi.entrance.east, poi.width, -4, poi.height + 8);
 
     for (var i=0; i < poi.walls.length; i++) {
-      // backgroundContainer.addChild(poi.walls[i]);
       poi.container.addChild(poi.walls[i]);
     }
     poi.container.cacheAsBitmap = true;
@@ -223,7 +231,27 @@ ZmMap = {
     });
   },
 
+  setGraveyardPosition() {
+    if (GameModel.level % 5 == 0) {
+      this.graveYardPosition = {
+        x:(Math.random() * gameFieldSize.x * 0.8) - 50 + (gameFieldSize.x * 0.1),
+        y:(Math.random() > 0.5 ? gameFieldSize.y * 0.25 : gameFieldSize.y * 0.75) - 50,
+        width: 100, height: 100
+      };
+    } else {
+      this.graveYardPosition = {
+        x:gameFieldSize.x / 2 - 50,
+        y:gameFieldSize.y / 2 - 50,
+        width: 100, height: 100
+      };
+    }
+    this.graveYardLocation = {x:this.graveYardPosition.x + 50, y:this.graveYardPosition.y + 50};
+  },
+
   populatePois() {
+    
+    this.setGraveyardPosition();
+
     if (!this.buildingTextures) {
       var floors = [];
       var walls = [];
@@ -238,6 +266,13 @@ ZmMap = {
         floors:floors,
         walls:walls
       }
+      this.roadSprite = new PIXI.TilingSprite(PIXI.Texture.from('road.png'));
+      this.roadSprite.width = gameFieldSize.x;
+      this.roadSprite.tileScale = {x:3,y:3};
+      this.roadSprite.height = 96;
+      backgroundContainer.addChild(this.roadSprite);
+      this.roadSprite.visible = false;
+      this.roadSprite.anchor = {x:0.5, y:0.5};
     }
 
     if (this.buildings.length > 0) {
@@ -255,22 +290,20 @@ ZmMap = {
 
     this.buildingsByPopularity = [];
     this.buildings = [];
-
-    this.graveYardPosition = {
-      x:gameFieldSize.x / 2 - 50,
-      y:gameFieldSize.y / 2 - 50,
-      width: 100, height: 100
-    };
-
     var minBuildings = this.minBuildings;
     var spaceToCreate = Humans.getMaxHumans();
     var areaPerPerson = 500;
     var maxRoomSize = Math.max(Math.min(50, Math.round(spaceToCreate / 3)), 10);
     var minRoomSize = 5;
-
+    this.roadSprite.visible = false;
     if (GameModel.isBossStage(GameModel.level)) {
       spaceToCreate = 0;
       minBuildings = 0;
+    } else if (GameModel.level % 5 == 0) {
+      this.roadSprite.visible = true;
+      this.roadSprite.width = gameFieldSize.x;
+      this.roadSprite.x = gameFieldSize.x / 2;
+      this.roadSprite.y = gameFieldSize.y / 2;
     }
 
     while(spaceToCreate > 0 || minBuildings > 0) {
@@ -285,12 +318,31 @@ ZmMap = {
       var spaceFromEdges = 10;
       while(!foundPosition && counter > 0) {
         counter--;
-        testPosition = {
-          x: spaceFromEdges + (Math.random() * (gameFieldSize.x - (2 * spaceFromEdges + roomSize))), 
-          y: spaceFromEdges + (Math.random() * (gameFieldSize.y - (2 * spaceFromEdges + roomSize))),
-          width : roomSize,
-          height: roomSize
-        };
+        if (GameModel.level % 5 == 0) {
+          if (Math.random() > 0.7) {
+            testPosition = {
+              x: spaceFromEdges + (Math.random() * (gameFieldSize.x - (2 * spaceFromEdges + roomSize))), 
+              y: spaceFromEdges + (Math.random() * (gameFieldSize.y - (2 * spaceFromEdges + roomSize))),
+              width : roomSize,
+              height: roomSize
+            };
+          } else {
+            testPosition = {
+              x: spaceFromEdges + (Math.random() * (gameFieldSize.x - (2 * spaceFromEdges + roomSize))), 
+              y: Math.random() > 0.5 ? gameFieldSize.y / 2 + (this.roadSprite.height / 2) + 8 : gameFieldSize.y / 2 - (this.roadSprite.height / 2) - 8 - roomSize,
+              width : roomSize,
+              height: roomSize
+            };
+          }
+          
+        } else {
+          testPosition = {
+            x: spaceFromEdges + (Math.random() * (gameFieldSize.x - (2 * spaceFromEdges + roomSize))), 
+            y: spaceFromEdges + (Math.random() * (gameFieldSize.y - (2 * spaceFromEdges + roomSize))),
+            width : roomSize,
+            height: roomSize
+          };
+        }
         foundPosition = this.isValidPosition(testPosition);
       }
 
@@ -650,6 +702,7 @@ ZmMap = {
 
   treeSprites : [],
   treeTextures : [],
+  armyTextures : [],
 
   isValidTreePosition(position) {
     if (!this.isValidPosition(position))
@@ -674,9 +727,14 @@ ZmMap = {
       for (var i=0; i < 6; i++) {
         this.treeTextures.push(PIXI.Texture.from('tree' + i + '.png'));
       }
+      this.armyTextures.push(PIXI.Texture.from('hedgehog.png'));
+      this.armyTextures.push(PIXI.Texture.from('sandbags.png'));
     }
 
     var treesToCreate = Math.round(gameFieldSize.x / 50);
+    if (GameModel.isBossStage(GameModel.level)) {
+      treesToCreate = Math.round(treesToCreate * 1.5);
+    }
 
     while(treesToCreate > 0) {
       var foundPosition = false;
@@ -699,10 +757,13 @@ ZmMap = {
       if (foundPosition) {
         var alivePercent = 0.4 + Math.random() * 0.6;
         if (GameModel.constructions.graveyard) {
-          alivePercent = Math.min((this.fastDistance(testPosition.x, testPosition.y, gameFieldSize.x / 2, gameFieldSize.y / 2) - 90) / 400, 1);
+          alivePercent = Math.min((this.fastDistance(testPosition.x, testPosition.y, this.graveYardLocation.x, this.graveYardLocation.y) - 90) / 400, 1);
         }
-        var textureId = (this.treeTextures.length - 1) - Math.round((this.treeTextures.length - 1) * alivePercent);
-        var treeSprite = new PIXI.Sprite(this.treeTextures[textureId]);
+        var texture = this.treeTextures[(this.treeTextures.length - 1) - Math.round((this.treeTextures.length - 1) * alivePercent)];
+        if (GameModel.isBossStage(GameModel.level) && Math.random() > 0.7) {
+          texture = getRandomElementFromArray(this.armyTextures, Math.random());
+        }
+        var treeSprite = new PIXI.Sprite(texture);
         treeSprite.anchor = {x:0.5, y:1};
         treeSprite.x = testPosition.x;
         treeSprite.y = testPosition.y;
