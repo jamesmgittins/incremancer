@@ -335,6 +335,22 @@ Skeleton = {
         break;
     }
   },
+
+  incinerate() {
+    var creature;
+    for (var i=0; i < this.skeletons.length; i++) {
+      if (this.skeletons[i].visible) {
+        creature=this.skeletons[i];
+      }
+    }
+    for (var i=0; i < this.aliveHumans.length; i++) {
+      if (Math.abs(this.aliveHumans[i].x - creature.x) < 200) {
+        if (Math.abs(this.aliveHumans[i].y - creature.y) < 200) {
+          Humans.burnHuman(this.aliveHumans[i], creature.attackDamage);
+        }
+      }
+    }
+  },
   
 
   getCreatureDirection(creature) {

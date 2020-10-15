@@ -74,6 +74,21 @@ Spells = {
       end() {
         Zombies.super = false;
       }
+    },
+    {
+      id : 6,
+      name : "Incinerate",
+      tooltip : "Burns humans near the skeleton champion",
+      icon : "",
+      cooldown : 1,
+      duration : 10,
+      energyCost : 10,
+      start() {
+        Skeleton.incinerate();
+      },
+      end() {
+
+      }
     }
   ],
   lockAllSpells() {

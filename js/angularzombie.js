@@ -550,6 +550,8 @@ angular.module('zombieApp', [])
     zm.updateMessages = function(timeDiff) {
       if (zm.message) {
         zm.messageTimer -= timeDiff;
+        if (zm.model.messageQueue.length > 0)
+          zm.messageTimer -= timeDiff;
         if (zm.messageTimer < 0) {
           zm.message = false;
           zm.messageTimer = 4;

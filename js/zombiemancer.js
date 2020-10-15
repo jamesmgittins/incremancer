@@ -182,8 +182,9 @@ function centerGameContainer(resetZoom = false) {
     if (Zombies.zombieCursor)
       Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursorScale * canvasSize.defaultScale;
   }
-  gameContainer.x = (canvasSize.x - gameContainer.width) / 2;
-  gameContainer.y = (canvasSize.y - gameContainer.height) / 2;
+  
+  gameContainer.x = (canvasSize.x - gameFieldSize.x * gameContainer.scale.x) / 2;
+  gameContainer.y = (canvasSize.y - gameFieldSize.y * gameContainer.scale.y) / 2;
 }
 
 function scrollGameContainer(timeDiff) {
