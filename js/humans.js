@@ -362,6 +362,11 @@ Humans = {
     human.xSpeed = human.targetVector.x * humanSpeedMod;
     human.ySpeed = human.targetVector.y * humanSpeedMod;
 
+    if (isNaN(human.xSpeed) || isNaN(human.ySpeed)) {
+      human.xSpeed = 0;
+      human.ySpeed = 0;
+    }
+
     human.position.x += human.xSpeed * timeDiff;
     human.position.y += human.ySpeed * timeDiff;
     human.zIndex = human.position.y;
