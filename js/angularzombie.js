@@ -68,6 +68,7 @@ angular.module('zombieApp', [])
           zm.sidePanels.factory = true;
           zm.upgrades = PartFactory.generators;
           zm.factoryStats = PartFactory.factoryStats();
+          zm.factory.updateDelays();
           break;
         case "prestige":
           zm.upgrades = Upgrades.prestigeUpgrades.filter(upgrade => upgrade.cap == 0 || zm.currentRank(upgrade) < upgrade.cap);
@@ -165,10 +166,12 @@ angular.module('zombieApp', [])
 
     // ---- Factory Functions ---- //
     zm.factory = {
+      delays : [],
       changeFactoryTab(tab) {
         zm.factoryTab = tab;
         if (tab == 'parts') {
           zm.upgrades = PartFactory.generators;
+          this.updateDelays();
         } else {
           zm.upgrades = CreatureFactory.creatures;
         }
@@ -238,6 +241,12 @@ angular.module('zombieApp', [])
       },
       creatureStats(creature) {
         return CreatureFactory.creatureStats(creature);
+      },
+      updateDelays() {
+        this.delays = [];
+        for (var i = 0; i < PartFactory.generatorsApplied.length; i++) {
+          this.delays[PartFactory.generatorsApplied[i].id] = (-1 * (PartFactory.generatorsApplied[i].time - PartFactory.generatorsApplied[i].timeLeft)).toFixed(2);
+        }
       }
     }
     // ---- Factory Functions ---- //
@@ -655,6 +664,7 @@ angular.module('zombieApp', [])
       return Skeleton.skeletonTimer();
     }
 
+    // ---- Skeleton Functions ---- //
     zm.skeletonMenu = {
       isShown :false,
       equipped : [],
@@ -662,6 +672,12 @@ angular.module('zombieApp', [])
         this.isShown = !this.isShown;
         if (this.isShown) {
           this.updateEquippedItems();
+          setTimeout(function(){
+            var elements = document.getElementsByClassName("item legendary");
+            for (var i = 0; i < elements.length; i++) {
+              elements[i].style.animationDelay = (Math.random() * 4).toFixed(2) + "s";
+            }
+          },100);
         }
       },
       acceptOffer() {
@@ -756,6 +772,9 @@ angular.module('zombieApp', [])
               return "Legendary level " + item.l + " " + this.itemType(item);
           }
         }
+        if (item.s == -1) {
+          return "Click this to destroy all non-equipped items. Or drag items here to destroy them.";
+        }
       },
       itemStats(item) {
         return Skeleton.getLootStats(item);
@@ -833,6 +852,7 @@ angular.module('zombieApp', [])
         }
       }
     }
+    // ---- Skeleton Functions ---- //
 
     function update() {
       var updateTime = new Date().getTime();

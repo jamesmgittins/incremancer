@@ -625,8 +625,8 @@ Skeleton = {
         prefixIndex = Math.floor(Math.random() * this.prefixes.legendaryQuality.length);
         break;
     }
-    var effects = [];
-    for (var i = 0; i < rarity; i++) {
+    var effects = [(Math.random() > 0.5 ? this.stats.zombieHealth.id : this.stats.zombieDamage.id)];
+    for (var i = 0; i < rarity - 1; i++) {
       var effect = Math.ceil(Math.random() * 5);
       while (effects.includes(effect)) {
         effect = Math.ceil(Math.random() * 5);

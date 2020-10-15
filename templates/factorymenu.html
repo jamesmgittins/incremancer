@@ -14,7 +14,7 @@
       <h4>{{generator.name}} ({{zm.currentRank(generator)}})</h4>
       <h4 class="cost">{{zm.factory.generatorPrice(generator)|whole}} {{generator.costType}}</h4>
       <div class="generator-progress clear {{zm.currentRank(generator) > 0 ? 'active' : ''}}">
-        <span class="percent" ng-style="{'animation-duration':(generator.time / zm.model.gameSpeed) + 's'}"></span>
+        <span class="percent" ng-style="{'animation-duration':(generator.time / zm.model.gameSpeed) + 's', 'animation-delay' : (zm.factory.delays[generator.id]) + 's'}"></span>
       </div>
       <button ng-click="zm.factory.buyGenerator(generator);" ng-disabled="zm.upgradeTooExpensive(generator);">{{zm.upgradeButtonText(generator)}}
         <span class="percent" ng-style="{'width':zm.upgradePercent(generator) + '%'}"></span>
