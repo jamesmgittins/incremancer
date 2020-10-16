@@ -966,14 +966,14 @@ angular.module('zombieApp', [])
         });
 
         el.bind("dragenter", function (e) {
-          if (e.target.classList.contains("icon")) {
+          if (e.target && e.target.classList && e.target.classList.contains("icon")) {
             angular.element(e.target.parentElement).addClass('over');
           }
           
         });
 
         el.bind("dragleave", function (e) {
-          if (e.target.classList.contains("icon")) {
+          if (e.target && e.target.classList && e.target.classList.contains("icon")) {
             angular.element(e.target.parentElement).removeClass('over');
           }
         });
