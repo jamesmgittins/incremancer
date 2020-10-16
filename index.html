@@ -9,18 +9,22 @@
       gtag('js', new Date());
       gtag('config', 'UA-56478232-3');
 
+      var errors = 1;
+
       // Track basic JavaScript errors
       window.addEventListener('error', function(e) {
-        gtag("event", "exception", {
-              "description": e.message + ": " + e.filename + ":  " + e.lineno,
-              "fatal" : true}
-            );
+          gtag('event', 'error', {
+            'event_category': 'JS exception',
+            'event_label': e.message + ": " + e.filename + ":  " + e.lineno,
+            'value': errors++
+          });
       });
     </script>
     <title>Incremancer</title>
     <meta name="description" content="Zombie necromancer idle game">
     <meta name="keywords" content="zombie,game,idle,javascript">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
     <meta name="theme-color" content="#104510" />
     <meta charset="utf-8"/>
     <link rel="manifest" href="manifest.json">
