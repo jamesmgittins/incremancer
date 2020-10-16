@@ -757,7 +757,11 @@ angular.module('zombieApp', [])
         return Skeleton.persistent.items.filter(i => !i.q).sort((a,b) => (b.r * b.l) - (a.r * a.l));
       },
       itemName(item) {
-        return item.name ?? Skeleton.getLootName(item);
+        if (item.name) {
+          return item.name;
+        } else {
+          return Skeleton.getLootName(item);
+        }
       },
       itemSubName(item) {
         if (!item.name) {
