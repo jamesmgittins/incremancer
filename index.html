@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html ng-app="zombieApp">
   <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-56478232-3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-56478232-3');
+
+      // Track basic JavaScript errors
+      window.addEventListener('error', function(e) {
+        gtag("event", "exception", {
+              "description": e.message + ": " + e.filename + ":  " + e.lineno,
+              "fatal" : true}
+            );
+      });
+    </script>
     <title>Incremancer</title>
     <meta name="description" content="Zombie necromancer idle game">
     <meta name="keywords" content="zombie,game,idle,javascript">
@@ -29,7 +45,6 @@
     <script src="js/graveyard.js"></script>
     <script src="js/bloodparts.js"></script>
     <script src="js/angularzombie.js"></script>
-    <!-- <script src="js/zombie.min.js"></script> -->
     <link rel="stylesheet" type="text/css" href="zombiemancer.css">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
   </head>
