@@ -762,7 +762,7 @@ GameModel = {
         // Invoke LoginWithKongregate API call and visualize both results (success or failue)
         PlayFabClientSDK.LoginWithKongregate(request,
           function(result){
-            if (result.data.PlayFabId) {
+            if (result && result.data && result.data.PlayFabId) {
               model.playFabId = result.data.PlayFabId;
               model.loadFromPlayFab();
             }
