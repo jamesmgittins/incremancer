@@ -352,6 +352,15 @@ div.buttons button {
   text-shadow: 2px 2px #000;
 }
 
+div.buttons button.shatter {
+  background: linear-gradient(270deg, rgba(0,0,0,0.5) 25%, dodgerblue 50%, rgba(0,0,0,0.5) 75%);
+  background-size: 400% 400%;
+
+  -webkit-animation: levelup-animation 4s ease infinite;
+  -moz-animation: levelup-animation 4s ease infinite;
+  animation: levelup-animation 4s ease infinite;
+}
+
 div.buttons button:not(.cooldown):hover, div.buttons button.active {
   background: rgba(0,0,0,0.8);
   color: #ff3;

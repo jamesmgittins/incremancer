@@ -25,10 +25,10 @@
             <div class="icon"></div>
               <div class="tooltip">
                 <span class="name">{{zm.skeletonMenu.itemName(item)}}</span>
-                <span class="desc" ng-if="item.id > 0 || item.s == -1">{{zm.skeletonMenu.itemSubName(item)}}</span>
-                <span class="stat" ng-if="item.id > 0" ng-repeat="stat in zm.skeletonMenu.itemStats(item)">{{stat}}</span>
-                <span class="effect" ng-if="item.id > 0" ng-repeat="stat in zm.skeletonMenu.itemEffects(item)">{{stat}}</span>
-                <span class="xp" ng-if="item.id > 0">Can be destroyed for {{item.l * item.r * 10|whole}} xp</span>
+                <span class="desc" ng-if="item.id > -1 || item.s == -1">{{zm.skeletonMenu.itemSubName(item)}}</span>
+                <span class="stat" ng-if="item.id > -1" ng-repeat="stat in zm.skeletonMenu.itemStats(item)">{{stat}}</span>
+                <span class="effect" ng-if="item.id > -1" ng-repeat="stat in zm.skeletonMenu.itemEffects(item)">{{stat}}</span>
+                <span class="xp" ng-if="item.id > -1">Can be destroyed for {{item.l * item.r * 10|whole}} xp</span>
               </div>
             <div class="level" ng-if="item.l">{{item.l}}</div>
           </div>

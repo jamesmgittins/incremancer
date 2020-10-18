@@ -594,6 +594,30 @@ angular.module('zombieApp', [])
       }
     }
 
+    zm.shatterPercent = function(rune) {
+      return Upgrades.shatterPercent(rune);
+    }
+
+    zm.shatterBloodCost = function(rune) {
+      return Upgrades.shatterBloodCost(rune);
+    }
+
+    zm.shatterSatiate = function(runetype, rune) {
+      Upgrades.infuseRune(runetype, "blood", this.shatterBloodCost(rune));
+    }
+
+    zm.canShatter = function() {
+      return Upgrades.canShatter();
+    }
+
+    zm.doShatter = function() {
+      Upgrades.doShatter();
+    }
+
+    zm.shatterEffect = function() {
+      return Upgrades.shatterEffect() * 100;
+    }
+
     zm.infuseButtonText = function() {
       if (zm.infusionMax) {
         return "Max";

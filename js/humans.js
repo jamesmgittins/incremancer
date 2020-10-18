@@ -26,7 +26,7 @@ Humans = {
   attackDamage : 5,
   fadeSpeed : 0.1,
   plagueTickTimer : 5,
-  healTickTimer : 4,
+  healTickTimer : 5,
   burnTickTimer : 5,
   smokeTimer : 0.3,
   fastDistance:fastDistance,
@@ -154,32 +154,28 @@ Humans = {
       return (level - 19) * 100;
     }
     if (level < 64) {
-      return (level - 29) * 150;
-    }
-    if (level < 78) {
-      return (level - 37) * 200;
+      return (level - 39) * 300;
     }
     if (level < 85) {
-      return (level - 45) * 250;
-    }
-    if (level < 92) {
-      return (level - 52) * 300;
+      return (level - 49) * 500;
     }
     if (level > 499) {
-      return 6000000 * Math.pow(1.05, level - 499);
+      return 8500000 * Math.pow(1.03, level - 499);
     }
-    if (level > 99) {
-      return 16000 * Math.pow(1.015, level-99);
-    }
-    return (level - 68) * 500;
+
+    return 17800 * Math.pow(1.015, level - 84);
   },
 
   getAttackDamage() {
     if (GameModel.level == 1) {
-      this.attackDamage = 4;
+      this.attackDamage = 2;
       return;
     }
     if (GameModel.level == 2) {
+      this.attackDamage = 4;
+      return;
+    }
+    if (GameModel.level == 3) {
       this.attackDamage = 5;
       return;
     }

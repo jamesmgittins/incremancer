@@ -116,12 +116,14 @@ function zoom(change, coords) {
   if (change > 0) {
     if (gc.scale.x < 10) {
       gc.scale.x = gc.scale.y = gc.scale.x * 1.1;
-      Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 1.1
+      if (Zombies.zombieCursor && Zombies.zombieCursor.scale) // .scale is undefined sometimes, don't know why yet
+        Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 1.1
     }
   } else {
     if (Math.max(gcWidth, gcHeight) > Math.min(canvasSize.y, canvasSize.x) * 0.8) {
       gc.scale.x = gc.scale.y = gc.scale.x * 0.9;
-      Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 0.9;
+      if (Zombies.zombieCursor && Zombies.zombieCursor.scale) // .scale is undefined sometimes, don't know why yet
+        Zombies.zombieCursor.scale.x = Zombies.zombieCursor.scale.y = Zombies.zombieCursor.scale.x * 0.9;
     }
   }
 

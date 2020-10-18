@@ -90,7 +90,7 @@ Zombies = {
     }
   },
 
-  createZombie(x, y, isDog = false, gigazombie = false) {
+  createZombie(x, y, isDog = false) {
     var textureId = Math.floor(Math.random() * this.textures.length);
     var zombie;
     if (this.discardedZombies.length > 0) {
@@ -114,10 +114,6 @@ Zombies = {
     if (this.super) {
       zombie.mod = 10;
       zombie.scalemod = 1.5;
-    }
-    if (gigazombie) {
-      zombie.mod *= 10;
-      zombie.scalemod *= 1.5;
     }
     if (zombie.scalemod > 2) {
       zombie.mod = 20;
@@ -166,7 +162,7 @@ Zombies = {
       return;
 
     this.model.energy -= this.model.zombieCost;
-    this.createZombie(x, y, false, this.model.persistentData.gigazombiesOn);
+    this.createZombie(x, y, false);
   },
 
   spawnAllZombies(x,y) {

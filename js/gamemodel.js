@@ -26,6 +26,8 @@ GameModel = {
   zombieSpeed : 10,
   zombieCages : 0,
   zombiesInCages : 0,
+  golemDamagePCMod :1,
+  golemHealthPCMod : 1,
   plagueDamagePCMod : 1,
   graveyardHealthMod : 1,
   burningSpeedMod : 1,
@@ -129,6 +131,8 @@ GameModel = {
     this.brainsStorePCMod = 1;
     this.zombieHealthPCMod = 1;
     this.zombieDamagePCMod = 1;
+    this.golemHealthPCMod = 1;
+    this.golemDamagePCMod = 1;
     this.plagueDamagePCMod = 1;
     this.burningSpeedMod = 1;
     this.startingResources = 0;
@@ -161,8 +165,12 @@ GameModel = {
     if (isNaN(value))
       return;
     this.persistentData.blood += (value * this.bloodPCMod);
-    if (this.persistentData.blood > this.bloodMax)
+    if (this.persistentData.blood > this.bloodMax) {
       this.persistentData.blood = this.bloodMax;
+      if (this.constructions.runesmith && this.runicSyphon.percentage > 0) {
+        this.runicSyphon.blood += value * this.bloodPCMod;
+      }
+    }
 
     if (this.runicSyphon.percentage > 0) {
       this.runicSyphon.blood += value * this.bloodPCMod * this.runicSyphon.percentage;
@@ -176,8 +184,13 @@ GameModel = {
     if (isNaN(value))
       return;
     this.persistentData.brains += (value * this.brainsPCMod);
-    if (this.persistentData.brains > this.brainsMax)
+
+    if (this.persistentData.brains > this.brainsMax) {
       this.persistentData.brains = this.brainsMax;
+      if (this.constructions.runesmith && this.runicSyphon.percentage > 0) {
+        this.runicSyphon.brains += value * this.brainsPCMod;
+      }
+    }
 
     if (this.runicSyphon.percentage > 0) {
       this.runicSyphon.brains += value * this.brainsPCMod * this.runicSyphon.percentage;
@@ -399,11 +412,13 @@ GameModel = {
         speed : Humans.maxRunSpeed
       },
       police : {
+        show : Police.getMaxPolice() > 0,
         health : Police.getMaxHealth(),
         damage : Police.attackDamage,
         speed : Police.maxRunSpeed
       },
       army : {
+        show : Army.getMaxArmy() > 0,
         health : Army.getMaxHealth(),
         damage : Army.attackDamage,
         speed : Army.maxRunSpeed
@@ -519,6 +534,7 @@ GameModel = {
       this.persistentData.creatureLevels = [];
       this.persistentData.creatureAutobuild = [];
       this.persistentData.levelsCompleted = [];
+      this.persistentData.runeshatter = 0;
       this.zombiesInCages = 0;
       this.autoconstruction = false;
       this.levelResourcesAdded = false;
@@ -619,6 +635,9 @@ GameModel = {
     }
     if (typeof this.persistentData.particles == 'undefined') {
       this.persistentData.particles = true;
+    }
+    if (!this.persistentData.runeshatter) {
+      this.persistentData.runeshatter = 0;
     }
     CreatureFactory.updateAutoBuild();
   },

@@ -39,6 +39,8 @@ Upgrades = {
     partsGainPC : "partsGainPC",
     zombieDmgPC : "zombieDmgPC",
     zombieHealthPC : "zombieHealthPC",
+    golemHealthPC : "golemHealthPC",
+    golemDamagePC : "golemDamagePC",
     startingPC : "startingPC",
     energyCost : "energyCost",
     autoconstruction : "autoconstruction",
@@ -98,10 +100,14 @@ Upgrades = {
     GameModel.brainsMax *= GameModel.brainsStorePCMod;
     GameModel.zombieDamage *= GameModel.zombieDamagePCMod;
     GameModel.zombieHealth *= GameModel.zombieHealthPCMod;
-    if (GameModel.persistentData.gigazombiesOn) {
-      GameModel.zombieCost *= 5;
+    if (GameModel.persistentData.runeshatter) {
+      GameModel.zombieDamage *= this.shatterEffect();
+      GameModel.zombieHealth *= this.shatterEffect();
+      GameModel.zombieCost += GameModel.persistentData.runeshatter;
     }
-    
+    // if (GameModel.persistentData.gigazombiesOn) {
+    //   GameModel.zombieCost *= 5;
+    // }
   },
 
   applyUpgrade(upgrade, rank) {
@@ -175,9 +181,9 @@ Upgrades = {
       case this.types.runicSyphon:
         GameModel.runicSyphon.percentage += upgrade.effect * rank;
         return;
-      case this.types.gigazombies:
-        GameModel.gigazombies = true;
-        return;
+      // case this.types.gigazombies:
+      //   GameModel.gigazombies = true;
+      //   return;
       case this.types.bulletproof:
         GameModel.bulletproofChance += upgrade.effect * rank;
         return;
@@ -210,12 +216,16 @@ Upgrades = {
         GameModel.brainsStorePCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.zombieDmgPC:
-        // GameModel.zombieDamagePCMod += upgrade.effect * upgrade.rank;
         GameModel.zombieDamagePCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.zombieHealthPC:
-        // GameModel.zombieHealthPCMod += upgrade.effect * upgrade.rank;
         GameModel.zombieHealthPCMod *= Math.pow(1 + upgrade.effect, rank);
+        return;
+      case this.types.golemDamagePC:
+        GameModel.golemDamagePCMod *= Math.pow(1 + upgrade.effect, rank);
+        return;
+      case this.types.golemHealthPC:
+        GameModel.golemHealthPCMod *= Math.pow(1 + upgrade.effect, rank);
         return;
       case this.types.startingPC:
         GameModel.startingResources += upgrade.effect * rank;
@@ -346,21 +356,25 @@ Upgrades = {
       case this.types.boneCollectorCapacity:
         return "Bone collector capacity: " + formatWhole(GameModel.boneCollectorCapacity);
       case this.types.bonesGainPC:
-        return "Bones: " + Math.round(GameModel.bonesPCMod * 100) + "%";
+        return "Bones: " + formatWhole(Math.round(GameModel.bonesPCMod * 100)) + "%";
       case this.types.partsGainPC:
-        return "Parts: " + Math.round(GameModel.partsPCMod * 100) + "%";
+        return "Parts: " + formatWhole(Math.round(GameModel.partsPCMod * 100)) + "%";
       case this.types.bloodGainPC:
-        return "Blood: " + Math.round(GameModel.bloodPCMod * 100) + "%";
+        return "Blood: " + formatWhole(Math.round(GameModel.bloodPCMod * 100)) + "%";
       case this.types.bloodStoragePC:
         return "Blood Storage: " + formatWhole(GameModel.bloodStorePCMod * 100) + "%";
       case this.types.brainsGainPC:
-        return "Brains: " + Math.round(GameModel.brainsPCMod * 100) + "%";
+        return "Brains: " + formatWhole(Math.round(GameModel.brainsPCMod * 100)) + "%";
       case this.types.brainsStoragePC:
         return "Brains Storage: " +  formatWhole(GameModel.brainsStorePCMod * 100) + "%";
       case this.types.zombieDmgPC:
         return "Zombie Damage: " + Math.round(GameModel.zombieDamagePCMod * 100) + "%";
       case this.types.zombieHealthPC:
         return "Zombie Health: " + Math.round(GameModel.zombieHealthPCMod * 100) + "%";
+      case this.types.golemDamagePC:
+        return "Golem Damage: " + Math.round(GameModel.golemDamagePCMod * 100) + "%";
+      case this.types.golemHealthPC:
+        return "Golem Health: " + Math.round(GameModel.golemHealthPCMod * 100) + "%";
       case this.types.startingPC:
         return Math.round(GameModel.startingResources * 500) + " blood, " + Math.round(GameModel.startingResources * 50) + " brains, " + Math.round(GameModel.startingResources * 200) + " bones";
       case this.types.unlockSpell:
@@ -385,8 +399,8 @@ Upgrades = {
         return this.currentRank(upgrade) > 0 ? "You have unlocked automatic shop purchases" : "You have yet to unlock automatic shop purchases";
       case this.types.graveyardHealth:
         return "Graveyard health: " + Math.round(GameModel.graveyardHealthMod * 100) + "%";
-      case this.types.gigazombies:
-        return this.currentRank(upgrade) > 0 ? "You have unlocked more gigazombies" : "You have yet to unlock more gigazombies";
+      // case this.types.gigazombies:
+        // return this.currentRank(upgrade) > 0 ? "You have unlocked more gigazombies" : "You have yet to unlock more gigazombies";
       case this.types.harpySpeed:
         return "Harpy speed: " + formatWhole(GameModel.harpySpeed);
       case this.types.harpyBombs:
@@ -632,6 +646,16 @@ Upgrades = {
           this.purchaseUpgrade(this.upgrades[i], false);
         }
       }
+      if (GameModel.constructions.factory) {
+        for (var i = 0; i < PartFactory.generators.length; i++) {
+          if (PartFactory.generators[i].auto) {
+            PartFactory.purchaseGenerator(PartFactory.generators[i], false);
+          }
+        }
+      }
+    }
+    if (GameModel.autoShatter) {
+      this.doShatter();
     }
   },
 
@@ -836,6 +860,37 @@ Upgrades = {
     }
   },
 
+  shatterPercent(rune) {
+    var amountRequired = 100000000 * Math.pow(1.5,GameModel.persistentData.runeshatter);
+    return Math.floor(Math.min(1,rune.blood / amountRequired) * 100);
+  },
+
+  shatterBloodCost(rune) {
+    return Math.max(0,(100000000 * Math.pow(1.5,GameModel.persistentData.runeshatter)) - rune.blood);
+  },
+
+  shatterEffect() {
+    return Math.pow(1.1, GameModel.persistentData.runeshatter);
+  },
+
+  canShatter() {
+    return this.shatterPercent(GameModel.persistentData.runes.life) + this.shatterPercent(GameModel.persistentData.runes.death) == 200;
+  },
+
+  doShatter() {
+    if (this.canShatter()) {
+      GameModel.persistentData.runeshatter++;
+      GameModel.persistentData.runes.life.blood = 0;
+      GameModel.persistentData.runes.death.blood = 0;
+      GameModel.persistentData.runes.life.brains = 0;
+      GameModel.persistentData.runes.death.brains = 0;
+      GameModel.persistentData.runes.life.bones = 0;
+      GameModel.persistentData.runes.death.bones = 0;
+      this.updateRuneEffects();
+      this.applyUpgrades();
+    }
+  },
+
   infuseRune(runeType, costType, amount) {
     var rune = runeType == "life" ? GameModel.persistentData.runes.life : GameModel.persistentData.runes.death;
     switch(costType) {
@@ -970,7 +1025,7 @@ Upgrades.constructionUpgrades = [
   new Upgrades.Construction(218, "Plague Laboratory", Upgrades.constructionTypes.plagueLaboratory, {brains:25000, blood:million}, 50, 1, 1, 1, 211, "Expand the plague workshop into a well equipped laboratory in order to unlock additional plague upgrades."),
   new Upgrades.Construction(219, "Part Factory", Upgrades.constructionTypes.partFactory, {brains:35000, blood:15 * million}, 50, 1, 1, 1, 218, "Build a factory to create parts that can be used to construct more powerful beings for your army.", "Factory menu now available!"),
   new Upgrades.Construction(220, "Creature Factory", Upgrades.constructionTypes.monsterFactory, {brains:45000, blood:40 * million}, 50, 1, 1, 1, 219, "Build a factory to turn creature parts into living entities of destruction", "Creatures now available in factory menu!"),
-  new Upgrades.Construction(221, "Bottomless Pit", Upgrades.constructionTypes.pit, {bones:75000, parts:5 * million}, 50, 1, 1, 5, 219, "A bottomless pit with walls made from creature parts. Drastically increases your capacity to store blood and brains."),
+  new Upgrades.Construction(221, "Bottomless Pit", Upgrades.constructionTypes.pit, {bones:75000, parts:5 * million}, 50, 1, 1, 10, 219, "A bottomless pit with walls made from creature parts. Drastically increases your capacity to store blood and brains."),
   new Upgrades.Construction(222, "Harpy Outfitter", Upgrades.constructionTypes.harpy, {bones:75000, brains:75000, blood:80 * million}, 50, 1, 1, 1, 220, "Build an outfitter to upgrade the abilities of your harpies.", "Harpy upgrades now available in the shop!")
 ];
 
@@ -1009,8 +1064,8 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(8, "Gigazombies?", Upgrades.types.unlockSpell, Upgrades.costs.blood, 50000, 1, 5, 1, "Learn the Gigazombies spell which will turn some of your zombies into hulking monstrosities with increased health and damage.", "New spell learned, Gigazombies!", 209),
   new Upgrades.Upgrade(13, "Blazing Speed", Upgrades.types.burningSpeedPC, Upgrades.costs.blood, 30000, 1.25, 0.05, 10, "The humans are using torches to set your zombies on fire. Perhaps we can turn the tables on them? Each rank increases the movement and attack speed of burning zombies by 5%", false, 207),
   new Upgrades.Upgrade(14, "Spit it Out", Upgrades.types.spitDistance, Upgrades.costs.blood, 500000, 1.6, 5, 10, "The first rank gives your zombies the ability to spit plague at enemies beyond normal attack range. Spit attacks do 50% zombie damage and infect the victim with plague. Subsequent ranks will increase the range of spit attacks.", false, 218),
-  new Upgrades.Upgrade(15, "Runic Syphon", Upgrades.types.runicSyphon, Upgrades.costs.blood, 34000, 1.9, 0.01, 10, "Infuse your runes for free! Each rank gives your Runesmith the ability to infuse 1% of your resource income, without consuming it", false, 210),
-  new Upgrades.Upgrade(18, "More Gigazombies", Upgrades.types.gigazombies, Upgrades.costs.blood, 100000000, 1.27, 1, 1, "We need more gigazombies! This will unlock the ability for all zombies to be gigazombies. They gain health and damage but the energy cost also increases. This can be toggled in the graveyard.", false, 220),
+  new Upgrades.Upgrade(15, "Runic Syphon", Upgrades.types.runicSyphon, Upgrades.costs.blood, 34000, 1.9, 0.01, 10, "Infuse your runes for free! Each rank gives your Runesmith the ability to infuse 1% of your resource income, without consuming it. Additionally when blood and brains reach their storage limit, any additional resources will be infused automatically.", false, 210),
+  // new Upgrades.Upgrade(18, "More Gigazombies", Upgrades.types.gigazombies, Upgrades.costs.blood, 100000000, 1.27, 1, 1, "We need more gigazombies! This will unlock the ability for all zombies to be gigazombies. They gain health and damage but the energy cost also increases. This can be toggled in the graveyard.", false, 220),
   new Upgrades.Upgrade(19, "Faster Harpies", Upgrades.types.harpySpeed, Upgrades.costs.blood, 100 * million, 1.07, 2, 20, "These harpies are way too slow! We have to make them faster. Each rank increases harpy speed by 2", false, 222),
 
   // brain upgrades
@@ -1018,7 +1073,7 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(21, "Master Summoner", Upgrades.types.energyCap, Upgrades.costs.brains, 10, 1.5, 5, 20, "All the brains you harvested have proved fruitful in your experiments. Each rank raises your maximum energy by 5."),
   new Upgrades.Upgrade(22, "Primal Reflexes", Upgrades.types.speed, Upgrades.costs.brains, 5, 1.6, 1, 20, "The zombies retain more of their human agility increasing run speed by 1 for each rank."),
   new Upgrades.Upgrade(23, "Blood Harvest", Upgrades.types.bloodStoragePC, Upgrades.costs.brains, 50, 1.12, 0.1, 0, "All this brain power has enabled you to devise some superior blood storage methods. Each rank increases your maximum blood by 10%."),
-  new Upgrades.Upgrade(24, "Unholy Construction", Upgrades.types.construction, Upgrades.costs.brains, 50, 1, 1, 1, "Learn the art of Unholy Construction in order to build structures that will solidify your foothold on the town.", "Construction menu now available!"),
+  new Upgrades.Upgrade(24, "Unholy Construction", Upgrades.types.construction, Upgrades.costs.brains, 25, 1, 1, 1, "Learn the art of Unholy Construction in order to build structures that will solidify your foothold on the town.", "Construction menu now available!"),
   new Upgrades.Upgrade(25, "Infected Corpse", Upgrades.types.infectedBlast, Upgrades.costs.brains, 500, 1.4, 0.1, 10, "Fill your zombies with so much plague they are ready to explode! Each rank adds 10% chance for a zombie to explode into a cloud of plague upon death.", false, 204),
   new Upgrades.Upgrade(26, "Energy Charge", Upgrades.types.unlockSpell, Upgrades.costs.brains, 2000, 1, 2, 1, "Learn the Energy Charge spell which can drastically increase your energy rate for a short time.", "New spell learned, Energy Charge!", 209),
   new Upgrades.Upgrade(27, "What Doesn't Kill You", Upgrades.types.blastHealing, Upgrades.costs.brains, 10000, 1.3, 0.1, 20, "Plague explosions from zombies and harpies will also heal nearby zombies for 10% of the explosion damage with each rank.", false, 218),
@@ -1037,6 +1092,6 @@ Upgrades.upgrades = [
   new Upgrades.Upgrade(48, "Bombs Away", Upgrades.types.harpyBombs, Upgrades.costs.bones, 500000, 1.6, 1, 3, "Upgrade your harpies so they can carry more than just one bomb at a time.", false, 222),
 
   // parts upgrades
-  new Upgrades.Upgrade(60, "Extra Limbs", Upgrades.types.zombieDmgPC, Upgrades.costs.parts, 900, 1.3, 0.02, 0, "Your zombies gain +2% damage with each rank of Extra Limbs.", false, 220),
-  new Upgrades.Upgrade(61, "Big Boned", Upgrades.types.zombieHealthPC, Upgrades.costs.parts, 1000, 1.31, 0.02, 0, "Your zombies gain +2% health with each rank of Big Boned.", false, 220),
+  new Upgrades.Upgrade(60, "Extra Limbs", Upgrades.types.golemDamagePC, Upgrades.costs.parts, 900, 1.3, 0.02, 0, "Your golems gain +2% damage with each rank of Extra Limbs.", false, 220),
+  new Upgrades.Upgrade(61, "Big Boned", Upgrades.types.golemHealthPC, Upgrades.costs.parts, 1000, 1.31, 0.02, 0, "Your golems gain +2% health with each rank of Big Boned.", false, 220),
 ];

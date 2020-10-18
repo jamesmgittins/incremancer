@@ -152,6 +152,12 @@ Skeleton = {
     }
     this.skeletons = skeletons;
     this.aliveSkeletons = [];
+
+    this.lootChance = 0.001;
+    if (GameModel.level < this.persistent.level)
+      this.lootChance *= 0.5;
+    if (GameModel.level > this.persistent.level * 2)
+      this.lootChance *= 1.5;
   },
 
   spawnCreature() {
@@ -586,8 +592,8 @@ Skeleton = {
   },
 
   testForLoot() {
-    if (this.persistent.skeletons > 0) { 
-      if (Math.random() < 0.001) {
+    if (this.persistent.skeletons > 0) {
+      if (Math.random() < this.lootChance) {
         var loot = this.generateLoot(this.persistent.level);
         GameModel.sendMessage(this.getLootName(loot) + " collected!");
         this.persistent.items.push(loot);

@@ -20,6 +20,7 @@
         <span class="percent" ng-style="{'width':zm.upgradePercent(generator) + '%'}"></span>
       </button>
       <button ng-click="generator.selected = !generator.selected" class="info  {{generator.selected ? 'active' : ''}}">i</button>
+      <button ng-click="generator.auto = !generator.auto" class="info {{generator.auto ? 'active' : ''}}" ng-if="zm.model.autoUpgrades">{{generator.auto ? 'On' : 'Auto'}}</button>
       <div class="clear"></div>
       <p ng-show="generator.selected">{{generator.description}}</p>
       <p ng-show="generator.selected">Owned: {{zm.currentRank(generator)}} - Producing {{zm.currentRank(generator) * generator.produces|decimal}} parts every {{generator.time}} seconds</p>

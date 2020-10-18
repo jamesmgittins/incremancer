@@ -41,12 +41,12 @@
       <h4>Energy rate {{zm.model.getEnergyRate()|decimal}} per second</h4>
       <button ng-click="zm.setHarpies(zm.model.persistentData.harpies - 1);">-</button><label>{{zm.model.persistentData.harpies|whole}} harpies</label><button ng-click="zm.setHarpies(zm.model.persistentData.harpies + 1);">+</button>
     </div>
-    <div class="bone-collectors bones" ng-if="zm.model.gigazombies">
+    <!-- <div class="bone-collectors bones" ng-if="zm.model.gigazombies">
       <h4>Gigazombies <button ng-click="zm.gzinfo = ! zm.gzinfo" class="{{zm.gzinfo ? 'active' : ''}}">Info</button></h4>
       <p ng-show="zm.gzinfo">Causes any zombie spawned using energy to be a Gigazombie. This will increase their health and damage by 10x, and energy cost by 5x.</p>
       <h4>Energy cost per zombie {{zm.model.zombieCost}}</h4>
       <button ng-click="zm.model.toggleGigazombies();" class="{{zm.model.persistentData.gigazombiesOn ? 'active' : ''}}">{{zm.model.persistentData.gigazombiesOn ? 'Gigazombies On' : 'Gigazombies Off'}}</button>
-    </div>
+    </div> -->
   </div>
   <p ng-if="zm.graveyardTab == 'trophies'">Earn bonuses by collecting the severed heads of VIPs from certain towns. These trophies persist through prestige resets, while escaped VIPs will return to town.</p>
   <div class="tabs" ng-if="zm.graveyardTab == 'trophies'">

@@ -98,7 +98,7 @@
       <button ng-click="zm.openSidePanel('construction');" ng-if="zm.model.construction" class="{{zm.sidePanels.construction ? 'active' : ''}}"><span ng-if="zm.model.persistentData.currentConstruction" class="tag">{{zm.constructionPercent()}}%</span>Construction</button>
       <button ng-click="zm.openSidePanel('graveyard');" ng-if="zm.model.constructions.graveyard" class="{{zm.sidePanels.graveyard ? 'active' : ''}}">Graveyard</button>
       <button ng-click="zm.openSidePanel('factory');" ng-if="zm.model.constructions.factory" class="{{zm.sidePanels.factory ? 'active' : ''}}">Factory</button>
-      <button ng-click="zm.openSidePanel('runesmith');" ng-if="zm.model.constructions.runesmith" class="{{zm.sidePanels.runesmith ? 'active' : ''}}">Runesmith</button>
+      <button ng-click="zm.openSidePanel('runesmith');" ng-if="zm.model.constructions.runesmith" class="{{zm.sidePanels.runesmith ? 'active' : ''}}{{zm.canShatter() ? 'shatter' : ''}}">Runesmith</button>
       <button ng-click="zm.openSidePanel('prestige');" ng-if="zm.isShowPrestige()" class="{{zm.sidePanels.prestige ? 'active' : ''}}" id="prestige-button"><div id="prestige-bg"></div>Prestige</button>
       <button ng-click="zm.openSidePanel('options');" class="{{zm.sidePanels.options ? 'active' : ''}}">Options</button>
       <button ng-click="zm.levelSelect.show()" class="{{zm.levelSelect.shown ? 'active' : ''}}" ng-if="zm.levelSelect.showButton()">Level Select</button>

@@ -96,8 +96,8 @@ CreatureFactory = {
   },
 
   spawnCreature(creature) {
-    var health = creature.baseHealth * Math.pow(this.creatureScaling, creature.level - 1);
-    var damage = creature.baseDamage * Math.pow(this.creatureScaling, creature.level - 1);
+    var health = creature.baseHealth * Math.pow(this.creatureScaling, creature.level - 1) * GameModel.golemHealthPCMod;
+    var damage = creature.baseDamage * Math.pow(this.creatureScaling, creature.level - 1) * GameModel.golemDamagePCMod;
     Creatures.spawnCreature(health, damage, creature.speed, creature.type, creature.level);
   },
 
@@ -121,14 +121,14 @@ CreatureFactory = {
     return {
       thisLevel : {
         level : creature.level,
-        health : creature.baseHealth * Math.pow(this.creatureScaling, creature.level - 1),
-        damage : creature.baseDamage * Math.pow(this.creatureScaling, creature.level - 1),
+        health : creature.baseHealth * Math.pow(this.creatureScaling, creature.level - 1) * GameModel.golemHealthPCMod,
+        damage : creature.baseDamage * Math.pow(this.creatureScaling, creature.level - 1) * GameModel.golemDamagePCMod,
         cost : creature.baseCost * Math.pow(this.creatureCostScaling, creature.level - 1)
       },
       nextLevel : {
         level : creature.level + 1,
-        health : creature.baseHealth * Math.pow(this.creatureScaling, creature.level),
-        damage : creature.baseDamage * Math.pow(this.creatureScaling, creature.level),
+        health : creature.baseHealth * Math.pow(this.creatureScaling, creature.level) * GameModel.golemHealthPCMod,
+        damage : creature.baseDamage * Math.pow(this.creatureScaling, creature.level) * GameModel.golemDamagePCMod,
         cost : creature.baseCost * Math.pow(this.creatureCostScaling, creature.level)
       }
     }
@@ -152,7 +152,7 @@ CreatureFactory = {
 }
 
 CreatureFactory.creatures = [
-  new CreatureFactory.Creature(1, CreatureFactory.types.earthGolem, "Earth Golem", 3000, 75, 25, 800, "A golem born from rocks and mud, able to take a lot of punishment and taunt enemies to attack it"),
+  new CreatureFactory.Creature(1, CreatureFactory.types.earthGolem, "Earth Golem", 3000, 75, 30, 800, "A golem born from rocks and mud, able to take a lot of punishment and taunt enemies to attack it"),
   new CreatureFactory.Creature(2, CreatureFactory.types.airGolem, "Air Golem", 1200, 110, 45, 900, "A fast moving golem able to cover large distances and chase targets down"),
   new CreatureFactory.Creature(3, CreatureFactory.types.fireGolem, "Fire Golem", 1200, 130, 32, 1000, "A fireball spewing golem that ignites everything it touches"),
   new CreatureFactory.Creature(4, CreatureFactory.types.waterGolem, "Water Golem", 1500, 90, 30, 1100, "A calming golem that restores health to nearby units")

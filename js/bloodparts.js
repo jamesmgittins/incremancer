@@ -725,7 +725,7 @@ Smoke = {
 	},
 	initialize() {
     this.viewableArea = viewableArea;
-    this.allowTint = GameModel.app.renderer.type == 1;
+    this.allowTint = GameModel.app && GameModel.app.renderer && GameModel.app.renderer.type == 1;
 
     if (!this.texture) {
       this.texture = this.getTexture();
