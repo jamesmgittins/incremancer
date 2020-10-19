@@ -660,8 +660,8 @@ Skeleton = {
     }
   },
   destroyAllItems() {
-    this.persistent.items = this.persistent.items.filter(i => i.q);
     this.addXp(this.xpForItems());
+    this.persistent.items = this.persistent.items.filter(i => i.q);    
   },
   xpForItems() {
     var xp = 0;

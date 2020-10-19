@@ -466,6 +466,9 @@ Humans = {
   },
 
   burnHuman(human, damage) {
+    if (!human)
+      return;
+      
     if (!human.burning) {
       human.burnTickTimer = this.burnTickTimer;
       human.smokeTimer = this.smokeTimer;
