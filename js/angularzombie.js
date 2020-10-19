@@ -385,8 +385,8 @@ angular.module('zombieApp', [])
           return "+" + upgrade.effect + " bones per second";
         case Upgrades.types.brainsRate:
           return "+" + upgrade.effect + " brains per second";
-        case Upgrades.types.plagueDamagePC:
-          return "+" + formatWhole(Math.round(upgrade.effect * 100)) + "% plague damage";
+        case Upgrades.types.plagueDamage:
+          return "+" + formatWhole(upgrade.effect) + " plague damage";
         case Upgrades.types.spitDistance:
           return "+" + upgrade.effect + " spit distance";
         case Upgrades.types.blastHealing:

@@ -441,10 +441,10 @@ Zombies = {
   inflictPlague(human) {
     if (!human.infected) {
       Exclamations.newPoison(human);
-      human.plagueDamage = (this.model.zombieDamage / 2) * this.model.plagueDamagePCMod;
+      human.plagueDamage = (this.model.zombieDamage / 2) + this.model.plagueDamageMod;
       human.plagueTicks = 5;
     } else {
-      human.plagueDamage += (this.model.zombieDamage / 2) * this.model.plagueDamagePCMod;
+      human.plagueDamage += (this.model.zombieDamage / 2) + this.model.plagueDamageMod;
       human.plagueTicks += 5;
     }
     human.infected = true;

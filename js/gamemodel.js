@@ -28,7 +28,7 @@ GameModel = {
   zombiesInCages : 0,
   golemDamagePCMod :1,
   golemHealthPCMod : 1,
-  plagueDamagePCMod : 1,
+  plagueDamageMod : 0,
   graveyardHealthMod : 1,
   burningSpeedMod : 1,
   startingResources : 0,
@@ -133,7 +133,7 @@ GameModel = {
     this.zombieDamagePCMod = 1;
     this.golemHealthPCMod = 1;
     this.golemDamagePCMod = 1;
-    this.plagueDamagePCMod = 1;
+    this.plagueDamageMod = 0;
     this.burningSpeedMod = 1;
     this.startingResources = 0;
     this.fenceRadius = 50;

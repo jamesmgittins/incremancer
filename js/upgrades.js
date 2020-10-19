@@ -17,7 +17,7 @@ Upgrades = {
     construction:"construction",
     infectedBite:"infectedBite",
     infectedBlast:"infectedBlast",
-    plagueDamagePC:"plagueDamagePC",
+    plagueDamage:"plagueDamage",
     burningSpeedPC:"burningSpeedPC",
     unlockSpell:"unlockSpell",
     spitDistance:"spitDistance",
@@ -151,8 +151,8 @@ Upgrades = {
       case this.types.infectedBlast:
         GameModel.infectedBlastChance += upgrade.effect * rank;
         return;
-      case this.types.plagueDamagePC:
-        GameModel.plagueDamagePCMod *= Math.pow(1 + upgrade.effect, rank);
+      case this.types.plagueDamage:
+        GameModel.plagueDamageMod += upgrade.effect, rank;
         return;
       case this.types.burningSpeedPC:
         GameModel.burningSpeedMod += upgrade.effect * rank;

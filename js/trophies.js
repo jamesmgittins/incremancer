@@ -21,9 +21,8 @@ Trophies = {
       value:15
     },
     {
-      type:Upgrades.types.plagueDamagePC,
-      value:0.05,
-      percentage:true
+      type:Upgrades.types.plagueDamage,
+      value:50
     },
     {
       type:Upgrades.types.bloodCap,
