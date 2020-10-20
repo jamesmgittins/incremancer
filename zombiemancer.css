@@ -115,6 +115,10 @@ div.start-game, div.end-level, div.level-select {
   max-height: 90%;
 }
 
+div.level-select.scroll { 
+  overflow: auto;
+}
+
 div.start-game ul > li {
   text-align: left;
   line-height: 26px;
