@@ -586,7 +586,7 @@ Skeleton = {
     if (loot.se)
     for (var i = 0; i < loot.se.length; i++) {
       var spell = Spells.spells.filter(sp => sp.id == loot.se[i])[0];
-      stats.push("Has a chance to cast " + spell.name + " when attacking, this does not cost energy or trigger a cooldown");
+      stats.push(spell.itemText || "Has a chance to cast " + spell.name + " when attacking, this does not cost energy or trigger a cooldown");
     }
     return stats;
   },

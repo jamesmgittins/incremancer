@@ -275,8 +275,8 @@ Upgrades = {
         GameModel.constructions.citadel = 1;
         // GameModel.brainsStorePCMod += 0.8;
         // GameModel.bloodStorePCMod += 0.8;
-        // GameModel.brainsStorePCMod *= 1.8;
-        // GameModel.bloodStorePCMod *= 1.8;
+        GameModel.brainsStorePCMod *= 1.8;
+        GameModel.bloodStorePCMod *= 1.8;
         return;
       case this.constructionTypes.plagueSpikes:
         GameModel.constructions.plagueSpikes = 1;

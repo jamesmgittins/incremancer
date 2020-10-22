@@ -488,9 +488,22 @@ Humans = {
       human.plagueTickTimer = this.plagueTickTimer;
       Exclamations.newPoison(human);
       human.plagueTicks--;
+      if (this.pandemic) {
+        this.pandemicBullet(human);
+      }
       if (human.plagueTicks <= 0) {
         human.infected = false;
         human.plagueDamage = 0;
+      }
+    }
+  },
+
+  pandemicBullet(human) {
+    for (var i = 0; i < this.aliveHumans.length; i++) {
+      if (Math.abs(this.aliveHumans[i].x - human.x) < 30 && Math.abs(this.aliveHumans[i].y - human.y) < 30) {
+        if (Math.random() < 0.3) {
+          Bullets.newBullet(human, this.aliveHumans[i], GameModel.zombieDamage / 2, true);
+        }
       }
     }
   },
