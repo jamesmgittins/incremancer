@@ -349,13 +349,14 @@ Skeleton = {
         creature=this.skeletons[i];
       }
     }
-    for (var i=0; i < this.aliveHumans.length; i++) {
-      if (Math.abs(this.aliveHumans[i].x - creature.x) < 200) {
-        if (Math.abs(this.aliveHumans[i].y - creature.y) < 200) {
-          Humans.burnHuman(this.aliveHumans[i], creature.attackDamage);
+    if (creature)
+      for (var i=0; i < this.aliveHumans.length; i++) {
+        if (Math.abs(this.aliveHumans[i].x - creature.x) < 200) {
+          if (Math.abs(this.aliveHumans[i].y - creature.y) < 200) {
+            Humans.burnHuman(this.aliveHumans[i], creature.attackDamage);
+          }
         }
       }
-    }
   },
   
 
