@@ -7,7 +7,7 @@ ZmMap = {
   roadTexture : false,
   entranceWidth : 16,
   entranceDepth : 16,
-  cornerDistance : 14,
+  cornerDistance : 16,
   minBuildings: 3,
   wallWidth : 4,
   graveyardCollision : false,
@@ -502,7 +502,7 @@ ZmMap = {
 
   normalizeVector(vector) {
 
-    if (vector.x + vector.y == 0) {
+    if (vector.x == 0 && vector.y == 0) {
       return vector;
     }
 
