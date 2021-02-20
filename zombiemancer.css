@@ -282,6 +282,9 @@ div.stats label {
   margin: 10px;
   white-space: nowrap;
 }
+div.stats button {
+  margin:-5px 0;
+}
 
 div.zoom-buttons {
   position: absolute;
@@ -614,13 +617,13 @@ div.upgrade .col:nth-of-type(2) {
 
 div.level-stats {
   position: absolute;
-  bottom: 55px;
+  bottom: 45px;
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0,0,0,0.5);
   text-align: left;
   text-shadow: 2px 2px #000;
-  padding:10px;
+  padding:5px 10px;
 }
 
 div.level-stats td {
