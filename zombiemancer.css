@@ -105,7 +105,6 @@ div.shop div.upgrade div.progress > div {
 
 div.start-game, div.end-level, div.level-select {
   position: absolute;
-  overflow-y: auto;
   top: 50%;
   left:50%;
   transform:translate(-50%,-50%);
@@ -115,6 +114,10 @@ div.start-game, div.end-level, div.level-select {
   border-radius: 5px;
   box-shadow: inset 0 0 15px rgb(5,20,20);
   max-height: 90%;
+}
+
+div.start-game, div.end-level {
+  overflow-y: auto;
 }
 
 div.start-game a {
