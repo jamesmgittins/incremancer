@@ -20,7 +20,7 @@
     <div class="inventory">
       <div class="equipped">
         <div class="row" ng-repeat="itemRow in zm.skeletonMenu.equipped track by $index">
-          <div class="item {{zm.skeletonMenu.itemClass(item)}} {{zm.skeletonMenu.itemType(item)}} droppable" ng-repeat="item in itemRow track by item.id" onmousemove="moveToolTip(event, this);" 
+          <div class="item {{zm.skeletonMenu.itemClass(item)}} {{zm.skeletonMenu.itemType(item)}} droppable" ng-repeat="item in itemRow track by item.id" ng-mousemove="zm.moveTooltip($event, $event.currentTarget);" 
             droppable-target="true" dropType="{{item.s}}" dropEndCall="zm.skeletonMenu.itemDropped" ng-click="item.s != -1 || zm.skeletonMenu.trashAll()">
             <div class="icon"></div>
               <div class="tooltip">
@@ -35,7 +35,7 @@
         </div>
       </div>
       <div class="items">
-        <div class="item {{zm.skeletonMenu.itemClass(item)}} {{zm.skeletonMenu.itemType(item)}}" ng-repeat="item in zm.skeletonMenu.inventoryItems() track by item.id" onmousemove="moveToolTip(event, this);" 
+        <div class="item {{zm.skeletonMenu.itemClass(item)}} {{zm.skeletonMenu.itemType(item)}}" ng-repeat="item in zm.skeletonMenu.inventoryItems() track by item.id" ng-mousemove="zm.moveTooltip($event, $event.currentTarget);" 
           draggable-item="true" drag-object="item" ng-click="zm.skeletonMenu.equipItem(item)">
           <div class="icon"></div>
           <div class="level" ng-if="item.l">{{item.l}}</div>
