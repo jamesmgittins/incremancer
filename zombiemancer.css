@@ -45,7 +45,8 @@ div.shop {
   right:0;
   padding:10px;
   height: calc(100% - 20px);
-  background-color: rgba(10,60,10,0.8);
+  background-color: rgba(10,60,10,1);
+  box-shadow: inset 2px 2px 15px #131;
   width:20%;
   min-width: 310px;
   display: flex;
