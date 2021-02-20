@@ -116,6 +116,17 @@ div.start-game, div.end-level, div.level-select {
   max-height: 90%;
 }
 
+div.start-game a {
+  display: block;
+  color:#ccc;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  text-decoration: none;
+} 
+div.start-game a:hover {
+  color:#fff;
+}
+
 div.level-select.scroll { 
   overflow: auto;
 }
