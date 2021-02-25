@@ -120,15 +120,19 @@ div.start-game, div.end-level {
   overflow-y: auto;
 }
 
+div.start-game h2, div.start-game h3, div.start-game h4 {
+  margin:0.5rem 1rem;
+}
+
 div.start-game a {
   display: block;
-  color:#ccc;
+  color:mediumseagreen;
   margin-bottom: 1rem;
   font-weight: bold;
   text-decoration: none;
 } 
 div.start-game a:hover {
-  color:#fff;
+  color:#8c8;
 }
 
 div.level-select.scroll { 
@@ -709,7 +713,7 @@ div.skeleton > div.lvl.dead {
   color:#fd5252;
 }
 .inventory {
-  margin: 1em 0;
+  margin: 0.5em 0;
   height:400px;
   overflow: visible;
 }
@@ -835,6 +839,9 @@ div.skeleton > div.lvl.dead {
 #champ-hold:not(.no-tooltip) .inventory .item:hover .tooltip {
   display: inline-block;
 }
+#champ-hold p {
+  margin:0.5em;
+}
 .inventory .item .tooltip span.name {
   font-weight: bold;
   display: block;
@@ -918,7 +925,7 @@ div.level-select div.start label {
 }
 
 div.level-select div.start, div.level-select div.ranges {
-  padding: 1em;
+  padding: 0.5em;
 }
 
 div.level-select > label {
