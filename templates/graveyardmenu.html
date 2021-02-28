@@ -12,7 +12,11 @@
       <h4>Bone Collectors <button ng-click="zm.bcinfo = !zm.bcinfo" class="{{zm.bcinfo ? 'active' : ''}}">Info</button></h4>
       <p ng-show="zm.bcinfo">Hire bone collectors to gather bones from the town's dead and your own fallen zombies. Each bone collector consumes 1 energy per second. They're hungry little creatures. Must be all that running around.</p>
       <h4>Energy rate {{zm.model.getEnergyRate()|decimal}} per second</h4>
-      <button ng-click="zm.subtractBoneCollector();">-</button><label>{{zm.model.persistentData.boneCollectors|whole}} bone collectors</label><button ng-click="zm.addBoneCollector();">+</button>
+      <button ng-click="zm.setBoneCollectors(0);">0</button>
+      <button ng-click="zm.subtractBoneCollector();">-</button>
+      <label>{{zm.model.persistentData.boneCollectors|whole}} collectors</label>
+      <button ng-click="zm.addBoneCollector();">+</button>
+      <button ng-click="zm.setBoneCollectors(zm.maxBoneCollectors());">{{zm.maxBoneCollectors()}}</button>
     </div>
     <div class="bone-collectors bones">
       <h4>Zombies to Spawn <button ng-click="zm.zsinfo = !zm.zsinfo" class="{{zm.zsinfo ? 'active' : ''}}">Info</button></h4>
@@ -39,7 +43,11 @@
       <h4>Harpies <button ng-click="zm.hpinfo = ! zm.hpinfo" class="{{zm.hpinfo ? 'active' : ''}}">Info</button></h4>
       <p ng-show="zm.hpinfo">Release harpies that drop barrels of plague infected zombie flesh on unsuspecting humans. Each harpy consumes 1 energy per second. Harpy bombs infect humans with plague and cause {{zm.model.zombieHealth * 0.2|whole}} damage. The damage scales with zombie health.</p>
       <h4>Energy rate {{zm.model.getEnergyRate()|decimal}} per second</h4>
-      <button ng-click="zm.setHarpies(zm.model.persistentData.harpies - 1);">-</button><label>{{zm.model.persistentData.harpies|whole}} harpies</label><button ng-click="zm.setHarpies(zm.model.persistentData.harpies + 1);">+</button>
+      <button ng-click="zm.setHarpies(0);">0</button>
+      <button ng-click="zm.setHarpies(zm.model.persistentData.harpies - 1);">-</button>
+      <label>{{zm.model.persistentData.harpies|whole}} harpies</label>
+      <button ng-click="zm.setHarpies(zm.model.persistentData.harpies + 1);">+</button>
+      <button ng-click="zm.setHarpies(zm.maxHarpies());">{{zm.maxHarpies()}}</button>
     </div>
     <!-- <div class="bone-collectors bones" ng-if="zm.model.gigazombies">
       <h4>Gigazombies <button ng-click="zm.gzinfo = ! zm.gzinfo" class="{{zm.gzinfo ? 'active' : ''}}">Info</button></h4>

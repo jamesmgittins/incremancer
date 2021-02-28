@@ -43,14 +43,12 @@
             <button ng-click="zm.infuseRune('life','bones')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.bones < zm.infusionAmount">Infuse {{zm.infuseButtonText()}} Bones</button>
         </div>
       </div>
-      <div class="row blood">
-        <div class="col">
-          <label>Blood Sated: {{zm.shatterPercent(zm.model.persistentData.runes.life)}}%</label>
-        </div>
-        <div class="col">
-          <button ng-disabled="zm.model.persistentData.blood < zm.shatterBloodCost(zm.model.persistentData.runes.life)" 
+      <div class="row blood text-center">
+        <label>Blood Sated: {{zm.shatterPercent(zm.model.persistentData.runes.life)}}%
+          <span class="percent" ng-style="{'width':zm.shatterPercent(zm.model.persistentData.runes.life) + '%'}"></span>
+        </label>
+        <button ng-disabled="zm.model.persistentData.blood < zm.shatterBloodCost(zm.model.persistentData.runes.life)" 
             ng-click="zm.shatterSatiate('life',zm.model.persistentData.runes.life)">Infuse {{zm.shatterBloodCost(zm.model.persistentData.runes.life)|whole}} Blood</button>
-        </div>
       </div>
     </div>
     <div class="upgrade">
@@ -83,14 +81,12 @@
             <button ng-click="zm.infuseRune('death','bones')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.bones < zm.infusionAmount">Infuse {{zm.infuseButtonText()}} Bones</button>
         </div>
       </div>
-      <div class="row blood">
-        <div class="col">
-          <label>Blood Sated: {{zm.shatterPercent(zm.model.persistentData.runes.death)}}%</label>
-        </div>
-        <div class="col">
-          <button ng-disabled="zm.model.persistentData.blood < zm.shatterBloodCost(zm.model.persistentData.runes.death)"
+      <div class="row blood text-center">
+        <label>Blood Sated: {{zm.shatterPercent(zm.model.persistentData.runes.death)}}%
+          <span class="percent" ng-style="{'width':zm.shatterPercent(zm.model.persistentData.runes.death) + '%'}"></span>
+        </label>
+        <button ng-disabled="zm.model.persistentData.blood < zm.shatterBloodCost(zm.model.persistentData.runes.death)"
             ng-click="zm.shatterSatiate('death',zm.model.persistentData.runes.death)">Infuse {{zm.shatterBloodCost(zm.model.persistentData.runes.death)|whole}} Blood</button>
-        </div>
       </div>
     </div>
     <div class="upgrade">

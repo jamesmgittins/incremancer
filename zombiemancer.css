@@ -107,6 +107,7 @@ div.start-game, div.end-level, div.level-select {
   position: absolute;
   top: 50%;
   left:50%;
+  z-index: 150;
   transform:translate(-50%,-50%);
   padding:15px;
   background-color: rgb(10,40,45);
@@ -255,7 +256,12 @@ div.shop div.upgrade label {
   display: block;
 }
 
+.text-center {
+  text-align: center;
+}
+
 div.shop div.upgrade label, div.shop div.bone-collectors label {
+  position: relative;
   font-weight: bold;
   font-size: 1em;
   margin-bottom: 5px;
