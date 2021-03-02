@@ -44,7 +44,7 @@
         </div>
       </div>
       <div class="row blood text-center">
-        <label>Blood Sated: {{zm.shatterPercent(zm.model.persistentData.runes.life)}}%
+        <label class="sated">Blood Sated: {{zm.shatterPercent(zm.model.persistentData.runes.life)}}%
           <span class="percent" ng-style="{'width':zm.shatterPercent(zm.model.persistentData.runes.life) + '%'}"></span>
         </label>
         <button ng-disabled="zm.model.persistentData.blood < zm.shatterBloodCost(zm.model.persistentData.runes.life)" 
@@ -82,7 +82,7 @@
         </div>
       </div>
       <div class="row blood text-center">
-        <label>Blood Sated: {{zm.shatterPercent(zm.model.persistentData.runes.death)}}%
+        <label class="sated">Blood Sated: {{zm.shatterPercent(zm.model.persistentData.runes.death)}}%
           <span class="percent" ng-style="{'width':zm.shatterPercent(zm.model.persistentData.runes.death) + '%'}"></span>
         </label>
         <button ng-disabled="zm.model.persistentData.blood < zm.shatterBloodCost(zm.model.persistentData.runes.death)"

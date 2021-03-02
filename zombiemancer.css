@@ -280,6 +280,10 @@ span.percent {
   left: 0;
   height: 2px;
 }
+label.sated > span.percent {
+  left:50%;
+  transform: translateX(-50%);
+}
 div.stats {
   white-space: nowrap;
   bottom:10px;
@@ -817,7 +821,7 @@ div.skeleton > div.lvl.dead {
 .inventory .equipped.helmet .item.helmet.over, .inventory .equipped.chest .item.chest.over, .inventory .equipped.legs .item.legs.over, .inventory .equipped.gloves .item.gloves.over,
 .inventory .equipped.boots .item.boots.over, .inventory .equipped.sword .item.sword.over, .inventory .equipped.shield .item.shield.over, .inventory .equipped .item.trash.over {
   color: #ff3;
-  box-shadow: 0 0 40px #ffee10;
+  box-shadow: 0 0 16px #ffee10;
 }
 .inventory .equipped.helmet .item:not(.helmet):not(.trash), .inventory .equipped.chest .item:not(.chest):not(.trash), .inventory .equipped.legs .item:not(.legs):not(.trash), .inventory .equipped.gloves .item:not(.gloves):not(.trash),
 .inventory .equipped.boots .item:not(.boots):not(.trash), .inventory .equipped.sword .item:not(.sword):not(.trash), .inventory .equipped.shield .item:not(.shield):not(.trash)  {
