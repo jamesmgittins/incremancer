@@ -109,7 +109,7 @@ div.start-game, div.end-level, div.level-select {
   left:50%;
   z-index: 150;
   transform:translate(-50%,-50%);
-  padding:15px;
+  padding:1rem;
   background-color: rgb(10,40,45);
   text-align: center;
   border-radius: 5px;
@@ -151,7 +151,7 @@ button {
   color: #ccc;
   cursor: pointer;
   text-shadow: 2px 2px #000;
-  font-size: 1.2em;
+  font-size: 1rem;
 }
 
 a.button {
@@ -181,7 +181,6 @@ div.start-game button,
 div.end-level button,
 div.level-select div.start button {
   padding: 8px 10px;
-  font-size: 1.2em;
 }
 div.shop button {
   position: relative;
@@ -301,6 +300,7 @@ div.stats label {
 }
 div.stats button {
   margin:-5px 0;
+  padding:0.25rem;
 }
 
 div.zoom-buttons {
@@ -846,11 +846,48 @@ div.skeleton > div.lvl.dead {
   padding:0.5em;
   z-index: 150;
 }
+#champ-hold.overflow {
+  overflow-y: auto;
+}
 #champ-hold:not(.no-tooltip) .inventory .item:hover .tooltip {
   display: inline-block;
 }
 #champ-hold p {
-  margin:0.5em;
+  margin:0.5em 0;
+  color: #ddd;
+}
+#champ-hold h2 > button {
+  margin: -0.5rem 0 -0.5rem 0.5rem;
+  float: none;
+  font-size: 1rem;
+}
+#champ-hold .talents h4 {
+  margin: 0.5rem 0;
+}
+#champ-hold .talents h4 > button {
+  padding:0.5rem;
+  margin-left: 0.5rem;
+}
+#champ-hold .talents .talent-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1rem;
+}
+#champ-hold .talents .talent-grid .talent {
+  box-shadow: inset 2px 2px 8px rgb(5 20 20);
+  padding:0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+}
+#champ-hold .talents .talent-grid .talent button {
+  padding:0.25rem 0.5rem;
+}
+#champ-hold .talents .talent-grid .talent.inactive p {
+  color:#666;
+}
+#champ-hold .talents .talent-grid .talent p:not(.info) {
+  display: inline;
+  font-weight: bold;
 }
 .inventory .item .tooltip span.name {
   font-weight: bold;
