@@ -885,6 +885,9 @@ div.skeleton > div.lvl.dead {
 #champ-hold .talents .talent-grid .talent.inactive p {
   color:#666;
 }
+#champ-hold .talents .talent-grid .talent.full {
+  background-color: rgb(20,50,55);
+}
 #champ-hold .talents .talent-grid .talent p:not(.info) {
   display: inline;
   font-weight: bold;

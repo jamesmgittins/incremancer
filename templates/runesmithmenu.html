@@ -22,7 +22,7 @@
             <label>{{100 * (1 - zm.model.runeEffects.damageReduction)|decimal}}% Damage Reduction</label>
         </div>
         <div class="col">
-            <button ng-click="zm.infuseRune('life','blood')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.blood < zm.infusionAmount">Infuse {{zm.infuseButtonText()}} Blood</button>
+            <button ng-click="zm.infuseRune('life','blood')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.blood < zm.infusionAmount">{{zm.infuseButtonText()}} Blood</button>
         </div>
       </div>
       <div class="row brains">
@@ -31,7 +31,7 @@
             <label>{{100 * zm.model.runeEffects.healthRegen|decimal}}% Health Regen / 5 secs</label>
         </div>
         <div class="col">
-            <button ng-click="zm.infuseRune('life','brains')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.brains < zm.infusionAmount">Infuse {{zm.infuseButtonText()}} Brains</button>
+            <button ng-click="zm.infuseRune('life','brains')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.brains < zm.infusionAmount">{{zm.infuseButtonText()}} Brains</button>
         </div>
       </div>
       <div class="row bones">
@@ -40,7 +40,7 @@
             <label>{{100 * zm.model.runeEffects.damageReflection|decimal}}% Damage Reflection</label>
         </div>
         <div class="col">
-            <button ng-click="zm.infuseRune('life','bones')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.bones < zm.infusionAmount">Infuse {{zm.infuseButtonText()}} Bones</button>
+            <button ng-click="zm.infuseRune('life','bones')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.bones < zm.infusionAmount">{{zm.infuseButtonText()}} Bones</button>
         </div>
       </div>
       <div class="row blood text-center">
@@ -60,7 +60,7 @@
             <label>{{100 * (1 - zm.model.runeEffects.attackSpeed)|decimal}}% Attack Speed</label>
         </div>
         <div class="col">
-            <button ng-click="zm.infuseRune('death','blood')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.blood < zm.infusionAmount">Infuse {{zm.infuseButtonText()}} Blood</button>
+            <button ng-click="zm.infuseRune('death','blood')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.blood < zm.infusionAmount">{{zm.infuseButtonText()}} Blood</button>
         </div>
       </div>
       <div class="row brains">
@@ -69,7 +69,7 @@
             <label>{{100 * zm.model.runeEffects.critChance|decimal}}% Critical Chance</label>
         </div>
         <div class="col">
-            <button ng-click="zm.infuseRune('death','brains')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.brains < zm.infusionAmount">Infuse {{zm.infuseButtonText()}} Brains</button>
+            <button ng-click="zm.infuseRune('death','brains')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.brains < zm.infusionAmount">{{zm.infuseButtonText()}} Brains</button>
         </div>
       </div>
       <div class="row bones">
@@ -78,7 +78,7 @@
             <label>{{100 * zm.model.runeEffects.critDamage|decimal}}% Critical Damage</label>
         </div>
         <div class="col">
-            <button ng-click="zm.infuseRune('death','bones')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.bones < zm.infusionAmount">Infuse {{zm.infuseButtonText()}} Bones</button>
+            <button ng-click="zm.infuseRune('death','bones')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.bones < zm.infusionAmount">{{zm.infuseButtonText()}} Bones</button>
         </div>
       </div>
       <div class="row blood text-center">

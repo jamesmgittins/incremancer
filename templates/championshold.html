@@ -69,7 +69,7 @@
     <div class="talent-grid">
       <div ng-repeat="group in zm.skeletonMenu.upgrades" class="{{group.class}}">
         <h4>{{group.name}}</h4>
-        <div ng-repeat="upgrade in group.talents" class="talent {{upgrade.active() ? '' : 'inactive'}}">
+        <div ng-repeat="upgrade in group.talents" class="talent {{upgrade.active() ? '' : 'inactive'}} {{upgrade.full() ? 'full' : ''}}">
           <p>{{upgrade.name}}</p>
           <p>{{zm.skeletonMenu.talentValue(upgrade)}}</p>
           <button ng-click="zm.skeletonMenu.talentSet(upgrade, 1)">+</button>
