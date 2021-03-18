@@ -550,14 +550,14 @@ div.message {
   left: 50%;
   transform: translateX(-50%);
   font-size: 1.5em;
-  padding:0 15px;
+  padding:0 0.5rem;
   z-index: 150;
 }
 
 div.message > p {
   position: relative;
   text-shadow: 2px 2px #000;
-  margin: 15px;
+  margin: 0.5rem;
 }
 
 div.message > p::after {
