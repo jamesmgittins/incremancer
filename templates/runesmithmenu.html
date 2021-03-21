@@ -57,7 +57,7 @@
       <div class="row blood">
         <div class="col">
             <label>Blood: {{zm.model.persistentData.runes.death.blood|decimal}}</label>
-            <label>{{100 * (1 - zm.model.runeEffects.attackSpeed)|decimal}}% Attack Speed</label>
+            <label>{{100 * zm.model.runeEffects.attackSpeed|decimal}}% Attack Speed</label>
         </div>
         <div class="col">
             <button ng-click="zm.infuseRune('death','blood')" ng-disabled="zm.infusionMax != true && zm.model.persistentData.blood < zm.infusionAmount">{{zm.infuseButtonText()}} Blood</button>
