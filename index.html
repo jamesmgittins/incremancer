@@ -107,6 +107,11 @@
     <level-select></level-select>
     <level-stats></level-stats>
 
+    <div class="end-level confirm" ng-if="zm.confirmCallback">
+      <div><label>{{zm.confirmMessage}}</label></div>
+      <button ng-click="zm.confirmCallback();">Yes</button><button ng-click="zm.confirmCancel();">No</button>
+    </div>
+
     <div class="start-game" ng-if="zm.model.currentState == zm.model.states.startGame">
       <h2>Incremancer</h2>
       <h4>Take control of a horde of zombies to ravage small towns</h4>

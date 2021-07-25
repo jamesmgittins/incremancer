@@ -121,6 +121,14 @@ div.start-game, div.end-level {
   overflow-y: auto;
 }
 
+div.end-level.confirm {
+  z-index: 250;
+}
+
+div.end-level.confirm button {
+  margin:1rem 1rem 0 1rem;
+}
+
 div.start-game h2, div.start-game h3, div.start-game h4 {
   margin:0.5rem 1rem;
 }
